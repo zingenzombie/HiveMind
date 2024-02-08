@@ -14,10 +14,17 @@ func _on_line_edit_text_changed(new_text):
 	address = new_text
 
 func _on_pressed():
-	print(address)
-	#$HTTPRequest.request_completed.connect(_on_request_completed)
-	$HTTPRequest.request("https://api.github.com/repos/godotengine/godot/releases/latest")
+	$HTTPRequest.request("http://" + address + "/servers")
+
+func array_to_string(arr: Array) -> String:
+	var s = ""
+	for i in arr:
+		s += char(i)
+	return s
 
 func _on_request_completed(result, response_code, headers, body):
-	var json = JSON.parse_string(body.get_string_from_utf8())
-	print(json["url"])
+	
+	print(array_to_string(body))
+	
+	#var json = JSON.parse_string(body.get_string_from_utf8())
+	#print(json["url"])
