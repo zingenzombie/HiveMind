@@ -29,5 +29,9 @@ offset_bottom = 164.0
 text = "Join Hive"
 script = ExtResource("2_p8r3e")
 
+[node name="HTTPRequest" type="HTTPRequest" parent="contact_hive"]
+
 [connection signal="pressed" from="start_button" to="start_button" method="_on_pressed"]
+[connection signal="text_changed" from="LineEdit" to="contact_hive" method="_on_line_edit_text_changed"]
 [connection signal="pressed" from="contact_hive" to="contact_hive" method="_on_pressed"]
+[connection signal="request_completed" from="contact_hive/HTTPRequest" to="contact_hive" method="_on_request_completed"]
