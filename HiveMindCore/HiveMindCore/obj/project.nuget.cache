@@ -1,8 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "MgnJ6kEPKkTqodtt5tzOU/SjwLM96J2olfzYDnlpDZjW78ZDJnmauU0B0TYRe+WU3TAi9lshgXvKcoQG9zaZzA==",
+  "dgSpecHash": "YskHZVQpAm6nGb05ufWL8+xkQdSn9r9fEQWNkpZS44mZlRCJksE+oCPPOo3i2arwdSccJQKvfHTjOXAgGALVBw==",
   "success": true,
-  "projectFilePath": "C:\\Users\\chase\\Documents\\ProgrammingProjects\\HiveMind\\HiveMindCore\\HiveMindCore\\HiveMindCore.csproj",
-  "expectedPackageFiles": [],
+  "projectFilePath": "/Users/zingen/Documents/Programming Projects/HiveMind/HiveMindCore/HiveMindCore/HiveMindCore.csproj",
+  "expectedPackageFiles": [
+    "/Users/zingen/.nuget/packages/newtonsoft.json/13.0.3/newtonsoft.json.13.0.3.nupkg.sha512"
+  ],
   "logs": []
 }

@@ -10,13 +10,13 @@ public class ServerData
     public string OwnerID;
     public string LastContact;
 
-    public ServerData(bool requestTile, int x, int y, string name, IPAddress ip, int port, string ownerID)
+    public ServerData(bool requestTile, int x, int y, string name, string ip, int port, string ownerID)
     {
         this.RequestTile = requestTile;
         this.X = x;
         this.Y = y;
         this.Name = name;
-        this.Ip = ip.ToString();
+        this.Ip = ip;
         this.Port = port;
         this.OwnerID = ownerID;
 

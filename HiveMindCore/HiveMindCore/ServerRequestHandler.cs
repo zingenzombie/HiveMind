@@ -1,39 +1,17 @@
 ﻿using System.Linq.Expressions;
 using System.Net.Sockets;
+using System.Text;
 
 namespace HiveMindCore;
 
-public class ServerRequestHandler
+public class ServerRequestHandler : RequestHandler
 {
-    private TcpClient server; 
-    ServerDataHolder holder;
-    
-    public ServerRequestHandler(TcpClient server, ServerDataHolder holder)
+    public ServerRequestHandler(TcpClient client, ServerDataHolder holder)
     {
-
-        this.server = server;
-        this.holder = holder;
-
-        string request = "";
-        byte[] buffer = new byte[1];
-        
-        while (server.Available > 0 && server.Connected){
-
-            server.GetStream().Read(buffer, 0, 1);
-
-            if (((char)buffer[0]).Equals('\n'))
-            {
-                Console.WriteLine(request);
-                SwitchRequest(request);
-                break;
-            }
-            
-            request += System.Text.Encoding.UTF8.GetString(buffer);
-
-        }
+        HandleIt(client, holder);
     }
 
-    private void SwitchRequest(string request)
+    protected override void SwitchRequest(string request)
     {
         switch (request)
         {
@@ -42,12 +20,17 @@ public class ServerRequestHandler
                 NewServer();
                 break;
             default:
-                throw new Exception("Server request does not match any accepted by core.");
+                throw new Exception("Server request does not match any accepted by core. Given request was " + request + ".");
         }
     }
 
     private void NewServer()
     {
-        
+        client.GetStream().Write(Encoding.ASCII.GetBytes("howdy server!"), 0, Encoding.ASCII.GetBytes("howdy server!").Length);
+
+        string serverRequest = GetStringFromStream();
+        Console.WriteLine(serverRequest);
+
+        holder.CreateServer(serverRequest);
     }
 }

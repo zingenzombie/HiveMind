@@ -42,8 +42,8 @@ public class ServerController : MonoBehaviour
 
     void ContactCore()
     {
-        ServerData tmp = new ServerData(requestTile, x, y, serverName, ipAddress, port, ownerID);
-        string jsonString = JsonUtility.ToJson(tmp);
+        ServerData tmp = new ServerData(requestTile, x, y, serverName, ipAddress.ToString(), port, ownerID);
+        string jsonString = JsonUtility.ToJson(tmp) + '\n';
 
         using TcpClient tcpClient = new TcpClient(coreAddress.ToString(), corePort);
 
@@ -113,11 +113,5 @@ public class ServerController : MonoBehaviour
             }
             yield return null;
         }
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 }

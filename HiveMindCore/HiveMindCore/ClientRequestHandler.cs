@@ -1,26 +1,36 @@
-﻿using System.Diagnostics;
+﻿using System.Linq.Expressions;
 using System.Net.Sockets;
-using System.Reflection.Metadata.Ecma335;
+using System.Text;
 
 namespace HiveMindCore;
 
-public class ClientRequestHandler
+public class ClientRequestHandler : RequestHandler
 {
     public ClientRequestHandler(TcpClient client, ServerDataHolder holder)
     {
-        while (client.Connected) //while the client is connected, we look for incoming messages
+        HandleIt(client, holder);
+    }
+
+    protected override void SwitchRequest(string request)
+    {
+        switch (request)
         {
-            if (client.Available > 0)
-            {
-                byte[] buffer = new byte[client.Available];
-
-                client.GetStream().Read(buffer, 0, client.Available);
-
-                Console.WriteLine(System.Text.Encoding.UTF8.GetString(buffer));
-
-            }
-
-            return;
+            case "getServers":
+                Console.WriteLine("Fetching servers...");
+                GetServers();
+                break;
+            default:
+                throw new Exception("Client request does not match any accepted by core. Given request was " + request + ".");
         }
+    }
+
+    private void GetServers()
+    {
+        client.GetStream().Write(Encoding.ASCII.GetBytes("howdy server!"), 0, Encoding.ASCII.GetBytes("howdy server!").Length);
+
+        string serverRequest = GetStringFromStream();
+        Console.WriteLine(serverRequest);
+
+        holder.CreateServer(serverRequest);
     }
 }
