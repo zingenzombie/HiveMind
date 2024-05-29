@@ -54,7 +54,7 @@ public class GridController : MonoBehaviour
             }
         }
         IPAddress tmpAddress = IPAddress.Parse("127.0.0.1");
-        ((GameObject) grid[new Key(0,0)]).GetComponent<HexTileController>().SetServer(tmpAddress, 3621, "testServer", "Zin");
+        ((GameObject) grid[new Key(0,0)]).GetComponent<HexTileController>().SetServer(tmpAddress, 3622, "testServer", "Zin");
     }
 
     // Update is called once per frame

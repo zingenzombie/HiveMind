@@ -13,11 +13,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\chase\\Documents\\ProgrammingProjects\\HiveMindUnity\\HiveMindCore\\HiveMindCore\\HiveMindCore.csproj",
+      "projectUniqueName": "C:\\Users\\chase\\Documents\\ProgrammingProjects\\HiveMind\\HiveMindCore\\HiveMindCore\\HiveMindCore.csproj",
       "projectName": "HiveMindCore",
-      "projectPath": "C:\\Users\\chase\\Documents\\ProgrammingProjects\\HiveMindUnity\\HiveMindCore\\HiveMindCore\\HiveMindCore.csproj",
+      "projectPath": "C:\\Users\\chase\\Documents\\ProgrammingProjects\\HiveMind\\HiveMindCore\\HiveMindCore\\HiveMindCore.csproj",
       "packagesPath": "C:\\Users\\chase\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\chase\\Documents\\ProgrammingProjects\\HiveMindUnity\\HiveMindCore\\HiveMindCore\\obj\\",
+      "outputPath": "C:\\Users\\chase\\Documents\\ProgrammingProjects\\HiveMind\\HiveMindCore\\HiveMindCore\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\chase\\AppData\\Roaming\\NuGet\\NuGet.Config",

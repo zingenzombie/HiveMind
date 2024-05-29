@@ -152,7 +152,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 51bd4336c5614e343a6cb38dcc64b559, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  corePort: 3621
+  requestTile: 1
   port: 3622
+  x: 0
+  y: 0
+  serverName: testServer
+  ownerID: Zin
 --- !u!4 &534617745
 Transform:
   m_ObjectHideFlags: 0

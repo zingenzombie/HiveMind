@@ -15,6 +15,8 @@ public class ServerDataHolder
     
     public class ServerData
     {
+        [JsonInclude] 
+        public bool OequestTile;
         [JsonInclude]
         public int X;
         [JsonInclude]

@@ -6,24 +6,66 @@ using System.Net.Sockets;
 using System.Text;
 using System;
 using System.Threading.Tasks;
+using Unity.VisualScripting;
 
 public class ServerController : MonoBehaviour
 {
 
+    public IPAddress coreAddress;
+    public int corePort;
+
+    public bool requestTile;
     public IPAddress ipAddress;
     public int port;
+    public int x, y;
+    public string serverName;
+    public string ownerID;
 
 
     // Start is called before the first frame update
     private void Start()
     {
         ipAddress = IPAddress.Parse("127.0.0.1");
+
+        //Delete this later and fix
+        coreAddress = IPAddress.Parse("127.0.0.1");
+
+        ContactCore();
+
         ClientConnectListener();
     }
 
     void ClientConnectListener()
     {
         StartCoroutine(ListenForClients());
+    }
+
+    void ContactCore()
+    {
+        ServerData tmp = new ServerData(requestTile, x, y, serverName, ipAddress, port, ownerID);
+        string jsonString = JsonUtility.ToJson(tmp);
+
+        using TcpClient tcpClient = new TcpClient(coreAddress.ToString(), corePort);
+
+        if (!tcpClient.Connected)
+        {
+            Console.WriteLine("Failed to connect to core!");
+            return;
+        }
+        byte[] buffer = new byte[6];
+        buffer[0] = (byte)'s';
+        buffer[1] = (byte)'e';
+        buffer[2] = (byte)'r';
+        buffer[3] = (byte)'v';
+        buffer[4] = (byte)'e';
+        buffer[5] = (byte)'r';
+        tcpClient.GetStream().Write(buffer, 0, buffer.Length);
+
+        buffer = Encoding.ASCII.GetBytes("newServer\n");
+        tcpClient.GetStream().Write(buffer, 0, buffer.Length);
+
+        tcpClient.GetStream().Write(Encoding.ASCII.GetBytes(jsonString), 0, Encoding.ASCII.GetBytes(jsonString).Length);
+
     }
 
     IEnumerator ListenForClients()
