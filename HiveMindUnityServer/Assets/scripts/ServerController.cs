@@ -7,6 +7,7 @@ using System.Text;
 using System;
 using System.Threading.Tasks;
 using Unity.VisualScripting;
+using System.Linq;
 
 public class ServerController : MonoBehaviour
 {
@@ -44,6 +45,7 @@ public class ServerController : MonoBehaviour
     {
         ServerData tmp = new ServerData(requestTile, x, y, serverName, ipAddress.ToString(), port, ownerID);
         string jsonString = JsonUtility.ToJson(tmp) + '\n';
+        byte[] bytes = Encoding.ASCII.GetBytes(jsonString);
 
         using TcpClient tcpClient = new TcpClient(coreAddress.ToString(), corePort);
 
@@ -52,6 +54,7 @@ public class ServerController : MonoBehaviour
             Console.WriteLine("Failed to connect to core!");
             return;
         }
+
         byte[] buffer = new byte[6];
         buffer[0] = (byte)'s';
         buffer[1] = (byte)'e';
@@ -64,7 +67,11 @@ public class ServerController : MonoBehaviour
         buffer = Encoding.ASCII.GetBytes("newServer\n");
         tcpClient.GetStream().Write(buffer, 0, buffer.Length);
 
-        tcpClient.GetStream().Write(Encoding.ASCII.GetBytes(jsonString), 0, Encoding.ASCII.GetBytes(jsonString).Length);
+        tcpClient.GetStream().Write(bytes, 0, bytes.Length);
+        Debug.Log("Wrote " + bytes.Length + " bytes.");
+
+        foreach(var character in bytes)
+            Console.WriteLine((char)character);
 
     }
 

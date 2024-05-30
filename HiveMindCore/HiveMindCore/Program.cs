@@ -1,9 +1,11 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
+using System.Collections;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using HiveMindCore;
+using Newtonsoft.Json;
 
 static async Task<IPAddress?> GetExternalIpAddress()
 {
@@ -75,25 +77,32 @@ void MaintainList()
 {
     while (true)
     {
-        Thread.Sleep(15000); //Run every 15 seconds.
-        foreach (var serverData in holder.servers)
+        Thread.Sleep(5000); //Run every 5 seconds.
+        
+        IEnumerator enumerator = holder.servers.GetEnumerator();
+
+        while (enumerator.MoveNext())
         {
-            using TcpClient tcpClient = new TcpClient(serverData.Ip, serverData.Port);
+            var serverData = (KeyValuePair<ServerDataHolder.Key, ServerDataHolder.ServerData>) enumerator.Current;
+
+            TcpClient tcpClient;
+
+            try
+            {
+                tcpClient = new TcpClient(serverData.Value.Ip, serverData.Value.Port);
+            }
+            catch
+            {
+                Console.WriteLine("Failed to connect to server at " + serverData.Value.X + ", " + serverData.Value.Y + ".");
+                holder.DeleteServer(serverData.Value.X, serverData.Value.Y);
+                continue;
+            }
             
             if (!tcpClient.Connected)
             {
-                Console.WriteLine("Failed to connect to core!");
-                holder.DeleteServer(serverData);
+                Console.WriteLine("Failed to connect to server at " + serverData.Value.X + ", " + serverData.Value.Y + ".");
+                holder.DeleteServer(serverData.Value.X, serverData.Value.Y);
             }
-            byte[] buffer = new byte[6];
-            buffer[0] = (byte)'s';
-            buffer[1] = (byte)'e';
-            buffer[2] = (byte)'r';
-            buffer[3] = (byte)'v';
-            buffer[4] = (byte)'e';
-            buffer[5] = (byte)'r';
-            tcpClient.GetStream().Write(buffer, 0, buffer.Length);
-            
         }
     }
 }

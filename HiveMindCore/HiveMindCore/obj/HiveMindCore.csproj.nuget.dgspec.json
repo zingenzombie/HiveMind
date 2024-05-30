@@ -1,26 +1,27 @@
 {
   "format": 1,
   "restore": {
-    "/Users/zingen/Documents/Programming Projects/HiveMind/HiveMindCore/HiveMindCore/HiveMindCore.csproj": {}
+    "C:\\Users\\chase\\Documents\\ProgrammingProjects\\HiveMind\\HiveMindCore\\HiveMindCore\\HiveMindCore.csproj": {}
   },
   "projects": {
-    "/Users/zingen/Documents/Programming Projects/HiveMind/HiveMindCore/HiveMindCore/HiveMindCore.csproj": {
+    "C:\\Users\\chase\\Documents\\ProgrammingProjects\\HiveMind\\HiveMindCore\\HiveMindCore\\HiveMindCore.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/zingen/Documents/Programming Projects/HiveMind/HiveMindCore/HiveMindCore/HiveMindCore.csproj",
+        "projectUniqueName": "C:\\Users\\chase\\Documents\\ProgrammingProjects\\HiveMind\\HiveMindCore\\HiveMindCore\\HiveMindCore.csproj",
         "projectName": "HiveMindCore",
-        "projectPath": "/Users/zingen/Documents/Programming Projects/HiveMind/HiveMindCore/HiveMindCore/HiveMindCore.csproj",
-        "packagesPath": "/Users/zingen/.nuget/packages/",
-        "outputPath": "/Users/zingen/Documents/Programming Projects/HiveMind/HiveMindCore/HiveMindCore/obj/",
+        "projectPath": "C:\\Users\\chase\\Documents\\ProgrammingProjects\\HiveMind\\HiveMindCore\\HiveMindCore\\HiveMindCore.csproj",
+        "packagesPath": "C:\\Users\\chase\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\chase\\Documents\\ProgrammingProjects\\HiveMind\\HiveMindCore\\HiveMindCore\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "/Users/zingen/.nuget/NuGet/NuGet.Config"
+          "C:\\Users\\chase\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "net7.0"
         ],
         "sources": {
-          "https://api.nuget.org/v3/index.json": {}
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {}
         },
         "frameworks": {
           "net7.0": {
@@ -38,9 +39,9 @@
         "net7.0": {
           "targetAlias": "net7.0",
           "dependencies": {
-            "Newtonsoft.Json": {
+            "newtonsoft.json": {
               "target": "Package",
-              "version": "[13.0.3, )"
+              "version": "[9.0.1, )"
             }
           },
           "imports": [
@@ -59,7 +60,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/7.0.316/RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.304\\RuntimeIdentifierGraph.json"
         }
       }
     }

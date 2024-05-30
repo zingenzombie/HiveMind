@@ -79,8 +79,14 @@ public class ServerDataHolder
 
         if (newServerData == null)
             return;
+
+        if (servers.TryAdd(new Key(newServerData.X, newServerData.Y), newServerData))
+        {
+            Console.WriteLine("Server successfully created at " + newServerData.X + ", " + newServerData.Y + ".");
+            return;
+        }
+        Console.WriteLine("Server failed to be created at " + newServerData.X + ", " + newServerData.Y + ".");
         
-        servers.TryAdd(new Key(newServerData.X, newServerData.Y),newServerData);
     }
 
     public void DeleteServer(int x, int y)
@@ -94,16 +100,27 @@ public class ServerDataHolder
         
         if(servers.TryGetValue(new Key(x, y), out data))
             throw new Exception("No server exists at " + x + ", " + y + ".");
-        
+
+        return JsonConvert.SerializeObject(data);
     }
 
     public string GetServerJsonData(string name)
     {
+
+        IEnumerator enumerator = servers.GetEnumerator();
+
+        while (enumerator.MoveNext())
+            if (((ServerData)enumerator.Current).Name == name)
+            {
+                return JsonConvert.SerializeObject((ServerData)enumerator.Current);
+            }
+        
+        /*
         foreach(ServerData server in servers)
         {
             if (server.Name == name)
                 return System.Text.Json.JsonSerializer.Serialize(server);
-        }
+        }*/
         throw new Exception("No server of name " + name + " exists.");
     }
     

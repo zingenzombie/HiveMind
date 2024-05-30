@@ -26,7 +26,7 @@ public class ServerRequestHandler : RequestHandler
 
     private void NewServer()
     {
-        client.GetStream().Write(Encoding.ASCII.GetBytes("howdy server!"), 0, Encoding.ASCII.GetBytes("howdy server!").Length);
+        //client.GetStream().Write(Encoding.ASCII.GetBytes("howdy server!"), 0, Encoding.ASCII.GetBytes("howdy server!").Length);
 
         string serverRequest = GetStringFromStream();
         Console.WriteLine(serverRequest);
