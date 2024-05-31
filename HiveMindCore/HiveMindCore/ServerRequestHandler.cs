@@ -16,7 +16,6 @@ public class ServerRequestHandler : RequestHandler
         switch (request)
         {
             case "newServer":
-                Console.WriteLine("Creating new server...");
                 NewServer();
                 break;
             default:
@@ -26,11 +25,15 @@ public class ServerRequestHandler : RequestHandler
 
     private void NewServer()
     {
-        //client.GetStream().Write(Encoding.ASCII.GetBytes("howdy server!"), 0, Encoding.ASCII.GetBytes("howdy server!").Length);
-
         string serverRequest = GetStringFromStream();
         Console.WriteLine(serverRequest);
 
-        holder.CreateServer(serverRequest);
+        if (!holder.CreateServer(serverRequest))
+        {
+            client.GetStream().Write("FAIL\n"u8);
+            return;
+        }
+        
+        client.GetStream().Write("SUCCESS\n"u8);
     }
 }

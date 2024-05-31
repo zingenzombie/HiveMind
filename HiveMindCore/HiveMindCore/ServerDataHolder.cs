@@ -63,13 +63,8 @@ public class ServerDataHolder
         }
     }
     
-    /*
-    public void CreateServer(int x, int y, string name, IPAddress ip, int port, string ownerID)
-    {
-        servers.Add(new ServerData(x, y, name, ip.ToString(), port, ownerID));
-    }
-    */
-    public void CreateServer(string JSONObject)
+    //Returns 1 if successfully creates a new server and 0 if not.
+    public bool CreateServer(string JSONObject)
     {
         ServerData newServerData;
         try
@@ -79,19 +74,26 @@ public class ServerDataHolder
         catch (Exception)
         {
             Console.WriteLine("ERROR: failed to represent server with given JSON.");
-            return;
+            return false;
         }
 
         if (newServerData == null)
-            return;
+            return false;
+
+        if (servers.ContainsKey(new Key(newServerData.X, newServerData.Y)))
+        {
+            Console.WriteLine("ERROR: Server already exists at " + newServerData.X + ", " + newServerData.Y + ".");
+            return false;
+        }
 
         if (servers.TryAdd(new Key(newServerData.X, newServerData.Y), newServerData))
         {
             Console.WriteLine("Server successfully created at " + newServerData.X + ", " + newServerData.Y + ".");
-            return;
+            return true;
         }
-        Console.WriteLine("Server failed to be created at " + newServerData.X + ", " + newServerData.Y + ".");
         
+        Console.WriteLine("Server failed to be created at " + newServerData.X + ", " + newServerData.Y + ". This should never occur.");
+        return false;
     }
 
     public void DeleteServer(int x, int y)
@@ -109,6 +111,7 @@ public class ServerDataHolder
         return JsonConvert.SerializeObject(data);
     }
 
+    //This function would only be use in user queries for servers by name.
     public string GetServerJsonData(string name)
     {
 

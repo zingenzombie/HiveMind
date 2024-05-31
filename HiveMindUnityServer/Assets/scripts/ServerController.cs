@@ -55,13 +55,7 @@ public class ServerController : MonoBehaviour
             return;
         }
 
-        byte[] buffer = new byte[6];
-        buffer[0] = (byte)'s';
-        buffer[1] = (byte)'e';
-        buffer[2] = (byte)'r';
-        buffer[3] = (byte)'v';
-        buffer[4] = (byte)'e';
-        buffer[5] = (byte)'r';
+        byte[] buffer = Encoding.ASCII.GetBytes("server");
         tcpClient.GetStream().Write(buffer);
 
         buffer = Encoding.ASCII.GetBytes("newServer\n");
@@ -73,6 +67,10 @@ public class ServerController : MonoBehaviour
         foreach(var character in bytes)
             Console.WriteLine((char)character);
 
+        string result = CoreCommunication.GetStringFromStream(tcpClient);
+
+        if(!result.Equals("SUCCESS"))
+            throw new Exception("Failed to reserve space on core grid. Message received: " + result);
     }
 
     IEnumerator ListenForClients()

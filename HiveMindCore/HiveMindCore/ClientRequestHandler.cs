@@ -18,11 +18,9 @@ public class ClientRequestHandler : RequestHandler
         switch (request)
         {
             case "getAllServers":
-                Console.WriteLine("Fetching servers...");
                 GetAllServers();
                 break;
             case "getServer":
-                Console.WriteLine("Fetching server...");
                 GetServer();
                 break;
             default:
@@ -48,8 +46,8 @@ public class ClientRequestHandler : RequestHandler
 
     private void GetServer()
     {
-        int x = 0;
-        int y = 0;
+        int x;
+        int y;
         
         try
         {
@@ -58,18 +56,18 @@ public class ClientRequestHandler : RequestHandler
         }
         catch
         {
-            throw new Exception("Invalid x and/or y coordinate received.");
+            //throw new Exception("Invalid x and/or y coordinate received.");
+            client.GetStream().Write("INVALXY"u8);
+            return;
         }
 
         Console.WriteLine(x + ", " + y + " requested.");
         
         ServerDataHolder.ServerData serverData;
 
-        byte[] noServer = Encoding.ASCII.GetBytes("DoesNotExist\n");
-
         if (!holder.servers.TryGetValue(new ServerDataHolder.Key(x, y), out serverData))
         {
-            client.GetStream().Write(noServer);
+            client.GetStream().Write("DoesNotExist\n"u8);
             return;
         }
 

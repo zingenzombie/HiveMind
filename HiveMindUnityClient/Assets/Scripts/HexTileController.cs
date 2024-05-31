@@ -66,7 +66,7 @@ public class HexTileController : MonoBehaviour
         byte[] buffer = Encoding.ASCII.GetBytes("client");
         tcpClient.GetStream().Write(buffer);
 
-        buffer = Encoding.ASCII.GetBytes("getServer" + '\n');
+        buffer = Encoding.ASCII.GetBytes("getServer\n");
         tcpClient.GetStream().Write(buffer);
 
         buffer = Encoding.ASCII.GetBytes(x.ToString() + '\n');

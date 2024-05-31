@@ -57,7 +57,7 @@ static void IncomingConnectionHandler(TcpClient client, ServerDataHolder holder)
     
     byte[] buffer = new byte[6];
 
-    client.GetStream().Read(buffer, 0, 6);
+    client.GetStream().Read(buffer);
 
     Console.WriteLine(System.Text.Encoding.UTF8.GetString(buffer));
 
