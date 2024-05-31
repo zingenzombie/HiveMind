@@ -36,7 +36,6 @@ public class GridController : MonoBehaviour
 
     void InitialSpawning(int posX = 0, int posY = 0)
     {
-
         for (int x = -renderDistance + posX; x < renderDistance; x++)
         {
             
@@ -50,16 +49,10 @@ public class GridController : MonoBehaviour
 
                 grid.Add(new Key(x, y), Instantiate(hexTile, new Vector3(offsetX, 1000 * Mathf.PerlinNoise(offsetX / 5000, offsetY / 5000), offsetY), transform.rotation, this.transform));
                 ((GameObject) grid[new Key(x, y)]).name = x + ", " + y;
-
+                ((GameObject) grid[new Key(x, y)]).GetComponent<HexTileController>().x = x;
+                ((GameObject) grid[new Key(x, y)]).GetComponent<HexTileController>().y = y;
+                ((GameObject)grid[new Key(x, y)]).GetComponent<HexTileController>().ContactCore();
             }
         }
-        IPAddress tmpAddress = IPAddress.Parse("127.0.0.1");
-        ((GameObject) grid[new Key(0,0)]).GetComponent<HexTileController>().SetServer(tmpAddress, 3622, "testServer", "Zin");
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 }

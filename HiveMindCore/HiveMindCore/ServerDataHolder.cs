@@ -56,6 +56,11 @@ public class ServerDataHolder
             
             LastContact = DateTime.Now.ToString();
         }
+
+        public string GetServerJsonData()
+        {
+            return JsonConvert.SerializeObject(this);
+        }
     }
     
     /*
@@ -115,12 +120,6 @@ public class ServerDataHolder
                 return JsonConvert.SerializeObject((ServerData)enumerator.Current);
             }
         
-        /*
-        foreach(ServerData server in servers)
-        {
-            if (server.Name == name)
-                return System.Text.Json.JsonSerializer.Serialize(server);
-        }*/
         throw new Exception("No server of name " + name + " exists.");
     }
     

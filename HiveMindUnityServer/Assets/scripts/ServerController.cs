@@ -62,12 +62,12 @@ public class ServerController : MonoBehaviour
         buffer[3] = (byte)'v';
         buffer[4] = (byte)'e';
         buffer[5] = (byte)'r';
-        tcpClient.GetStream().Write(buffer, 0, buffer.Length);
+        tcpClient.GetStream().Write(buffer);
 
         buffer = Encoding.ASCII.GetBytes("newServer\n");
-        tcpClient.GetStream().Write(buffer, 0, buffer.Length);
+        tcpClient.GetStream().Write(buffer);
 
-        tcpClient.GetStream().Write(bytes, 0, bytes.Length);
+        tcpClient.GetStream().Write(bytes);
         Debug.Log("Wrote " + bytes.Length + " bytes.");
 
         foreach(var character in bytes)

@@ -93,16 +93,18 @@ void MaintainList()
             }
             catch
             {
-                Console.WriteLine("Failed to connect to server at " + serverData.Value.X + ", " + serverData.Value.Y + ".");
+                Console.WriteLine("Goodbye " + serverData.Value.X + ", " + serverData.Value.Y + ".");
                 holder.DeleteServer(serverData.Value.X, serverData.Value.Y);
                 continue;
             }
             
             if (!tcpClient.Connected)
             {
-                Console.WriteLine("Failed to connect to server at " + serverData.Value.X + ", " + serverData.Value.Y + ".");
+                Console.WriteLine("Goodbye " + serverData.Value.X + ", " + serverData.Value.Y + ".");
                 holder.DeleteServer(serverData.Value.X, serverData.Value.Y);
             }
         }
+
+        ((IDisposable)enumerator).Dispose();
     }
 }

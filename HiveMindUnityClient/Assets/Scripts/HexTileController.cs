@@ -3,16 +3,15 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
+using System.Text;
 using UnityEngine;
 
 public class HexTileController : MonoBehaviour
 {
-
-
-    public IPAddress ipAddress;
-    public int port;
-    public string serverName;
-    public string serverOwner;
+    public int corePort, x, y;
+    public string coreAddress;
+    public bool hasServer = false;
+    public ServerData serverData;
 
     public GameObject groundHolder;
     public GameObject templateGroundHolder;
@@ -39,9 +38,64 @@ public class HexTileController : MonoBehaviour
      */
 
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
+        coreAddress = "127.0.0.1";
+        corePort = 3621;
+
         ClearServer();
+    }
+
+    public void ContactCore()
+    {
+        TcpClient tcpClient;
+
+        try
+        {
+            tcpClient = new TcpClient(coreAddress, corePort);
+        }
+        catch (Exception)
+        {
+            //throw new Exception("Failed to connect to core.");
+            return;
+        }
+
+        if (!tcpClient.Connected)
+            throw new Exception("Failed to connect to core.");
+
+        byte[] buffer = Encoding.ASCII.GetBytes("client");
+        tcpClient.GetStream().Write(buffer);
+
+        buffer = Encoding.ASCII.GetBytes("getServer" + '\n');
+        tcpClient.GetStream().Write(buffer);
+
+        buffer = Encoding.ASCII.GetBytes(x.ToString() + '\n');
+        tcpClient.GetStream().Write(buffer);
+
+        buffer = Encoding.ASCII.GetBytes(y.ToString() + '\n');
+        tcpClient.GetStream().Write(buffer);
+
+        string serverJSON = CoreCommunication.GetStringFromStream(tcpClient);
+
+        print(serverJSON);
+
+        if (serverJSON.Equals("DoesNotExist"))
+            return;
+
+        try
+        {
+            serverData = JsonUtility.FromJson<ServerData>(serverJSON);
+        }
+        catch (Exception)
+        {
+            Debug.Log("Server data JSON given was improper");
+            return;
+        }
+
+        hasServer = true;
+
+        ClearGroundAndTileObjects();
+        ContactServerAndRequestObjects();
     }
 
     private void OnDestroy()
@@ -52,37 +106,38 @@ public class HexTileController : MonoBehaviour
     //Sets a tile back to its default state with the template ground.
     void ClearServer()
     {
-        ipAddress = null;
-        port = 0;
-        serverName = string.Empty;
-        serverOwner = string.Empty;
 
-        ClearGroundAndTileObjects();
-
+        StartCoroutine(ClearGroundAndTileObjects());
         Instantiate(templateGroundHolder, groundHolder.transform);
 
     }
 
     //Erases all ground and TileObject data
-    void ClearGroundAndTileObjects()
+    IEnumerator ClearGroundAndTileObjects()
     {
         //This should only ever run once at a time, but idk,
         //maybe someone will do some magic and have a server with multiple ground objects...
         while (groundHolder.transform.childCount > 0)
+        {
             Destroy(groundHolder.transform.GetChild(0));
+            yield return null;
+        }
 
 
         while (tileObjects.transform.childCount > 0)
+        {
             Destroy(groundHolder.transform.GetChild(0));
+            yield return null;
+        }
     }
 
     //Assigns a server to the tile, then contacts the server to load all necessary data.
     public void SetServer(IPAddress address, int port, string name, string owner)
     {
-        ipAddress = address;
-        this.port = port;
-        this.serverName = name;
-        this.serverOwner = owner;
+        serverData.Ip = address.ToString();
+        serverData.Port = port;
+        serverData.Name = name;
+        serverData.OwnerID = owner;
 
         ClearGroundAndTileObjects();
         ContactServerAndRequestObjects();
@@ -91,7 +146,7 @@ public class HexTileController : MonoBehaviour
     void ContactServerAndRequestObjects()
     {
 
-        using TcpClient tcpClient = new TcpClient(ipAddress.ToString(), port);
+        using TcpClient tcpClient = new TcpClient(serverData.Ip, serverData.Port);
 
         if(!tcpClient.Connected)
             Console.WriteLine("Failed to connect to server of tile " + transform.parent.name + ".");
