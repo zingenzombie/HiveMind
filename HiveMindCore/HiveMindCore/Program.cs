@@ -103,8 +103,8 @@ void MaintainList()
                 Console.WriteLine("Goodbye " + serverData.Value.X + ", " + serverData.Value.Y + ".");
                 holder.DeleteServer(serverData.Value.X, serverData.Value.Y);
             }
+            tcpClient.GetStream().Write("\n"u8);
         }
-
         ((IDisposable)enumerator).Dispose();
     }
 }

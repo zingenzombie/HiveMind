@@ -1,9 +1,11 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using UnityEditor;
 using UnityEngine;
 
 public class HexTileController : MonoBehaviour
@@ -77,10 +79,10 @@ public class HexTileController : MonoBehaviour
 
         string serverJSON = CoreCommunication.GetStringFromStream(tcpClient);
 
-        print(serverJSON);
-
         if (serverJSON.Equals("DoesNotExist"))
             return;
+
+        print(serverJSON);
 
         try
         {
@@ -155,15 +157,56 @@ public class HexTileController : MonoBehaviour
 
     }
 
+    //This should be moved to another thread and piped back.
     IEnumerator ServerConnectAndGetGameObjects(TcpClient server)
     {
-        byte[] buffer = new byte[5];
-        buffer[0] = (byte) 't';
-        buffer[1] = (byte)'e';
-        buffer[2] = (byte)'s';
-        buffer[3] = (byte)'t';
-        buffer[4] = (byte)'\n';
-        server.GetStream().Write(buffer, 0, 5);
+
+        byte[] buffer = Encoding.ASCII.GetBytes("getAssets\n");
+        server.GetStream().Write(buffer);
+
+        string numFilesStr = CoreCommunication.GetStringFromStream(server);
+
+        int numFiles;
+
+        if (Int32.TryParse(numFilesStr, out numFiles))
+        {
+
+            string assetBundleDirectoryPath = Application.dataPath + "/AssetBundles/" + x + "," + y + "/";
+
+            if (!Directory.Exists(assetBundleDirectoryPath))
+                Directory.CreateDirectory(assetBundleDirectoryPath);
+
+            Debug.Log(numFiles);
+
+            for(int i = 0; i < numFiles; i++)
+            {
+                string fileName = CoreCommunication.GetStringFromStream(server);
+
+                //This does not verify that the given string is a long!!!
+                int fileSize = Int32.Parse(CoreCommunication.GetStringFromStream(server));
+
+                byte[] fileBuffer = new byte[fileSize];
+
+                server.GetStream().Read(fileBuffer, 0, fileSize);
+
+                System.IO.File.WriteAllBytes(assetBundleDirectoryPath + fileName, fileBuffer);
+
+                Debug.Log(fileName);
+            }
+
+            var prefab = AssetBundle.LoadFromFile(assetBundleDirectoryPath + "tileobjects");
+
+            UnityEngine.Object[] tileObjectsAll = prefab.LoadAllAssets();
+
+            foreach (var tileObject in tileObjectsAll)
+            {
+                Instantiate(tileObject, tileObjects.transform);
+            }
+
+            prefab.Unload(false);
+
+        }
+            
 
         yield return null;
     }

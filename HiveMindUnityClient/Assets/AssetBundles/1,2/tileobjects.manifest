@@ -1,0 +1,36 @@
+ManifestFileVersion: 0
+CRC: 1308557171
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: fa3e277e692279ff583b23ab9e8c43ae
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 8bb7ab07db362829e03f0449d9af9db4
+  IncrementalBuildHash:
+    serializedVersion: 2
+    Hash: fa3e277e692279ff583b23ab9e8c43ae
+HashAppended: 0
+ClassTypes:
+- Class: 1
+  Script: {instanceID: 0}
+- Class: 4
+  Script: {instanceID: 0}
+- Class: 21
+  Script: {instanceID: 0}
+- Class: 23
+  Script: {instanceID: 0}
+- Class: 33
+  Script: {instanceID: 0}
+- Class: 43
+  Script: {instanceID: 0}
+- Class: 48
+  Script: {instanceID: 0}
+- Class: 108
+  Script: {instanceID: 0}
+- Class: 136
+  Script: {instanceID: 0}
+SerializeReferenceClassIdentifiers: []
+Assets:
+- Assets/ServerObjectPrefabs/TileObjects.prefab
+Dependencies: []

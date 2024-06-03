@@ -1,12 +1,9 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Net.Sockets;
-using UnityEditor.PackageManager;
-using UnityEngine;
 
 public static class CoreCommunication
 {
+
     public static string GetStringFromStream(TcpClient client)
     {
 

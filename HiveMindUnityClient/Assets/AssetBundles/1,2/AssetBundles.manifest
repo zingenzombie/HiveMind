@@ -1,0 +1,7 @@
+ManifestFileVersion: 0
+CRC: 2751978030
+AssetBundleManifest:
+  AssetBundleInfos:
+    Info_0:
+      Name: tileobjects
+      Dependencies: {}

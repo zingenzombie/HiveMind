@@ -1,5 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Net;
 using UnityEngine;
 
@@ -25,9 +27,32 @@ public class GridController : MonoBehaviour
 
     private Hashtable grid = new Hashtable();
 
+    private void clearFolder(string FolderName)
+    {
+        DirectoryInfo dir = new DirectoryInfo(FolderName);
+
+        foreach (FileInfo fi in dir.GetFiles())
+        {
+            fi.Delete();
+        }
+
+        foreach (DirectoryInfo di in dir.GetDirectories())
+        {
+            clearFolder(di.FullName);
+            di.Delete();
+        }
+    }
+
     // Start is called before the first frame update
     void Start()
     {
+        //This set of lines is a hack and needs to be fixed later
+
+        string assetBundleDirectoryPath = Application.dataPath + "/AssetBundles";
+
+        if (Directory.Exists(assetBundleDirectoryPath))
+            clearFolder(assetBundleDirectoryPath);
+
 
         tileSize = hexTileTemplate.GetComponent<Renderer>().bounds.size.z;
 

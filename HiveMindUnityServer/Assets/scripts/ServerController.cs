@@ -1,27 +1,34 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System;
-using System.Threading.Tasks;
-using Unity.VisualScripting;
-using System.Linq;
+using System.Threading;
+using UnityEditor;
+using System.IO;
 
 public class ServerController : MonoBehaviour
 {
-
+    private Thread listen;
     public IPAddress coreAddress;
     public int corePort;
+    public GameObject hexTile;
+    private GameObject groundHolder, tileObjects;
 
-    public bool requestTile;
+    public bool requestXY;
     public IPAddress ipAddress;
     public int port;
     public int x, y;
     public string serverName;
     public string ownerID;
 
+
+    private void OnApplicationQuit()
+    {
+        if(listen != null)
+            listen.Abort();
+    }
 
     // Start is called before the first frame update
     private void Start()
@@ -31,19 +38,22 @@ public class ServerController : MonoBehaviour
         //Delete this later and fix
         coreAddress = IPAddress.Parse("127.0.0.1");
 
-        ContactCore();
+        groundHolder = hexTile.transform.GetChild(0).gameObject;
+        groundHolder = hexTile.transform.GetChild(1).gameObject;
 
+        ContactCore();
         ClientConnectListener();
     }
 
-    void ClientConnectListener()
+    private void ClientConnectListener()
     {
-        StartCoroutine(ListenForClients());
+        listen = new Thread(() => ListenForClients());
+        listen.Start();
     }
 
     void ContactCore()
     {
-        ServerData tmp = new ServerData(requestTile, x, y, serverName, ipAddress.ToString(), port, ownerID);
+        ServerData tmp = new ServerData(requestXY, x, y, serverName, ipAddress.ToString(), port, ownerID);
         string jsonString = JsonUtility.ToJson(tmp) + '\n';
         byte[] bytes = Encoding.ASCII.GetBytes(jsonString);
 
@@ -73,7 +83,7 @@ public class ServerController : MonoBehaviour
             throw new Exception("Failed to reserve space on core grid. Message received: " + result);
     }
 
-    IEnumerator ListenForClients()
+    private void ListenForClients()
     {
         TcpListener server = new TcpListener(IPAddress.Any, port);
         // we set our IP address as server's address, and we also set the port
@@ -89,34 +99,51 @@ public class ServerController : MonoBehaviour
 
                 if (client.Connected)  //while the client is connected, we look for incoming messages
                 {
-                    StartCoroutine(HandleNewClient(client));
-                    yield return null;
+                    Thread thread = new Thread(() => HandleNewClient(client));
+                    thread.Start();
                 }
                 else
                 {
                     Debug.Log("Error! TCP client connection attempt received, but connection failed before handling!");
                 }
             }
-            yield return null;
         }
     }
 
-    IEnumerator HandleNewClient(TcpClient client)
+    private void HandleNewClient(TcpClient client)
     {
-        while (true)
+        //Any calls to GetStringFromStream() MUST NOT be called
+        //from the main thread to prevent hanging in the case of
+        //a lagging \n character. This violates that rule...
+
+        switch (CoreCommunication.GetStringFromStream(client))
         {
-            if (!client.Connected)
-                yield break;
+            case "getAssets":
+                GetAssets(client);
+                break;
+            case "joinServer":
+                break;
 
-            if (client.Available > 0)
-            {
-                byte[] buffer = new byte[client.Available];
+            default: break;
+        }
+    }
 
-                client.GetStream().Read(buffer, 0, client.Available);
+    private void GetAssets(TcpClient client)
+    {
 
-                Debug.Log(System.Text.Encoding.UTF8.GetString(buffer));
-            }
-            yield return null;
+        string assetBundleDirectoryPath = Application.dataPath + "/AssetBundles";
+
+        string[] fileNames = Directory.GetFiles(assetBundleDirectoryPath);
+
+        client.GetStream().Write(Encoding.ASCII.GetBytes(fileNames.Length.ToString() + '\n'));
+
+        foreach(string fileName in fileNames)
+        {
+            Debug.Log(new System.IO.FileInfo(fileName).Name);
+
+            client.GetStream().Write(Encoding.ASCII.GetBytes(new System.IO.FileInfo(fileName).Name+ '\n'));
+            client.GetStream().Write(Encoding.ASCII.GetBytes(((int) new System.IO.FileInfo(fileName).Length).ToString() + '\n'));
+            client.Client.SendFile(fileName);
         }
     }
 }
