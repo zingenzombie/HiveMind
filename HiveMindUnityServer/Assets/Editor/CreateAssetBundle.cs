@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.IO;
 using UnityEditor;
@@ -10,18 +11,47 @@ public class CreateAssetBundle
     {
         string assetBundleDirectoryPath = Application.dataPath+ "/AssetBundles";
 
-        if(!Directory.Exists(assetBundleDirectoryPath))
+        if (Directory.Exists(assetBundleDirectoryPath))
+            clearFolder(assetBundleDirectoryPath);
+
+        if (!Directory.Exists(assetBundleDirectoryPath))
             Directory.CreateDirectory(assetBundleDirectoryPath);
+
+        Directory.CreateDirectory(assetBundleDirectoryPath + "/w");
+        Directory.CreateDirectory(assetBundleDirectoryPath + "/m");
+        Directory.CreateDirectory(assetBundleDirectoryPath + "/l");
 
         try
         {
 
-            BuildPipeline.BuildAssetBundles(assetBundleDirectoryPath,
-                BuildAssetBundleOptions.None, EditorUserBuildSettings.activeBuildTarget);
+            BuildPipeline.BuildAssetBundles(assetBundleDirectoryPath + "/w",
+                BuildAssetBundleOptions.None, BuildTarget.StandaloneWindows64);
 
-        }catch(System.Exception e) { 
+            BuildPipeline.BuildAssetBundles(assetBundleDirectoryPath + "/m",
+                BuildAssetBundleOptions.None, BuildTarget.StandaloneOSX);
+
+            BuildPipeline.BuildAssetBundles(assetBundleDirectoryPath + "/l",
+                BuildAssetBundleOptions.None, BuildTarget.StandaloneLinux64);
+
+        }
+        catch(System.Exception e) { 
             Debug.LogWarning(e); 
         }
+    }
 
+    private static void clearFolder(string FolderName)
+    {
+        DirectoryInfo dir = new DirectoryInfo(FolderName);
+
+        foreach (FileInfo fi in dir.GetFiles())
+        {
+            fi.Delete();
+        }
+
+        foreach (DirectoryInfo di in dir.GetDirectories())
+        {
+            clearFolder(di.FullName);
+            di.Delete();
+        }
     }
 }

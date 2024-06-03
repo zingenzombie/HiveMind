@@ -133,7 +133,16 @@ public class ServerController : MonoBehaviour
 
         string assetBundleDirectoryPath = Application.dataPath + "/AssetBundles";
 
-        string[] fileNames = Directory.GetFiles(assetBundleDirectoryPath);
+        string typeOS = CoreCommunication.GetStringFromStream(client);
+
+        if (!(typeOS.Equals("w") || typeOS.Equals("m") || typeOS.Equals("l")))
+        {
+            client.Close();
+            Debug.Log("Client sent invalid OS type.");
+            return;
+        }
+
+        string[] fileNames = Directory.GetFiles(assetBundleDirectoryPath + "/" + typeOS);
 
         client.GetStream().Write(Encoding.ASCII.GetBytes(fileNames.Length.ToString() + '\n'));
 

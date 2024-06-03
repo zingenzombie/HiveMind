@@ -164,6 +164,24 @@ public class HexTileController : MonoBehaviour
         byte[] buffer = Encoding.ASCII.GetBytes("getAssets\n");
         server.GetStream().Write(buffer);
 
+        switch (Application.platform)
+        {
+            case RuntimePlatform.WindowsPlayer:
+            case RuntimePlatform.WindowsEditor:
+                server.GetStream().Write(Encoding.ASCII.GetBytes("w\n"));
+                break;
+            case RuntimePlatform.OSXPlayer:
+            case RuntimePlatform.OSXEditor:
+                server.GetStream().Write(Encoding.ASCII.GetBytes("m\n"));
+                break;
+            case RuntimePlatform.LinuxPlayer:
+            case RuntimePlatform.LinuxEditor:
+                server.GetStream().Write(Encoding.ASCII.GetBytes("l\n"));
+                break;
+            default:
+                throw new Exception("Unsupported OS");
+        }
+
         string numFilesStr = CoreCommunication.GetStringFromStream(server);
 
         int numFiles;
