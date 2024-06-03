@@ -145,17 +145,33 @@ public class ServerController : MonoBehaviour
             return;
         }
 
+        Debug.Log(typeOS);
+
         string[] fileNames = Directory.GetFiles(assetBundleDirectoryPath + "/" + typeOS);
 
         client.GetStream().Write(Encoding.ASCII.GetBytes(fileNames.Length.ToString() + '\n'));
 
         foreach(string fileName in fileNames)
         {
+            Debug.Log(fileName);
             Debug.Log(new System.IO.FileInfo(fileName).Name);
+            Debug.Log(new System.IO.FileInfo(fileName).Length);
 
             client.GetStream().Write(Encoding.ASCII.GetBytes(new System.IO.FileInfo(fileName).Name+ '\n'));
             client.GetStream().Write(Encoding.ASCII.GetBytes(((int) new System.IO.FileInfo(fileName).Length).ToString() + '\n'));
-            client.Client.SendFile(fileName);
+            //Debug.Log(client.Client.SendBufferSize);
+
+            byte[] buffer = new byte[8192]; // 8 KB buffer size
+            using (FileStream fileStream = new FileStream(fileName, FileMode.Open, FileAccess.Read))
+            {
+                int bytesRead;
+                while ((bytesRead = fileStream.Read(buffer, 0, buffer.Length)) > 0)
+                {
+                    client.GetStream().Write(buffer, 0, bytesRead);
+                }
+            }
+
+            //client.Client.SendFile(fileName);
         }
     }
 }

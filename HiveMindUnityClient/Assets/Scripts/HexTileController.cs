@@ -205,6 +205,7 @@ public class HexTileController : MonoBehaviour
 
                 byte[] fileBuffer = new byte[fileSize];
 
+                while (server.Available < fileSize) { }
                 server.GetStream().Read(fileBuffer, 0, fileSize);
 
                 System.IO.File.WriteAllBytes(assetBundleDirectoryPath + fileName, fileBuffer);
