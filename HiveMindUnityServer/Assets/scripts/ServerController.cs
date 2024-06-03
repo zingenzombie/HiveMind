@@ -7,6 +7,8 @@ using System;
 using System.Threading;
 using UnityEditor;
 using System.IO;
+using System.Net.Http;
+using System.Threading.Tasks;
 
 public class ServerController : MonoBehaviour
 {
@@ -15,6 +17,7 @@ public class ServerController : MonoBehaviour
     public int corePort;
     public GameObject hexTile;
     private GameObject groundHolder, tileObjects;
+    public string serverIPString, coreIPString;
 
     public bool requestXY;
     public IPAddress ipAddress;
@@ -33,10 +36,10 @@ public class ServerController : MonoBehaviour
     // Start is called before the first frame update
     private void Start()
     {
-        ipAddress = IPAddress.Parse("127.0.0.1");
+        ipAddress = IPAddress.Parse(serverIPString);
 
         //Delete this later and fix
-        coreAddress = IPAddress.Parse("127.0.0.1");
+        coreAddress = IPAddress.Parse(coreIPString);
 
         groundHolder = hexTile.transform.GetChild(0).gameObject;
         groundHolder = hexTile.transform.GetChild(1).gameObject;
