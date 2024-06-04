@@ -125,6 +125,7 @@ public class ServerController : MonoBehaviour
                 GetAssets(client);
                 break;
             case "joinServer":
+
                 break;
 
             default: break;
@@ -159,8 +160,8 @@ public class ServerController : MonoBehaviour
 
             client.GetStream().Write(Encoding.ASCII.GetBytes(new System.IO.FileInfo(fileName).Name+ '\n'));
             client.GetStream().Write(Encoding.ASCII.GetBytes(((int) new System.IO.FileInfo(fileName).Length).ToString() + '\n'));
-            //Debug.Log(client.Client.SendBufferSize);
-
+            
+            //SendFile() had issues with files above ~16 KB in size on macOS, so this solution was implemented instead.
             byte[] buffer = new byte[8192]; // 8 KB buffer size
             using (FileStream fileStream = new FileStream(fileName, FileMode.Open, FileAccess.Read))
             {
@@ -170,7 +171,6 @@ public class ServerController : MonoBehaviour
                     client.GetStream().Write(buffer, 0, bytesRead);
                 }
             }
-
             //client.Client.SendFile(fileName);
         }
     }

@@ -1,8 +1,10 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
+using System.Numerics;
 using UnityEngine;
 
 public class GridController : MonoBehaviour
@@ -62,22 +64,22 @@ public class GridController : MonoBehaviour
     void InitialSpawning(int posX = 0, int posY = 0)
     {
         for (int x = -renderDistance + posX; x < renderDistance; x++)
-        {
-            
-            float offsetX = x * tileSize * Mathf.Cos(Mathf.Deg2Rad * 30);
-            float offsetY = x % 2 == 0 ? 0 : tileSize / 2;
-
             for (int y = -renderDistance + posY; y < renderDistance; y++)
-            {
+                SpawnTile(x, y);
+    }
 
-                offsetY += tileSize;
+    private void SpawnTile(int x, int y)
+    {
 
-                grid.Add(new Key(x, y), Instantiate(hexTile, new Vector3(offsetX, 1000 * Mathf.PerlinNoise(offsetX / 5000, offsetY / 5000), offsetY), transform.rotation, this.transform));
-                ((GameObject) grid[new Key(x, y)]).name = x + ", " + y;
-                ((GameObject) grid[new Key(x, y)]).GetComponent<HexTileController>().x = x;
-                ((GameObject) grid[new Key(x, y)]).GetComponent<HexTileController>().y = y;
-                ((GameObject)grid[new Key(x, y)]).GetComponent<HexTileController>().ContactCore();
-            }
-        }
+        float offsetX = x * tileSize * Mathf.Cos(Mathf.Deg2Rad * 30);
+        float offsetY = x % 2 == 0 ? 0 : tileSize / 2;
+
+        offsetY += y * tileSize;
+
+        grid.Add(new Key(x, y), Instantiate(hexTile, new UnityEngine.Vector3(offsetX, 1000 * Mathf.PerlinNoise(offsetX / 5000, offsetY / 5000), offsetY), transform.rotation, this.transform));
+        ((GameObject)grid[new Key(x, y)]).name = x + ", " + y;
+        ((GameObject)grid[new Key(x, y)]).GetComponent<HexTileController>().x = x;
+        ((GameObject)grid[new Key(x, y)]).GetComponent<HexTileController>().y = y;
+        ((GameObject)grid[new Key(x, y)]).GetComponent<HexTileController>().ContactCore();
     }
 }
