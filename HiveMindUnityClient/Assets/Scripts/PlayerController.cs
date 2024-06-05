@@ -2,16 +2,22 @@ using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-[RequireComponent(typeof(CharacterController))]
 public class PlayerController : MonoBehaviour
 {
 
     [SerializeField] float walkSpeed = 10f;
-    private Vector2 moveInput;
-    private Rigidbody myRigidbody;
+    [SerializeField] PlayerLook mainCamera;
+    [SerializeField] float jumpPower = 10f;
+
+    float walkSpeedActual;
+    bool sprinting;
+    bool jumping;
+    Vector2 moveInput;
+    Rigidbody myRigidbody;
 
     void Start()
     {
+        walkSpeedActual = walkSpeed;
         myRigidbody = GetComponent<Rigidbody>();
     }
 
@@ -20,16 +26,43 @@ public class PlayerController : MonoBehaviour
         Run();
     }
 
+
+    float newY;
     void Run()
     {
 
-        Vector3 playerVelocity = new Vector3(moveInput.x * walkSpeed, myRigidbody.velocity.y, moveInput.y * walkSpeed);
+        Vector3 playerVelocity = new Vector3(moveInput.x * walkSpeedActual, myRigidbody.velocity.y, moveInput.y * walkSpeedActual);
         myRigidbody.velocity = transform.TransformDirection(playerVelocity);
     }
 
     public void OnMove(InputValue value)
     {
         moveInput = value.Get<Vector2>();
+    }
+    public void OnLook(InputValue value)
+    {
+        mainCamera.OnLook(value);
+    }
+
+    public void OnSprint(InputValue value)
+    {
+        sprinting = value.isPressed;
+
+        if (sprinting)
+            walkSpeedActual = walkSpeed * 2;
+        else
+            walkSpeedActual = walkSpeed;
+    }
+
+    public void OnJump(InputValue value)
+    {
+        jumping = value.isPressed;
+
+        if (jumping)
+        {
+            Vector3 playerVelocity = new Vector3(myRigidbody.velocity.x, myRigidbody.velocity.y + jumpPower, myRigidbody.velocity.z);
+            myRigidbody.velocity = transform.TransformDirection(playerVelocity);
+        }
     }
 
 }

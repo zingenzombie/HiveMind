@@ -1,9 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class PlayerLook : MonoBehaviour
 {
+
+    private Vector2 moveInput;
+    private Rigidbody myRigidbody;
 
     [SerializeField] private float minViewDistance;
     [SerializeField] private float mouseSensitivity;
@@ -21,14 +26,16 @@ public class PlayerLook : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity * Time.deltaTime;
-        float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity * Time.deltaTime;
-
-        xRotation -= mouseY;
+        xRotation -= moveInput.y * mouseSensitivity;
         xRotation = Mathf.Clamp(xRotation, -90f, minViewDistance);
 
         transform.localRotation = Quaternion.Euler(xRotation, 0, 0);
 
-        playerBody.Rotate(Vector3.up * mouseX);
+        playerBody.Rotate(Vector3.up * moveInput.x * mouseSensitivity);
+    }
+
+    public void OnLook(InputValue value)
+    {
+        moveInput = value.Get<Vector2>();
     }
 }
