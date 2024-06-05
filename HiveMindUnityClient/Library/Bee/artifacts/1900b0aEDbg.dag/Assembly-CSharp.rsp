@@ -364,6 +364,7 @@
 "Assets/Scripts/GridController.cs"
 "Assets/Scripts/HexTileController.cs"
 "Assets/Scripts/PlayerController.cs"
+"Assets/Scripts/PlayerLook.cs"
 "Assets/Scripts/ServerData.cs"
 -langversion:9.0
 

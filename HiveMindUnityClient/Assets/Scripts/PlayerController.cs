@@ -5,33 +5,31 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(CharacterController))]
 public class PlayerController : MonoBehaviour
 {
-    private Vector2 _input;
-    private CharacterController _characterController;
-    private Vector3 _direction;
 
-    [SerializeField] private float speed;
+    [SerializeField] float walkSpeed = 10f;
+    private Vector2 moveInput;
+    private Rigidbody myRigidbody;
 
-    private void Awake()
+    void Start()
     {
-        _characterController = GetComponent<CharacterController>();
+        myRigidbody = GetComponent<Rigidbody>();
     }
 
-    private void Update()
+    void Update()
+    {
+        Run();
+    }
+
+    void Run()
     {
 
-        _characterController.Move(_direction * speed * Time.deltaTime);
+        Vector3 playerVelocity = new Vector3(moveInput.x * walkSpeed, myRigidbody.velocity.y, moveInput.y * walkSpeed);
+        myRigidbody.velocity = transform.TransformDirection(playerVelocity);
     }
 
-    public float Sprinting(InputAction.CallbackContext context) {
-
-        return context.ReadValue<bool>() ? speed : speed * 1.5f;
-
-    }
-
-    public void Move(InputAction.CallbackContext context)
+    public void OnMove(InputValue value)
     {
-        _input = context.ReadValue<Vector2>();
-        _direction = new Vector3(_input.x, 0.0f, _input.y);
-
+        moveInput = value.Get<Vector2>();
     }
+
 }
