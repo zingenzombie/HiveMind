@@ -2,36 +2,67 @@ using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-[RequireComponent(typeof(CharacterController))]
 public class PlayerController : MonoBehaviour
 {
-    private Vector2 _input;
-    private CharacterController _characterController;
-    private Vector3 _direction;
 
-    [SerializeField] private float speed;
+    [SerializeField] float walkSpeed = 10f;
+    [SerializeField] PlayerLook mainCamera;
+    [SerializeField] float jumpPower = 10f;
 
-    private void Awake()
+    float walkSpeedActual;
+    bool sprinting;
+    bool jumping;
+    Vector2 moveInput;
+    Rigidbody myRigidbody;
+
+    void Start()
     {
-        _characterController = GetComponent<CharacterController>();
+        walkSpeedActual = walkSpeed;
+        myRigidbody = GetComponent<Rigidbody>();
     }
 
-    private void Update()
+    void Update()
+    {
+        Run();
+    }
+
+
+    float newY;
+    void Run()
     {
 
-        _characterController.Move(_direction * speed * Time.deltaTime);
+        Vector3 playerVelocity = new Vector3(moveInput.x * walkSpeedActual, myRigidbody.velocity.y, moveInput.y * walkSpeedActual);
+        myRigidbody.velocity = transform.TransformDirection(playerVelocity);
     }
 
-    public float Sprinting(InputAction.CallbackContext context) {
-
-        return context.ReadValue<bool>() ? speed : speed * 1.5f;
-
-    }
-
-    public void Move(InputAction.CallbackContext context)
+    public void OnMove(InputValue value)
     {
-        _input = context.ReadValue<Vector2>();
-        _direction = new Vector3(_input.x, 0.0f, _input.y);
-
+        moveInput = value.Get<Vector2>();
     }
+    public void OnLook(InputValue value)
+    {
+        mainCamera.OnLook(value);
+    }
+
+    public void OnSprint(InputValue value)
+    {
+        sprinting = value.isPressed;
+
+        if (sprinting)
+            walkSpeedActual = walkSpeed * 2;
+        else
+            walkSpeedActual = walkSpeed;
+    }
+
+    public void OnJump(InputValue value)
+    {
+        jumping = value.isPressed;
+
+        if (jumping)
+        {
+            Vector3 playerVelocity = new Vector3(myRigidbody.velocity.x, myRigidbody.velocity.y + jumpPower, myRigidbody.velocity.z);
+            myRigidbody.velocity = transform.TransformDirection(playerVelocity);
+        }
+    }
+
 }

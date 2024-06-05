@@ -15,9 +15,6 @@ public static class CoreCommunication
 
         while (true)
         {
-            /*
-                        if (!(client.Available > 0))
-                            continue;*/
 
             int read = client.GetStream().Read(buffer, 0, 1);
 
