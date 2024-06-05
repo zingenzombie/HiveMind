@@ -42,7 +42,7 @@ public class HexTileController : MonoBehaviour
     // Start is called before the first frame update
     void Awake()
     {
-        coreAddress = "127.0.0.1";
+        coreAddress = "hive.honeydragonproductions.com";
         corePort = 3621;
 
         ClearServer();
@@ -205,8 +205,21 @@ public class HexTileController : MonoBehaviour
 
                 byte[] fileBuffer = new byte[fileSize];
 
+                /*
                 while (server.Available < fileSize) { }
-                server.GetStream().Read(fileBuffer, 0, fileSize);
+                server.GetStream().Read(fileBuffer, 0, fileSize);*/
+
+                int bytesRead = 0;
+                while (bytesRead < fileSize)
+                {
+                    int read = server.GetStream().Read(fileBuffer, bytesRead, fileSize - bytesRead);
+                    if(read == 0 && !CoreCommunication.IsConnected(server))
+                    {
+                        //Handle stream closed or error connection
+                        break;
+                    }
+                    bytesRead += read;
+                }
 
                 System.IO.File.WriteAllBytes(assetBundleDirectoryPath + fileName, fileBuffer);
 

@@ -61,7 +61,7 @@ public class ClientRequestHandler : RequestHandler
             return;
         }
 
-        Console.WriteLine(x + ", " + y + " requested.");
+        //Console.WriteLine(x + ", " + y + " requested.");
         
         ServerDataHolder.ServerData serverData;
 

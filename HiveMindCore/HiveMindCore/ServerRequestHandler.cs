@@ -26,7 +26,7 @@ public class ServerRequestHandler : RequestHandler
     private void NewServer()
     {
         string serverRequest = GetStringFromStream();
-        Console.WriteLine(serverRequest);
+        //Console.WriteLine(serverRequest);
 
         if (!holder.CreateServer(serverRequest))
         {

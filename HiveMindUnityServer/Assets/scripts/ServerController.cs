@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 public class ServerController : MonoBehaviour
 {
     private Thread listen;
-    public IPAddress coreAddress;
+    private IPAddress coreAddress;
     public int corePort;
     public GameObject hexTile;
     private GameObject groundHolder, tileObjects;
@@ -39,7 +39,7 @@ public class ServerController : MonoBehaviour
         ipAddress = IPAddress.Parse(serverIPString);
 
         //Delete this later and fix
-        coreAddress = IPAddress.Parse(coreIPString);
+        coreAddress = Dns.Resolve(coreIPString).AddressList[0];
 
         groundHolder = hexTile.transform.GetChild(0).gameObject;
         groundHolder = hexTile.transform.GetChild(1).gameObject;

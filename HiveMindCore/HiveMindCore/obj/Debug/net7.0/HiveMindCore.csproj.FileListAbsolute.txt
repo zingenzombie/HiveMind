@@ -47,3 +47,20 @@ C:/Users/chase/Documents/ProgrammingProjects/HiveMind/HiveMindCore/HiveMindCore/
 /Users/zingen/Documents/Programming Projects/HiveMind/HiveMindCore/HiveMindCore/obj/Debug/net7.0/HiveMindCore.csproj.CopyComplete
 C:/Users/chase/Documents/ProgrammingProjects/HiveMind/HiveMindCore/HiveMindCore/bin/Debug/net7.0/Newtonsoft.Json.dll
 C:/Users/chase/Documents/ProgrammingProjects/HiveMind/HiveMindCore/HiveMindCore/obj/Debug/net7.0/HiveMindCore.csproj.CopyComplete
+C:\Users\chase\Documents\ProgrammingProjects\HiveMind\HiveMindCore\HiveMindCore\bin\Debug\net7.0\HiveMindCore.exe
+C:\Users\chase\Documents\ProgrammingProjects\HiveMind\HiveMindCore\HiveMindCore\bin\Debug\net7.0\HiveMindCore.deps.json
+C:\Users\chase\Documents\ProgrammingProjects\HiveMind\HiveMindCore\HiveMindCore\bin\Debug\net7.0\HiveMindCore.runtimeconfig.json
+C:\Users\chase\Documents\ProgrammingProjects\HiveMind\HiveMindCore\HiveMindCore\bin\Debug\net7.0\HiveMindCore.dll
+C:\Users\chase\Documents\ProgrammingProjects\HiveMind\HiveMindCore\HiveMindCore\bin\Debug\net7.0\HiveMindCore.pdb
+C:\Users\chase\Documents\ProgrammingProjects\HiveMind\HiveMindCore\HiveMindCore\bin\Debug\net7.0\Newtonsoft.Json.dll
+C:\Users\chase\Documents\ProgrammingProjects\HiveMind\HiveMindCore\HiveMindCore\obj\Debug\net7.0\HiveMindCore.csproj.AssemblyReference.cache
+C:\Users\chase\Documents\ProgrammingProjects\HiveMind\HiveMindCore\HiveMindCore\obj\Debug\net7.0\HiveMindCore.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\chase\Documents\ProgrammingProjects\HiveMind\HiveMindCore\HiveMindCore\obj\Debug\net7.0\HiveMindCore.AssemblyInfoInputs.cache
+C:\Users\chase\Documents\ProgrammingProjects\HiveMind\HiveMindCore\HiveMindCore\obj\Debug\net7.0\HiveMindCore.AssemblyInfo.cs
+C:\Users\chase\Documents\ProgrammingProjects\HiveMind\HiveMindCore\HiveMindCore\obj\Debug\net7.0\HiveMindCore.csproj.CoreCompileInputs.cache
+C:\Users\chase\Documents\ProgrammingProjects\HiveMind\HiveMindCore\HiveMindCore\obj\Debug\net7.0\HiveMindCore.csproj.CopyComplete
+C:\Users\chase\Documents\ProgrammingProjects\HiveMind\HiveMindCore\HiveMindCore\obj\Debug\net7.0\HiveMindCore.dll
+C:\Users\chase\Documents\ProgrammingProjects\HiveMind\HiveMindCore\HiveMindCore\obj\Debug\net7.0\refint\HiveMindCore.dll
+C:\Users\chase\Documents\ProgrammingProjects\HiveMind\HiveMindCore\HiveMindCore\obj\Debug\net7.0\HiveMindCore.pdb
+C:\Users\chase\Documents\ProgrammingProjects\HiveMind\HiveMindCore\HiveMindCore\obj\Debug\net7.0\HiveMindCore.genruntimeconfig.cache
+C:\Users\chase\Documents\ProgrammingProjects\HiveMind\HiveMindCore\HiveMindCore\obj\Debug\net7.0\ref\HiveMindCore.dll

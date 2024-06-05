@@ -51,7 +51,7 @@ return;
 static void IncomingConnectionHandler(TcpClient client, ServerDataHolder holder)
 {
 
-    Console.WriteLine("HIT");
+    //Console.WriteLine("HIT");
 
     while(client.Available < 6 && client.Connected){}
     
@@ -59,16 +59,16 @@ static void IncomingConnectionHandler(TcpClient client, ServerDataHolder holder)
 
     client.GetStream().Read(buffer);
 
-    Console.WriteLine(System.Text.Encoding.UTF8.GetString(buffer));
+    //Console.WriteLine(System.Text.Encoding.UTF8.GetString(buffer));
 
     if (System.Text.Encoding.UTF8.GetString(buffer).Equals("server"))
     {
-        Console.WriteLine("Server Hit");
+        //Console.WriteLine("Server Hit");
         ServerRequestHandler tmp = new ServerRequestHandler(client, holder);
     }
     else if (System.Text.Encoding.UTF8.GetString(buffer).Equals("client"))
     {
-        Console.WriteLine("Client Hit");
+        //Console.WriteLine("Client Hit");
         ClientRequestHandler tmp = new ClientRequestHandler(client, holder);
     }
 }

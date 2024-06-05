@@ -119,9 +119,7 @@ public class ServerDataHolder
 
         while (enumerator.MoveNext())
             if (((ServerData)enumerator.Current).Name == name)
-            {
                 return JsonConvert.SerializeObject((ServerData)enumerator.Current);
-            }
         
         throw new Exception("No server of name " + name + " exists.");
     }

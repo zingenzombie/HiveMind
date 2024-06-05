@@ -6,17 +6,24 @@ public static class CoreCommunication
 
     public static string GetStringFromStream(TcpClient client)
     {
-
         string request = "";
         byte[] buffer = new byte[1];
 
-        while (IsConnected(client))
+        while (true)
         {
+            /*
+                        if (!(client.Available > 0))
+                            continue;*/
 
-            if (!(client.Available > 0))
-                continue;
+            int read = client.GetStream().Read(buffer, 0, 1);
 
-            client.GetStream().Read(buffer, 0, 1);
+            if (read == 0)
+            {
+                if (IsConnected(client))
+                    continue;
+
+                throw new Exception("Client disconnected before receiving a '\\n' character.");
+            }
 
             if (((char)buffer[0]).Equals('\n'))
                 return request;

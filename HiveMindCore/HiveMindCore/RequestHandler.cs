@@ -38,14 +38,22 @@ public class RequestHandler
         string request = "";
         byte[] buffer = new byte[1];
         
-        while (IsConnected())
+        while (true)
         {
-
+/*
             if (!(client.Available > 0))
-                continue;
+                continue;*/
         
-            client.GetStream().Read(buffer, 0, 1);
+            int read = client.GetStream().Read(buffer, 0, 1);
 
+            if (read == 0)
+            {
+                if(IsConnected())
+                    continue;
+
+                throw new Exception("Client disconnected before receiving a '\\n' character.");
+            }
+            
             if (((char)buffer[0]).Equals('\n'))
                 return request;
         
