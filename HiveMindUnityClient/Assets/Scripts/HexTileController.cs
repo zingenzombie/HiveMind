@@ -1,10 +1,12 @@
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using UnityEditor;
 using UnityEngine;
 
@@ -45,10 +47,44 @@ public class HexTileController : MonoBehaviour
         coreAddress = "hive.honeydragonproductions.com";
         corePort = 3621;
 
-        ClearServer();
+        //ClearServer();
     }
 
-    public void ContactCore()
+    public void ActivateTile()
+    {
+        StartCoroutine(InitializeMe());
+    }
+
+    public IEnumerator InitializeMe()
+    {
+
+        BlockingCollection<ServerData> pipe = new BlockingCollection<ServerData>(1);
+
+        Thread thread = new Thread(() => ContactCore(pipe));
+        thread.Start();
+
+        Debug.Log(x + ", " + y);
+
+        while (true)
+        {
+
+            pipe.TryTake(out ServerData tmpData);
+
+            if (tmpData != null)
+            {
+                serverData = tmpData;
+                hasServer = true;
+                ContactServerAndRequestObjects();
+                break;
+            }
+
+            yield return null;
+        }
+        
+        thread.Abort();
+    }
+
+    public void ContactCore(BlockingCollection<ServerData> pipe)
     {
         TcpClient tcpClient;
 
@@ -82,22 +118,8 @@ public class HexTileController : MonoBehaviour
         if (serverJSON.Equals("DoesNotExist"))
             return;
 
-        print(serverJSON);
-
-        try
-        {
-            serverData = JsonUtility.FromJson<ServerData>(serverJSON);
-        }
-        catch (Exception)
-        {
-            Debug.Log("Server data JSON given was improper");
-            return;
-        }
-
-        hasServer = true;
-
-        ClearGroundAndTileObjects();
-        ContactServerAndRequestObjects();
+        serverData = JsonUtility.FromJson<ServerData>(serverJSON);
+        pipe.Add(serverData);
     }
 
     private void OnDestroy()
@@ -115,7 +137,7 @@ public class HexTileController : MonoBehaviour
     }
 
     //Erases all ground and TileObject data
-    IEnumerator ClearGroundAndTileObjects()
+    public IEnumerator ClearGroundAndTileObjects()
     {
         //This should only ever run once at a time, but idk,
         //maybe someone will do some magic and have a server with multiple ground objects...
@@ -145,7 +167,7 @@ public class HexTileController : MonoBehaviour
         ContactServerAndRequestObjects();
     }
 
-    void ContactServerAndRequestObjects()
+    public void ContactServerAndRequestObjects()
     {
 
         using TcpClient tcpClient = new TcpClient(serverData.Ip, serverData.Port);
