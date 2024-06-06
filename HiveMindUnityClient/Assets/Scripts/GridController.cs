@@ -35,7 +35,6 @@ public class GridController : MonoBehaviour
             Dimension1 = x;
             Dimension2 = y;
         }
-        // Equals and GetHashCode ommitted
     }
 
     private Hashtable grid = new Hashtable();
@@ -84,6 +83,11 @@ public class GridController : MonoBehaviour
     void SpawnTiles(int posX = 0, int posY = 0)
     {
 
+        HashSet<Key> tiles = new HashSet<Key>();
+
+        foreach (DictionaryEntry entry in grid)
+            tiles.Add((Key) entry.Key);
+
         TcpClient tcpClient;
 
         try
@@ -107,8 +111,16 @@ public class GridController : MonoBehaviour
 
         for (int x = -renderDistance + posX; x < renderDistance + posX; x++)
             for (int y = -renderDistance + posY; y < renderDistance + posY; y++)
+            {
                 SpawnTile(x, y, tcpClient);
+                tiles.Remove(new Key(x, y));
+            }
 
+        foreach(var key in tiles)
+        {
+            Destroy((GameObject) grid[key]);
+            grid.Remove(key);
+        }
     }
 
     public void ChangeActiveTile(byte direction, int x, int y)
@@ -119,7 +131,6 @@ public class GridController : MonoBehaviour
 
         switch (direction)
         {
-
             case 0:
                 newX = x;
                 newY = y + 1;
@@ -179,34 +190,6 @@ public class GridController : MonoBehaviour
         ((GameObject)grid[new Key(x, y)]).GetComponent<HexTileController>().x = x;
         ((GameObject)grid[new Key(x, y)]).GetComponent<HexTileController>().y = y;
         ((GameObject)grid[new Key(x, y)]).GetComponent<HexTileController>().ActivateTile();
-
-        /*
-        byte[] buffer = Encoding.ASCII.GetBytes(x.ToString() + '\n');
-        tcpClient.GetStream().Write(buffer);
-
-        buffer = Encoding.ASCII.GetBytes(y.ToString() + '\n');
-        tcpClient.GetStream().Write(buffer);
-
-        string serverJSON = CoreCommunication.GetStringFromStream(tcpClient);
-
-        if (serverJSON.Equals("DoesNotExist"))
-            return;
-
-        print(serverJSON);
-        try
-        {
-            ServerData serverData;
-            serverData = JsonUtility.FromJson<ServerData>(serverJSON);
-            ((GameObject)grid[new Key(x, y)]).GetComponent<HexTileController>().serverData = serverData;
-
-            ((GameObject)grid[new Key(x, y)]).GetComponent<HexTileController>().ContactServerAndRequestObjects();
-            ((GameObject)grid[new Key(x, y)]).GetComponent<HexTileController>().hasServer = true;
-        }
-        catch (Exception)
-        {
-            Debug.Log("Server data JSON given was improper");
-            return;
-        }*/
 
     }
 }
