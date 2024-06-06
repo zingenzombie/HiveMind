@@ -59,6 +59,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Scripts\GridController.cs" />
+    <Compile Include="Assets\ExitUpAndDown.cs" />
+    <Compile Include="Assets\ExitMoveOnGrid.cs" />
+    <Compile Include="Assets\Scripts\MoveExit.cs" />
     <Compile Include="Assets\Scripts\HexTileController.cs" />
     <Compile Include="Assets\Scripts\PlayerLook.cs" />
     <Compile Include="Assets\Scripts\CoreCommunication.cs" />

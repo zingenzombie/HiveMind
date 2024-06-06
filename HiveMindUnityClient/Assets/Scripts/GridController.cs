@@ -1,18 +1,24 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.Data;
 using System.IO;
 using System.Net;
 using System.Numerics;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class GridController : MonoBehaviour
 {
 
-    public GameObject hexTile;
-    public GameObject hexTileTemplate;
-    public int renderDistance;
+    [SerializeField] GameObject playerPrefab;
+    [SerializeField] GameObject hexTile;
+    [SerializeField] GameObject hexTileTemplate;
+    [SerializeField] GameObject exitTilePrefab;
+    
+    GameObject exitTile;
+
+    [SerializeField] int renderDistance;
     private float tileSize;
 
     private struct Key
@@ -58,18 +64,83 @@ public class GridController : MonoBehaviour
 
         tileSize = hexTileTemplate.GetComponent<Renderer>().bounds.size.z;
 
-        InitialSpawning();
+        SpawnTiles();
+
+        exitTile = Instantiate(exitTilePrefab, ((GameObject)grid[new Key(0, 0)]).transform);
+        exitTile.GetComponent<MoveExit>().gridController = this;
+        exitTile.GetComponent<MoveExit>().x = 0;
+        exitTile.GetComponent<MoveExit>().y = 0;
+
+        GameObject tmp = Instantiate(playerPrefab);
+
+        tmp.transform.SetPositionAndRotation(((GameObject)grid[new Key(0, 0)]).transform.GetChild(1).transform.position, tmp.transform.rotation);
     }
 
-    void InitialSpawning(int posX = 0, int posY = 0)
+    void SpawnTiles(int posX = 0, int posY = 0)
     {
-        for (int x = -renderDistance + posX; x < renderDistance; x++)
-            for (int y = -renderDistance + posY; y < renderDistance; y++)
+        for (int x = -renderDistance + posX; x < renderDistance + posX; x++)
+            for (int y = -renderDistance + posY; y < renderDistance + posY; y++)
                 SpawnTile(x, y);
+
     }
 
-    private void SpawnTile(int x, int y)
+    public void ChangeActiveTile(byte direction, int x, int y)
     {
+
+        int newX, newY;
+        int offset = Math.Abs(x % 2);
+
+        switch (direction)
+        {
+
+            case 0:
+                newX = x;
+                newY = y + 1;
+                break;
+            case 1:
+                newX = x + 1;
+                newY = y + offset;
+                break;
+            case 2:
+                newX = x + 1;
+                newY = y - 1 + offset;
+                break;
+            case 3:
+                newX = x;
+                newY = y - 1;
+                break;
+            case 4:
+                newX = x - 1;
+                newY = y - 1 + offset;
+                break;
+            case 5:
+                newX = x - 1;
+                newY = y + offset;
+                break;
+            default:
+                throw new Exception("Unsupported direction received!");
+        }
+
+        float yCoord = exitTile.transform.position.y;
+
+        Destroy(exitTile);
+
+        exitTile = Instantiate(exitTilePrefab, ((GameObject)grid[new Key(newX, newY)]).transform);
+        exitTile.transform.position = new UnityEngine.Vector3(exitTile.transform.position.x, yCoord, exitTile.transform.position.z);
+        exitTile.GetComponent<MoveExit>().gridController = this;
+        exitTile.GetComponent<MoveExit>().x = newX;
+        exitTile.GetComponent<MoveExit>().y = newY;
+
+        SpawnTiles(newX, newY);
+
+        //Contact tile server (if present).
+    }
+
+    void SpawnTile(int x, int y)
+    {
+
+        if (grid.ContainsKey(new Key(x, y)))
+            return;
 
         float offsetX = x * tileSize * Mathf.Cos(Mathf.Deg2Rad * 30);
         float offsetY = x % 2 == 0 ? 0 : tileSize / 2;
