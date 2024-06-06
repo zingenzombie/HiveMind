@@ -322,7 +322,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3cbba992789e5416090b0ab192d7eb7e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  minViewDistance: 25
+  minViewDistance: 90
   mouseSensitivity: 0.25
   playerBody: {fileID: 1264698174}
 --- !u!1 &1264698169

@@ -43,7 +43,7 @@ Shader "Custom/DefaultTileGrassShader"
 
             float3 baseWorldPos = unity_ObjectToWorld._m03_m13_m23;
 
-            _Color *= baseWorldPos.y / 400;
+            _Color *= baseWorldPos.y / 200;
 
             fixed4 c = tex2D (_MainTex, IN.uv_MainTex) * _Color;
             o.Albedo = c.rgb;

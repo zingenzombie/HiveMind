@@ -31,7 +31,13 @@ public class PlayerController : MonoBehaviour
     void Run()
     {
 
-        Vector3 playerVelocity = new Vector3(moveInput.x * walkSpeedActual, myRigidbody.velocity.y, moveInput.y * walkSpeedActual);
+        Vector3 playerVelocity;
+
+        if (myRigidbody.velocity.y < -50)
+            playerVelocity = new Vector3(moveInput.x * walkSpeedActual, -50, moveInput.y * walkSpeedActual);
+        else
+            playerVelocity = new Vector3(moveInput.x * walkSpeedActual, myRigidbody.velocity.y, moveInput.y * walkSpeedActual);
+        
         myRigidbody.velocity = transform.TransformDirection(playerVelocity);
     }
 

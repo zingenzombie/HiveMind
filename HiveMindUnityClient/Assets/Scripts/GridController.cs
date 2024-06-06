@@ -76,7 +76,7 @@ public class GridController : MonoBehaviour
 
         offsetY += y * tileSize;
 
-        grid.Add(new Key(x, y), Instantiate(hexTile, new UnityEngine.Vector3(offsetX, 1000 * Mathf.PerlinNoise(offsetX / 5000, offsetY / 5000), offsetY), transform.rotation, this.transform));
+        grid.Add(new Key(x, y), Instantiate(hexTile, new UnityEngine.Vector3(offsetX, 250 * Mathf.PerlinNoise(offsetX / 5000, offsetY / 5000), offsetY), transform.rotation, this.transform));
         ((GameObject)grid[new Key(x, y)]).name = x + ", " + y;
         ((GameObject)grid[new Key(x, y)]).GetComponent<HexTileController>().x = x;
         ((GameObject)grid[new Key(x, y)]).GetComponent<HexTileController>().y = y;
