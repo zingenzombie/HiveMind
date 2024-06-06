@@ -4,12 +4,17 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Net;
+using System.Net.Http;
+using System.Net.Sockets;
 using System.Numerics;
+using System.Text;
 using Unity.VisualScripting;
 using UnityEngine;
 
 public class GridController : MonoBehaviour
 {
+    [SerializeField] int corePort;
+    [SerializeField] string coreAddress;
 
     [SerializeField] GameObject playerPrefab;
     [SerializeField] GameObject hexTile;
@@ -78,9 +83,31 @@ public class GridController : MonoBehaviour
 
     void SpawnTiles(int posX = 0, int posY = 0)
     {
+
+        TcpClient tcpClient;
+
+        try
+        {
+            tcpClient = new TcpClient(coreAddress, corePort);
+        }
+        catch (Exception)
+        {
+            //throw new Exception("Failed to connect to core.");
+            return;
+        }
+
+        if (!tcpClient.Connected)
+            throw new Exception("Failed to connect to core.");
+
+        byte[] buffer = Encoding.ASCII.GetBytes("client");
+        tcpClient.GetStream().Write(buffer);
+
+        buffer = Encoding.ASCII.GetBytes("getServers\n");
+        tcpClient.GetStream().Write(buffer);
+
         for (int x = -renderDistance + posX; x < renderDistance + posX; x++)
             for (int y = -renderDistance + posY; y < renderDistance + posY; y++)
-                SpawnTile(x, y);
+                SpawnTile(x, y, tcpClient);
 
     }
 
@@ -136,7 +163,7 @@ public class GridController : MonoBehaviour
         //Contact tile server (if present).
     }
 
-    void SpawnTile(int x, int y)
+    void SpawnTile(int x, int y, TcpClient tcpClient)
     {
 
         if (grid.ContainsKey(new Key(x, y)))
@@ -151,6 +178,35 @@ public class GridController : MonoBehaviour
         ((GameObject)grid[new Key(x, y)]).name = x + ", " + y;
         ((GameObject)grid[new Key(x, y)]).GetComponent<HexTileController>().x = x;
         ((GameObject)grid[new Key(x, y)]).GetComponent<HexTileController>().y = y;
-        ((GameObject)grid[new Key(x, y)]).GetComponent<HexTileController>().ContactCore();
+        ((GameObject)grid[new Key(x, y)]).GetComponent<HexTileController>().ActivateTile();
+
+        /*
+        byte[] buffer = Encoding.ASCII.GetBytes(x.ToString() + '\n');
+        tcpClient.GetStream().Write(buffer);
+
+        buffer = Encoding.ASCII.GetBytes(y.ToString() + '\n');
+        tcpClient.GetStream().Write(buffer);
+
+        string serverJSON = CoreCommunication.GetStringFromStream(tcpClient);
+
+        if (serverJSON.Equals("DoesNotExist"))
+            return;
+
+        print(serverJSON);
+        try
+        {
+            ServerData serverData;
+            serverData = JsonUtility.FromJson<ServerData>(serverJSON);
+            ((GameObject)grid[new Key(x, y)]).GetComponent<HexTileController>().serverData = serverData;
+
+            ((GameObject)grid[new Key(x, y)]).GetComponent<HexTileController>().ContactServerAndRequestObjects();
+            ((GameObject)grid[new Key(x, y)]).GetComponent<HexTileController>().hasServer = true;
+        }
+        catch (Exception)
+        {
+            Debug.Log("Server data JSON given was improper");
+            return;
+        }*/
+
     }
 }

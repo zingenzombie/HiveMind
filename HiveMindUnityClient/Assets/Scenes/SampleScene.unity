@@ -261,11 +261,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dea5ffc871a0e6949a55cae91b8258df, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  corePort: 3621
+  coreAddress: hive.honeydragonproductions.com
   playerPrefab: {fileID: 4302254615625725645, guid: a5210d2bde052cf46ac503ded39bf2d3, type: 3}
   hexTile: {fileID: 227366594333924227, guid: 1695bfc5e2fc432488d2b6fe01289783, type: 3}
   hexTileTemplate: {fileID: 7693739768744577133, guid: 142239a109042df4ab372023a3b13902, type: 3}
   exitTilePrefab: {fileID: 5966602332483114496, guid: 896fd603b63cc0847b1818deddef74b7, type: 3}
-  renderDistance: 3
+  renderDistance: 6
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

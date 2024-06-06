@@ -20,6 +20,10 @@ public class ClientRequestHandler : RequestHandler
             case "getAllServers":
                 GetAllServers();
                 break;
+            case "getServers":
+                GetServers();
+                break;
+            //depreciated.
             case "getServer":
                 GetServer();
                 break;
@@ -28,6 +32,14 @@ public class ClientRequestHandler : RequestHandler
         }
     }
 
+    private void GetServers()
+    {
+        while (IsConnected())
+            GetServer();
+        
+        Console.WriteLine("Client served.");
+    }
+    
     private void GetAllServers()
     {
         IEnumerator enumerator = holder.servers.GetEnumerator();
@@ -60,8 +72,6 @@ public class ClientRequestHandler : RequestHandler
             client.GetStream().Write("INVALXY"u8);
             return;
         }
-
-        //Console.WriteLine(x + ", " + y + " requested.");
         
         ServerDataHolder.ServerData serverData;
 
