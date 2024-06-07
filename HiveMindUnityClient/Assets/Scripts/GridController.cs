@@ -123,6 +123,7 @@ public class GridController : MonoBehaviour
         }
     }
 
+    //This function is public; I'm concerned that a malicious server could use this to force the client onto a different server.
     public void ChangeActiveTile(byte direction, int x, int y)
     {
 
