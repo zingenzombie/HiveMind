@@ -21,6 +21,9 @@ public class HexTileController : MonoBehaviour
     public GameObject templateGroundHolder;
     public GameObject tileObjects;
 
+    private Thread serverTCP = null, serverUDP = null;
+    public BlockingCollection<object> serverTCPPipe, serverUDPPipe;
+
 
     /* *** Welcome to the HexTileControler ***
      * 
@@ -50,24 +53,59 @@ public class HexTileController : MonoBehaviour
         //ClearServer();
     }
 
+    public void ContactTileServer()
+    {
+        serverTCP = new Thread(() => ServerTCP());
+        serverTCP.Start();
+    }
+
+    public void ServerTCP()
+    {
+        TcpClient server = new TcpClient(serverData.Ip, serverData.Port);
+
+        if (!server.Connected)
+            return;
+
+        byte[] buffer = Encoding.ASCII.GetBytes("joinServer\n");
+        server.GetStream().Write(buffer);
+
+        string acknowledge = CoreCommunication.GetStringFromStream(server);
+
+        if (!acknowledge.Equals("ACK"))
+        {
+            Debug.Log("Failed to receive ACK from tile server!");
+            return;
+        }
+
+        serverUDP = new Thread(() => ServerUDP());
+        serverUDP.Start();
+
+    }
+    public void ServerUDP()
+    {
+        UdpClient server = new UdpClient(serverData.Ip, serverData.Port);
+
+        byte[] buffer = Encoding.ASCII.GetBytes("joinServer\n");
+        server.Send(buffer, buffer.Length);
+
+
+
+    }
+
     public void ActivateTile()
     {
         StartCoroutine(InitializeMe());
     }
 
-    public IEnumerator InitializeMe()
+    IEnumerator InitializeMe()
     {
-
         BlockingCollection<ServerData> pipe = new BlockingCollection<ServerData>(1);
 
         Thread thread = new Thread(() => ContactCore(pipe));
         thread.Start();
 
-        Debug.Log(x + ", " + y);
-
         while (true)
         {
-
             pipe.TryTake(out ServerData tmpData);
 
             if (tmpData != null)
@@ -77,10 +115,8 @@ public class HexTileController : MonoBehaviour
                 ContactServerAndRequestObjects();
                 break;
             }
-
             yield return null;
         }
-        
         thread.Abort();
     }
 
@@ -122,9 +158,11 @@ public class HexTileController : MonoBehaviour
         pipe.Add(serverData);
     }
 
+    //Kill coroutine communicating with server.
     private void OnDestroy()
     {
-        //Kill coroutine communicating with server.
+        serverTCP.Abort();
+        serverUDP.Abort();
     }
 
     //Sets a tile back to its default state with the template ground.
@@ -172,8 +210,11 @@ public class HexTileController : MonoBehaviour
 
         using TcpClient tcpClient = new TcpClient(serverData.Ip, serverData.Port);
 
-        if(!tcpClient.Connected)
+        if (!tcpClient.Connected)
+        {
             Console.WriteLine("Failed to connect to server of tile " + transform.parent.name + ".");
+            return;
+        }
 
         StartCoroutine(ServerConnectAndGetGameObjects(tcpClient));
 
@@ -227,41 +268,28 @@ public class HexTileController : MonoBehaviour
 
                 byte[] fileBuffer = new byte[fileSize];
 
-                /*
-                while (server.Available < fileSize) { }
-                server.GetStream().Read(fileBuffer, 0, fileSize);*/
-
                 int bytesRead = 0;
                 while (bytesRead < fileSize)
                 {
                     int read = server.GetStream().Read(fileBuffer, bytesRead, fileSize - bytesRead);
                     if(read == 0 && !CoreCommunication.IsConnected(server))
-                    {
                         //Handle stream closed or error connection
                         break;
-                    }
+
                     bytesRead += read;
+                    yield return null;
                 }
 
                 System.IO.File.WriteAllBytes(assetBundleDirectoryPath + fileName, fileBuffer);
-
-                Debug.Log(fileName);
             }
 
-            var prefab = AssetBundle.LoadFromFile(assetBundleDirectoryPath + "tileobjects");
+            var tileObjectsPrefab = AssetBundle.LoadFromFile(assetBundleDirectoryPath + "tileobjects");
 
-            UnityEngine.Object[] tileObjectsAll = prefab.LoadAllAssets();
+            UnityEngine.Object tileObject = tileObjectsPrefab.LoadAsset("abc");
 
-            foreach (var tileObject in tileObjectsAll)
-            {
-                Instantiate(tileObject, tileObjects.transform);
-            }
+            Instantiate(tileObject, tileObjects.transform);
 
-            prefab.Unload(false);
-
+            tileObjectsPrefab.Unload(false);
         }
-            
-
-        yield return null;
     }
 }

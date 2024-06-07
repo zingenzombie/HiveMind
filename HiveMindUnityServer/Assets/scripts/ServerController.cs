@@ -26,6 +26,7 @@ public class ServerController : MonoBehaviour
     public string serverName;
     public string ownerID;
 
+    public Hashtable players = new Hashtable();
 
     private void OnApplicationQuit()
     {
@@ -50,7 +51,7 @@ public class ServerController : MonoBehaviour
 
     private void ClientConnectListener()
     {
-        listen = new Thread(() => ListenForClients());
+        listen = new Thread(() => ListenForClientsTCP());
         listen.Start();
     }
 
@@ -86,7 +87,7 @@ public class ServerController : MonoBehaviour
             throw new Exception("Failed to reserve space on core grid. Message received: " + result);
     }
 
-    private void ListenForClients()
+    private void ListenForClientsTCP()
     {
         TcpListener server = new TcpListener(IPAddress.Any, port);
         // we set our IP address as server's address, and we also set the port
@@ -125,11 +126,16 @@ public class ServerController : MonoBehaviour
                 GetAssets(client);
                 break;
             case "joinServer":
-
+                JoinServer(client);
                 break;
 
             default: break;
         }
+    }
+
+    private void JoinServer(TcpClient client)
+    {
+        players.Add(client.Client.RemoteEndPoint, new PlayerData(client));
     }
 
     private void GetAssets(TcpClient client)
@@ -141,7 +147,6 @@ public class ServerController : MonoBehaviour
 
         if (!(typeOS.Equals("w") || typeOS.Equals("m") || typeOS.Equals("l")))
         {
-            client.Close();
             Debug.Log("Client sent invalid OS type.");
             return;
         }
@@ -154,24 +159,17 @@ public class ServerController : MonoBehaviour
 
         foreach(string fileName in fileNames)
         {
-            Debug.Log(fileName);
-            Debug.Log(new System.IO.FileInfo(fileName).Name);
-            Debug.Log(new System.IO.FileInfo(fileName).Length);
 
             client.GetStream().Write(Encoding.ASCII.GetBytes(new System.IO.FileInfo(fileName).Name+ '\n'));
             client.GetStream().Write(Encoding.ASCII.GetBytes(((int) new System.IO.FileInfo(fileName).Length).ToString() + '\n'));
             
             //SendFile() had issues with files above ~16 KB in size on macOS, so this solution was implemented instead.
             byte[] buffer = new byte[8192]; // 8 KB buffer size
+            int bytesRead;
+
             using (FileStream fileStream = new FileStream(fileName, FileMode.Open, FileAccess.Read))
-            {
-                int bytesRead;
                 while ((bytesRead = fileStream.Read(buffer, 0, buffer.Length)) > 0)
-                {
                     client.GetStream().Write(buffer, 0, bytesRead);
-                }
-            }
-            //client.Client.SendFile(fileName);
         }
     }
 }
