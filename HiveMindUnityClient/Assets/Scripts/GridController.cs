@@ -13,8 +13,8 @@ using UnityEngine;
 
 public class GridController : MonoBehaviour
 {
-    [SerializeField] int corePort;
-    [SerializeField] string coreAddress;
+    public int corePort;
+    public string coreAddress;
 
     [SerializeField] GameObject playerPrefab;
     [SerializeField] GameObject hexTile;
@@ -126,6 +126,7 @@ public class GridController : MonoBehaviour
     //This function is public; I'm concerned that a malicious server could use this to force the client onto a different server.
     public void ChangeActiveTile(byte direction, int x, int y)
     {
+        ((GameObject)grid[new Key(x, y)]).GetComponent<HexTileController>().Disconnect();
 
         int newX, newY;
         int offset = Math.Abs(x % 2);
@@ -172,7 +173,7 @@ public class GridController : MonoBehaviour
 
         SpawnTiles(newX, newY);
 
-        //Contact tile server (if present).
+        ((GameObject)grid[new Key(newX, newY)]).GetComponent<HexTileController>().ContactTileServer();
     }
 
     void SpawnTile(int x, int y, TcpClient tcpClient)

@@ -40,7 +40,8 @@ public class ServerController : MonoBehaviour
         ipAddress = IPAddress.Parse(serverIPString);
 
         //Delete this later and fix
-        coreAddress = Dns.Resolve(coreIPString).AddressList[0];
+        if(!IPAddress.TryParse(coreIPString, out coreAddress))
+            coreAddress = Dns.Resolve(coreIPString).AddressList[0];
 
         groundHolder = hexTile.transform.GetChild(0).gameObject;
         groundHolder = hexTile.transform.GetChild(1).gameObject;

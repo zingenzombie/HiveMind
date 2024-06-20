@@ -12,8 +12,9 @@ using UnityEngine;
 
 public class HexTileController : MonoBehaviour
 {
-    public int corePort, x, y;
-    public string coreAddress;
+    int corePort;
+    public int x, y;
+    string coreAddress;
     public bool hasServer = false;
     public ServerData serverData;
 
@@ -22,7 +23,7 @@ public class HexTileController : MonoBehaviour
     public GameObject tileObjects;
 
     private Thread serverTCP = null, serverUDP = null;
-    public BlockingCollection<object> serverTCPPipe, serverUDPPipe;
+    public BlockingCollection<NetworkMessage> serverTCPPipe, serverUDPPipe;
 
 
     /* *** Welcome to the HexTileControler ***
@@ -47,16 +48,37 @@ public class HexTileController : MonoBehaviour
     // Start is called before the first frame update
     void Awake()
     {
-        coreAddress = "hive.honeydragonproductions.com";
-        corePort = 3621;
+        coreAddress = GameObject.FindWithTag("Grid").GetComponent<GridController>().coreAddress;
+        corePort = GameObject.FindWithTag("Grid").GetComponent<GridController>().corePort;
 
         //ClearServer();
     }
 
     public void ContactTileServer()
     {
+        if (!hasServer)
+            return;
+
         serverTCP = new Thread(() => ServerTCP());
         serverTCP.Start();
+    }
+
+    public void Disconnect()
+    {
+        if(!hasServer) 
+            return;
+
+        try
+        {
+            serverTCP.Abort();
+        }catch(Exception) { }
+        
+        try
+        {
+            serverUDP.Abort();
+        }
+        catch (Exception) { }
+
     }
 
     public void ServerTCP()
@@ -71,6 +93,8 @@ public class HexTileController : MonoBehaviour
 
         string acknowledge = CoreCommunication.GetStringFromStream(server);
 
+        Debug.Log(acknowledge);
+
         if (!acknowledge.Equals("ACK"))
         {
             Debug.Log("Failed to receive ACK from tile server!");
@@ -80,7 +104,22 @@ public class HexTileController : MonoBehaviour
         serverUDP = new Thread(() => ServerUDP());
         serverUDP.Start();
 
+        //Running TCP server loop
+        while (true)
+        {
+            
+            
+            //if (serverTCPPipe.TryTake(out NetworkMessage newObject))
+                //server.GetStream.Write();
+        }
+
     }
+
+    private void HandleMessage(NetworkMessage message)
+    {
+
+    }
+
     public void ServerUDP()
     {
         UdpClient server = new UdpClient(serverData.Ip, serverData.Port);
@@ -114,12 +153,11 @@ public class HexTileController : MonoBehaviour
 
         pipe.TryTake(out ServerData tmpData);
 
-        if (tmpData != null)
-        {
-            serverData = tmpData;
-            hasServer = true;
-            //ContactServerAndRequestObjects();
-        }
+        if (tmpData == null)
+            yield break;
+
+        serverData = tmpData;
+        hasServer = true;
 
         thread = new Thread(() => ContactServerAndRequestObjects());
         thread.Start();

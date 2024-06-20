@@ -367,6 +367,7 @@
 "Assets/Scripts/GridController.cs"
 "Assets/Scripts/HexTileController.cs"
 "Assets/Scripts/MoveExit.cs"
+"Assets/Scripts/NetworkMessage.cs"
 "Assets/Scripts/PlayerController.cs"
 "Assets/Scripts/PlayerLook.cs"
 "Assets/Scripts/ServerData.cs"

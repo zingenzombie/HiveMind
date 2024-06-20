@@ -154,8 +154,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   corePort: 3621
   hexTile: {fileID: 227366595927526913}
-  serverIPString: 5.161.235.144
-  coreIPString: hive.honeydragonproductions.com
+  serverIPString: 127.0.0.1
+  coreIPString: 127.0.0.1
   requestXY: 1
   port: 3622
   x: 1

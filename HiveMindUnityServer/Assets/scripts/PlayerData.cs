@@ -26,14 +26,15 @@ public class PlayerData
         byte[] buffer = Encoding.ASCII.GetBytes("ACK\n");
         tcpClient.GetStream().Write(buffer);
 
-        UdpClient udpClient = new UdpClient(3621);
-        remoteEP = new IPEndPoint(IPAddress.Parse(ip), 0);
-
         udpThread = new Thread(() => UDPThread());
+        udpThread.Start();
     }
 
     private void UDPThread()
     {
+
+        UdpClient listener = new UdpClient(3622);
+        IPEndPoint groupEP = new IPEndPoint(IPAddress.Parse(ip), 3622);
 
         while (true)
             handleUDPMessage();
