@@ -17,7 +17,6 @@ public class PlayerController : MonoBehaviour
 
     void Start()
     {
-        //networkController = GameObject.FindWithTag("NetworkController").GetComponent<NetworkController>();
 
         walkSpeedActual = walkSpeed;
         myRigidbody = GetComponent<Rigidbody>();

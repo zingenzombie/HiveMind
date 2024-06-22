@@ -46,11 +46,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ff3e40ce695016040a918ab4bf2d8a6e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  corePort: 0
   x: 0
   y: 0
-  coreAddress: 
   hasServer: 0
+  playerName: testName
   groundHolder: {fileID: 6592415647992496422}
   templateGroundHolder: {fileID: 7693739768744577133, guid: 142239a109042df4ab372023a3b13902, type: 3}
   tileObjects: {fileID: 705462435388874766}

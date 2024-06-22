@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading;
 using UnityEditor;
 using UnityEngine;
+using static UnityEngine.InputSystem.InputRemoting;
 
 public class HexTileController : MonoBehaviour
 {
@@ -17,13 +18,16 @@ public class HexTileController : MonoBehaviour
     string coreAddress;
     public bool hasServer = false;
     public ServerData serverData;
+    [SerializeField] string playerName;
 
     public GameObject groundHolder;
     public GameObject templateGroundHolder;
     public GameObject tileObjects;
 
     private Thread serverTCP = null, serverUDP = null;
-    public BlockingCollection<NetworkMessage> serverTCPPipe, serverUDPPipe;
+    public BlockingCollection<NetworkMessage> serverPipeIn, serverPipeOut;
+
+    public Hashtable players = new Hashtable();
 
 
     /* *** Welcome to the HexTileControler ***
@@ -82,6 +86,7 @@ public class HexTileController : MonoBehaviour
 
     }
     TcpClient serverTCPSocket;
+
     public void ServerTCP()
     {
         serverTCPSocket = new TcpClient(serverData.Ip, serverData.Port);
@@ -92,20 +97,50 @@ public class HexTileController : MonoBehaviour
         byte[] buffer = Encoding.ASCII.GetBytes("joinServer\n");
         serverTCPSocket.GetStream().Write(buffer);
 
-        buffer = Encoding.ASCII.GetBytes("testName\n");
+        buffer = Encoding.ASCII.GetBytes(playerName + '\n');
         serverTCPSocket.GetStream().Write(buffer);
 
         string acknowledge = CoreCommunication.GetStringFromStream(serverTCPSocket);
 
         Debug.Log(acknowledge);
 
-        serverTCPPipe = new BlockingCollection<NetworkMessage>();
+        serverPipeIn = new BlockingCollection<NetworkMessage>();
+        serverPipeOut = new BlockingCollection<NetworkMessage>();
 
         if (!acknowledge.Equals("ACK"))
         {
             Debug.Log("Failed to receive ACK from tile server!");
             return;
         }
+
+        while (serverTCPSocket.Available < 4) { }
+
+        buffer = new byte[4];
+        int numPlayers = serverTCPSocket.GetStream().Read(buffer, 0, 4);
+
+        for(int i = 0; i < numPlayers; i++)
+        {
+            string messageType = CoreCommunication.GetStringFromStream(serverTCPSocket);
+
+            byte[] tmpMessageLength = new byte[4];
+
+            while (serverTCPSocket.Available < 4) { }
+
+            serverTCPSocket.GetStream().Read(tmpMessageLength, 0, tmpMessageLength.Length);
+            int messageLength = BitConverter.ToInt32(tmpMessageLength, 0);
+
+            while (serverTCPSocket.Available < messageLength) { }
+
+            byte[] message = new byte[messageLength];
+            serverTCPSocket.GetStream().Read(message, 0, messageLength);
+
+            NetworkMessage netMessage = new NetworkMessage(messageType, message);
+
+
+        }
+
+        //I'm not completely confident that I can spawn a coroutine from outside of the main thread.
+        StartCoroutine(HandleMessage());
 
         serverUDP = new Thread(() => ServerUDP());
         serverUDP.Start();
@@ -116,7 +151,7 @@ public class HexTileController : MonoBehaviour
             while (true)
             {
                 //Send outgoing TCP messages
-                if (serverTCPPipe.TryTake(out NetworkMessage newObject))
+                if (serverPipeOut.TryTake(out NetworkMessage newObject))
                 {
                     serverTCPSocket.GetStream().Write(ASCIIEncoding.ASCII.GetBytes(newObject.messageType + '\n'));
                     serverTCPSocket.GetStream().Write(BitConverter.GetBytes(newObject.numBytes));
@@ -142,7 +177,7 @@ public class HexTileController : MonoBehaviour
 
                     NetworkMessage netMessage = new NetworkMessage(messageType, message);
 
-                    HandleMessage(netMessage);
+                    serverPipeIn.Add(netMessage);
                 }
             }
 
@@ -150,14 +185,43 @@ public class HexTileController : MonoBehaviour
         catch (Exception) { }
     }
 
-    private void HandleMessage(NetworkMessage message)
+    public void GetNetworkMessage(TcpClient serverTCPSocket)
     {
-        switch(message.messageType)
-        {
-            case "PlayerPos":
+        string messageType = CoreCommunication.GetStringFromStream(serverTCPSocket);
 
-                break;
-            default: break;
+        byte[] tmpMessageLength = new byte[4];
+
+        while (serverTCPSocket.Available < 4) { }
+
+        serverTCPSocket.GetStream().Read(tmpMessageLength, 0, tmpMessageLength.Length);
+        int messageLength = BitConverter.ToInt32(tmpMessageLength, 0);
+
+        while (serverTCPSocket.Available < messageLength) { }
+
+        byte[] message = new byte[messageLength];
+        serverTCPSocket.GetStream().Read(message, 0, messageLength);
+
+        NetworkMessage netMessage = new NetworkMessage(messageType, message);
+
+        serverPipeIn.Add(netMessage);
+    }
+
+    IEnumerator HandleMessage()
+    {
+        while (true)
+        {
+            if (serverPipeIn.TryTake(out NetworkMessage message))
+            {
+                switch (message.messageType)
+                {
+                    case "PlayerPos":
+                        //Debug.Log(message.message.ToString());
+                        break;
+                    default: break;
+                }
+            }
+
+            yield return null;
         }
     }
 
@@ -341,7 +405,6 @@ public class HexTileController : MonoBehaviour
         }
 
         ServerConnectAndGetGameObjects(tcpClient);
-
     }
 
     public void ServerConnectAndGetGameObjects(TcpClient server)

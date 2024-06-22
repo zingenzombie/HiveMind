@@ -73,7 +73,6 @@ public class ServerController : MonoBehaviour
 
     IEnumerator InstantiateNewClients()
     {
-
         while (true)
         {
             if(playerPipe.TryTake(out TcpClient client))
@@ -150,6 +149,51 @@ public class ServerController : MonoBehaviour
                     Debug.Log("Error! TCP client connection attempt received, but connection failed before handling!");
                 }
             }
+        }
+    }
+
+    public void SendPlayerPositionToOthers(string ipStr, Transform playerTransform)
+    {
+        byte[] ip = IPAddress.Parse(ipStr).GetAddressBytes();
+
+        byte[] posX = BitConverter.GetBytes(playerTransform.position.x);
+        byte[] posY = BitConverter.GetBytes(playerTransform.position.y);
+        byte[] posZ = BitConverter.GetBytes(playerTransform.position.z);
+
+        byte[] rotX = BitConverter.GetBytes(playerTransform.rotation.x);
+        byte[] rotY = BitConverter.GetBytes(playerTransform.rotation.y);
+        byte[] rotZ = BitConverter.GetBytes(playerTransform.rotation.z);
+        byte[] rotW = BitConverter.GetBytes(playerTransform.rotation.w);
+
+        byte[] message = new byte[28 + ip.Length];
+
+        for (int i = 0; i < 28; i++)
+        {
+            if (i < 4)
+                message[i] = posX[i];
+            else if (i < 8)
+                message[i] = posY[i - 4];
+            else if (i < 12)
+                message[i] = posZ[i - 8];
+            else if (i < 16)
+                message[i] = rotX[i - 12];
+            else if (i < 20)
+                message[i] = rotY[i - 16];
+            else if (i < 24)
+                message[i] = rotZ[i - 20];
+            else
+                message[i] = rotW[i - 24];
+        }
+
+        for(int i = 0; i < ip.Length; i++)
+            message[28 + i] = ip[i];
+
+        foreach(GameObject player in players)
+        {
+            if (player.GetComponent<PlayerData>().ip == ipStr)
+                continue;
+
+            player.GetComponent<PlayerData>().serverPipeOut.Add(new NetworkMessage("playerPos", message));
         }
     }
 

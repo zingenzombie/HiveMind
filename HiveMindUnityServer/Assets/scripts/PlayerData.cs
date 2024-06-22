@@ -19,6 +19,7 @@ public class PlayerData : MonoBehaviour
     public TcpClient tcpClient;
     public UdpClient udpClient;
     public IPEndPoint remoteEP;
+    ServerController serverController;
 
     Thread udpThread, tcpThread;
 
@@ -26,6 +27,8 @@ public class PlayerData : MonoBehaviour
 
     public void InitializePlayerData(TcpClient client)
     {
+        serverController = GameObject.FindWithTag("ServerController").GetComponent<ServerController>();
+
         ip = ((IPEndPoint) client.Client.RemoteEndPoint).Address.ToString();
         tcpClient = client;
         clientName = CoreCommunication.GetStringFromStream(client);
@@ -49,7 +52,7 @@ public class PlayerData : MonoBehaviour
     {
         while (true)
         {
-            if(serverPipeOut.TryTake(out NetworkMessage message))
+            if(serverPipeIn.TryTake(out NetworkMessage message))
             {
                 switch (message.messageType)
                 {
@@ -83,6 +86,7 @@ public class PlayerData : MonoBehaviour
 
         transform.SetPositionAndRotation(new Vector3(posX,posY,posZ), new Quaternion(rotX, rotY, rotZ, rotW));
 
+
     }
 
     void TCPThread()
@@ -103,7 +107,7 @@ public class PlayerData : MonoBehaviour
             }
 
             //Send outgoing TCP messages
-            if (serverPipeIn.TryTake(out NetworkMessage newObject))
+            if (serverPipeOut.TryTake(out NetworkMessage newObject))
             {
                 tcpClient.GetStream().Write(ASCIIEncoding.ASCII.GetBytes(newObject.messageType + '\n'));
                 tcpClient.GetStream().Write(BitConverter.GetBytes(newObject.numBytes));
@@ -151,6 +155,6 @@ public class PlayerData : MonoBehaviour
 
     private void HandleMessage(NetworkMessage message)
     {
-        serverPipeOut.Add(message);
+        serverPipeIn.Add(message);
     }
 }
