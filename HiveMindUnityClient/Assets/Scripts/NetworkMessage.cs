@@ -4,11 +4,11 @@ using UnityEngine;
 
 public class NetworkMessage
 {
-    public int numBytes;
     public string messageType;
+    public int numBytes;
     public byte[] message;
 
-    NetworkMessage(string messageType, byte[] message)
+    public NetworkMessage(string messageType, byte[] message)
     {
         this.messageType = messageType;
         numBytes = message.Length;

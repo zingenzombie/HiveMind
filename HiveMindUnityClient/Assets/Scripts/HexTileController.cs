@@ -70,6 +70,7 @@ public class HexTileController : MonoBehaviour
 
         try
         {
+            serverTCPSocket.Close();
             serverTCP.Abort();
         }catch(Exception) { }
         
@@ -80,20 +81,25 @@ public class HexTileController : MonoBehaviour
         catch (Exception) { }
 
     }
-
+    TcpClient serverTCPSocket;
     public void ServerTCP()
     {
-        TcpClient server = new TcpClient(serverData.Ip, serverData.Port);
+        serverTCPSocket = new TcpClient(serverData.Ip, serverData.Port);
 
-        if (!server.Connected)
+        if (!serverTCPSocket.Connected)
             return;
 
         byte[] buffer = Encoding.ASCII.GetBytes("joinServer\n");
-        server.GetStream().Write(buffer);
+        serverTCPSocket.GetStream().Write(buffer);
 
-        string acknowledge = CoreCommunication.GetStringFromStream(server);
+        buffer = Encoding.ASCII.GetBytes("testName\n");
+        serverTCPSocket.GetStream().Write(buffer);
+
+        string acknowledge = CoreCommunication.GetStringFromStream(serverTCPSocket);
 
         Debug.Log(acknowledge);
+
+        serverTCPPipe = new BlockingCollection<NetworkMessage>();
 
         if (!acknowledge.Equals("ACK"))
         {
@@ -105,19 +111,54 @@ public class HexTileController : MonoBehaviour
         serverUDP.Start();
 
         //Running TCP server loop
-        while (true)
+        try
         {
-            
-            
-            //if (serverTCPPipe.TryTake(out NetworkMessage newObject))
-                //server.GetStream.Write();
-        }
+            while (true)
+            {
+                //Send outgoing TCP messages
+                if (serverTCPPipe.TryTake(out NetworkMessage newObject))
+                {
+                    serverTCPSocket.GetStream().Write(ASCIIEncoding.ASCII.GetBytes(newObject.messageType + '\n'));
+                    serverTCPSocket.GetStream().Write(BitConverter.GetBytes(newObject.numBytes));
+                    serverTCPSocket.GetStream().Write(newObject.message);
+                }
 
+                //Receive incoming TCP messages
+                if (serverTCPSocket.Available > 0)
+                {
+                    string messageType = CoreCommunication.GetStringFromStream(serverTCPSocket);
+
+                    byte[] tmpMessageLength = new byte[4];
+
+                    while (serverTCPSocket.Available < 4) { }
+
+                    serverTCPSocket.GetStream().Read(tmpMessageLength, 0, tmpMessageLength.Length);
+                    int messageLength = BitConverter.ToInt32(tmpMessageLength, 0);
+
+                    while (serverTCPSocket.Available < messageLength) { }
+
+                    byte[] message = new byte[messageLength];
+                    serverTCPSocket.GetStream().Read(message, 0, messageLength);
+
+                    NetworkMessage netMessage = new NetworkMessage(messageType, message);
+
+                    HandleMessage(netMessage);
+                }
+            }
+
+        }
+        catch (Exception) { }
     }
 
     private void HandleMessage(NetworkMessage message)
     {
+        switch(message.messageType)
+        {
+            case "PlayerPos":
 
+                break;
+            default: break;
+        }
     }
 
     public void ServerUDP()

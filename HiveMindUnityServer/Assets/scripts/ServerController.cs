@@ -9,6 +9,7 @@ using UnityEditor;
 using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
+using System.Collections.Concurrent;
 
 public class ServerController : MonoBehaviour
 {
@@ -25,6 +26,12 @@ public class ServerController : MonoBehaviour
     public int x, y;
     public string serverName;
     public string ownerID;
+
+    [SerializeField] GameObject playerPrefab;
+    [SerializeField] GameObject hexTileTemplate;
+    private float tileSize;
+
+    BlockingCollection<TcpClient> playerPipe;
 
     public Hashtable players = new Hashtable();
 
@@ -43,11 +50,42 @@ public class ServerController : MonoBehaviour
         if(!IPAddress.TryParse(coreIPString, out coreAddress))
             coreAddress = Dns.Resolve(coreIPString).AddressList[0];
 
-        groundHolder = hexTile.transform.GetChild(0).gameObject;
+        //groundHolder = hexTile.transform.GetChild(0).gameObject;
         groundHolder = hexTile.transform.GetChild(1).gameObject;
 
         ContactCore();
+
+
+        tileSize = hexTileTemplate.GetComponent<Renderer>().bounds.size.z;
+
+        float offsetX = x * tileSize * Mathf.Cos(Mathf.Deg2Rad * 30);
+        float offsetY = x % 2 == 0 ? 0 : tileSize / 2;
+
+        offsetY += y * tileSize;
+
+        hexTile.transform.SetLocalPositionAndRotation(new UnityEngine.Vector3(offsetX, 250 * Mathf.PerlinNoise(offsetX / 5000, offsetY / 5000), offsetY), transform.rotation);
+
+        playerPipe = new BlockingCollection<TcpClient>();
+        StartCoroutine(InstantiateNewClients());
+
         ClientConnectListener();
+    }
+
+    IEnumerator InstantiateNewClients()
+    {
+
+        while (true)
+        {
+            if(playerPipe.TryTake(out TcpClient client))
+            {
+                GameObject newPlayer = Instantiate(playerPrefab, hexTile.transform);
+
+                newPlayer.GetComponent<PlayerData>().InitializePlayerData(client);
+
+                players.Add(client.Client.RemoteEndPoint, newPlayer);
+            }
+            yield return null;
+        }
     }
 
     private void ClientConnectListener()
@@ -117,9 +155,6 @@ public class ServerController : MonoBehaviour
 
     private void HandleNewClient(TcpClient client)
     {
-        //Any calls to GetStringFromStream() MUST NOT be called
-        //from the main thread to prevent hanging in the case of
-        //a lagging \n character. This violates that rule...
 
         switch (CoreCommunication.GetStringFromStream(client))
         {
@@ -136,7 +171,7 @@ public class ServerController : MonoBehaviour
 
     private void JoinServer(TcpClient client)
     {
-        players.Add(client.Client.RemoteEndPoint, new PlayerData(client));
+        playerPipe.Add(client);
     }
 
     private void GetAssets(TcpClient client)

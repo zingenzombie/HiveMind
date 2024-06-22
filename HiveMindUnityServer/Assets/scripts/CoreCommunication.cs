@@ -4,6 +4,9 @@ using System.Net.Sockets;
 public static class CoreCommunication
 {
 
+    //Any calls to GetStringFromStream() MUST NOT be called
+    //from the main thread to prevent hanging in the case of
+    //a lagging \n character.
     public static string GetStringFromStream(TcpClient client)
     {
         string request = "";
@@ -11,8 +14,12 @@ public static class CoreCommunication
 
         while (true)
         {
+            int read;
 
-            int read = client.GetStream().Read(buffer, 0, 1);
+            try
+            {
+                read = client.GetStream().Read(buffer, 0, 1);
+            }catch (Exception) { return null; }
 
             if (read == 0)
             {
@@ -30,7 +37,6 @@ public static class CoreCommunication
 
         throw new Exception("Client disconnected before receiving a '\\n' character.");
     }
-
 
     public static bool IsConnected(TcpClient client)
     {

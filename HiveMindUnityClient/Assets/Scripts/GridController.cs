@@ -20,6 +20,8 @@ public class GridController : MonoBehaviour
     [SerializeField] GameObject hexTile;
     [SerializeField] GameObject hexTileTemplate;
     [SerializeField] GameObject exitTilePrefab;
+
+    //private NetworkController networkController;
     
     GameObject exitTile;
 
@@ -70,14 +72,20 @@ public class GridController : MonoBehaviour
 
         SpawnTiles();
 
+
         exitTile = Instantiate(exitTilePrefab, ((GameObject)grid[new Key(0, 0)]).transform);
-        exitTile.GetComponent<MoveExit>().gridController = this;
-        exitTile.GetComponent<MoveExit>().x = 0;
-        exitTile.GetComponent<MoveExit>().y = 0;
 
-        GameObject tmp = Instantiate(playerPrefab);
+        MoveExit exitTileMove = exitTile.GetComponent<MoveExit>();
 
-        tmp.transform.SetPositionAndRotation(((GameObject)grid[new Key(0, 0)]).transform.GetChild(1).transform.position, tmp.transform.rotation);
+        NetworkController.activeServer = ((GameObject)grid[new Key(0, 0)]).GetComponent<HexTileController>();
+
+        exitTileMove.gridController = this;
+        exitTileMove.x = 0;
+        exitTileMove.y = 0;
+
+
+        GameObject player = Instantiate(playerPrefab);
+        player.transform.SetPositionAndRotation(((GameObject)grid[new Key(0, 0)]).transform.GetChild(1).transform.position, player.transform.rotation);
     }
 
     void SpawnTiles(int posX = 0, int posY = 0)
@@ -167,9 +175,14 @@ public class GridController : MonoBehaviour
 
         exitTile = Instantiate(exitTilePrefab, ((GameObject)grid[new Key(newX, newY)]).transform);
         exitTile.transform.position = new UnityEngine.Vector3(exitTile.transform.position.x, yCoord, exitTile.transform.position.z);
-        exitTile.GetComponent<MoveExit>().gridController = this;
-        exitTile.GetComponent<MoveExit>().x = newX;
-        exitTile.GetComponent<MoveExit>().y = newY;
+
+        MoveExit exitTileMove = exitTile.GetComponent<MoveExit>();
+
+        exitTileMove.gridController = this;
+        exitTileMove.x = newX;
+        exitTileMove.y = newY;
+
+        NetworkController.activeServer = ((GameObject)grid[new Key(newX, newY)]).GetComponent<HexTileController>();
 
         SpawnTiles(newX, newY);
 
@@ -188,10 +201,13 @@ public class GridController : MonoBehaviour
         offsetY += y * tileSize;
 
         grid.Add(new Key(x, y), Instantiate(hexTile, new UnityEngine.Vector3(offsetX, 250 * Mathf.PerlinNoise(offsetX / 5000, offsetY / 5000), offsetY), transform.rotation, this.transform));
-        ((GameObject)grid[new Key(x, y)]).name = x + ", " + y;
-        ((GameObject)grid[new Key(x, y)]).GetComponent<HexTileController>().x = x;
-        ((GameObject)grid[new Key(x, y)]).GetComponent<HexTileController>().y = y;
-        ((GameObject)grid[new Key(x, y)]).GetComponent<HexTileController>().ActivateTile();
 
+        GameObject tile = ((GameObject)grid[new Key(x, y)]);
+        HexTileController tileController = tile.GetComponent<HexTileController>();
+
+        tile.name = x + ", " + y;
+        tileController.x = x;
+        tileController.y = y;
+        tileController.ActivateTile();
     }
 }

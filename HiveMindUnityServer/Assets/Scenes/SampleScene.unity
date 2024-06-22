@@ -158,10 +158,11 @@ MonoBehaviour:
   coreIPString: 127.0.0.1
   requestXY: 1
   port: 3622
-  x: 1
+  x: 0
   y: 1
   serverName: testServer
   ownerID: Zin
+  playerPrefab: {fileID: 4302254615625725645, guid: 1f088450dacacb0429520eb56f7a2fe3, type: 3}
 --- !u!4 &534617745
 Transform:
   m_ObjectHideFlags: 0
@@ -344,7 +345,7 @@ GameObject:
   - component: {fileID: 2115727471202422422}
   m_Layer: 0
   m_Name: HexTile
-  m_TagString: Untagged
+  m_TagString: tile
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

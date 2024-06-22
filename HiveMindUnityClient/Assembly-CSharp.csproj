@@ -59,6 +59,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Scripts\GridController.cs" />
+    <Compile Include="Assets\NetworkController.cs" />
     <Compile Include="Assets\Scripts\ExitMoveOnGrid.cs" />
     <Compile Include="Assets\Scripts\MoveExit.cs" />
     <Compile Include="Assets\Scripts\HexTileController.cs" />
