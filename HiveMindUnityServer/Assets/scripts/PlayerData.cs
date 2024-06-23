@@ -7,8 +7,8 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
-using UnityEditor.PackageManager;
-using UnityEditor.VersionControl;
+//using UnityEditor.PackageManager;
+//using UnityEditor.VersionControl;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
@@ -35,6 +35,21 @@ public class PlayerData : MonoBehaviour
         
         byte[] buffer = Encoding.ASCII.GetBytes("ACK\n");
         tcpClient.GetStream().Write(buffer);
+
+        int numPlayers = serverController.players.Count;
+
+        client.GetStream().Write(BitConverter.GetBytes(numPlayers));
+
+        foreach(GameObject player in serverController.players)
+        {
+            //This is temporary and must be switched out with a new playerdata object.
+
+            NetworkMessage newObject = new NetworkMessage("newPlayer", ASCIIEncoding.ASCII.GetBytes(player.GetComponent<PlayerData>().ip));
+
+            client.GetStream().Write(ASCIIEncoding.ASCII.GetBytes(newObject.messageType + '\n'));
+            client.GetStream().Write(BitConverter.GetBytes(newObject.numBytes));
+            client.GetStream().Write(newObject.message);
+        }
 
         serverPipeIn = new BlockingCollection<NetworkMessage>(); //Will need to be separated into udp and tcp pipes!
         serverPipeOut = new BlockingCollection<NetworkMessage>();
@@ -73,6 +88,7 @@ public class PlayerData : MonoBehaviour
 
     void UpdatePlayerPosAndRot(NetworkMessage message)
     {
+        Debug.Log(message.message);
         //***CHECK THAT MESSAGE TIME IS NEWER THAN CURRENT UPDATE***
 
         float posX = BitConverter.ToSingle(message.message, 0);

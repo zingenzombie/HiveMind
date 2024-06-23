@@ -13,7 +13,7 @@ public static class NetworkController
 
         try
         {
-            activeServer.serverTCPPipe.Add(message);
+            activeServer.serverPipeOut.Add(message);
         }
         catch (System.Exception) { }
     }
@@ -25,7 +25,7 @@ public static class NetworkController
 
         try
         {
-            activeServer.serverUDPPipe.Add(message);
+            //activeServer.serverUDPPipe.Add(message);
         }
         catch (System.Exception) { }
     }

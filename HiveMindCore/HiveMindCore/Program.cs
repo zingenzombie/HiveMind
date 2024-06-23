@@ -15,7 +15,7 @@ static async Task<IPAddress?> GetExternalIpAddress()
     return ipAddress;
 }
 
-Console.WriteLine("Good meowning.");
+Console.WriteLine("Good morning.");
 
 IPAddress address = GetExternalIpAddress().Result;
 int port = 3621;

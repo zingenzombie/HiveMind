@@ -55,6 +55,8 @@ public class HexTileController : MonoBehaviour
         coreAddress = GameObject.FindWithTag("Grid").GetComponent<GridController>().coreAddress;
         corePort = GameObject.FindWithTag("Grid").GetComponent<GridController>().corePort;
 
+        StartCoroutine(HandleMessage());
+
         //ClearServer();
     }
 
@@ -116,32 +118,18 @@ public class HexTileController : MonoBehaviour
         while (serverTCPSocket.Available < 4) { }
 
         buffer = new byte[4];
-        int numPlayers = serverTCPSocket.GetStream().Read(buffer, 0, 4);
+        serverTCPSocket.GetStream().Read(buffer, 0, 4);
+
+        int numPlayers = BitConverter.ToInt32(buffer);
 
         for(int i = 0; i < numPlayers; i++)
         {
-            string messageType = CoreCommunication.GetStringFromStream(serverTCPSocket);
-
-            byte[] tmpMessageLength = new byte[4];
-
-            while (serverTCPSocket.Available < 4) { }
-
-            serverTCPSocket.GetStream().Read(tmpMessageLength, 0, tmpMessageLength.Length);
-            int messageLength = BitConverter.ToInt32(tmpMessageLength, 0);
-
-            while (serverTCPSocket.Available < messageLength) { }
-
-            byte[] message = new byte[messageLength];
-            serverTCPSocket.GetStream().Read(message, 0, messageLength);
-
-            NetworkMessage netMessage = new NetworkMessage(messageType, message);
-
-
+            //I will need to construct a player class which newPlayer fills and is stored in the players hashmap.
+            //This should just need to include the player's ip and their avatar prefab for now?
+            NetworkMessage newPlayer = GetNetworkMessage(serverTCPSocket);
         }
 
-        //I'm not completely confident that I can spawn a coroutine from outside of the main thread.
-        StartCoroutine(HandleMessage());
-
+        //Should probably start the UDP thread at some point here, right?
         serverUDP = new Thread(() => ServerUDP());
         serverUDP.Start();
 
@@ -160,32 +148,14 @@ public class HexTileController : MonoBehaviour
 
                 //Receive incoming TCP messages
                 if (serverTCPSocket.Available > 0)
-                {
-                    string messageType = CoreCommunication.GetStringFromStream(serverTCPSocket);
-
-                    byte[] tmpMessageLength = new byte[4];
-
-                    while (serverTCPSocket.Available < 4) { }
-
-                    serverTCPSocket.GetStream().Read(tmpMessageLength, 0, tmpMessageLength.Length);
-                    int messageLength = BitConverter.ToInt32(tmpMessageLength, 0);
-
-                    while (serverTCPSocket.Available < messageLength) { }
-
-                    byte[] message = new byte[messageLength];
-                    serverTCPSocket.GetStream().Read(message, 0, messageLength);
-
-                    NetworkMessage netMessage = new NetworkMessage(messageType, message);
-
-                    serverPipeIn.Add(netMessage);
-                }
+                    serverPipeIn.Add(GetNetworkMessage(serverTCPSocket));
             }
 
         }
         catch (Exception) { }
     }
 
-    public void GetNetworkMessage(TcpClient serverTCPSocket)
+    public NetworkMessage GetNetworkMessage(TcpClient serverTCPSocket)
     {
         string messageType = CoreCommunication.GetStringFromStream(serverTCPSocket);
 
@@ -201,13 +171,20 @@ public class HexTileController : MonoBehaviour
         byte[] message = new byte[messageLength];
         serverTCPSocket.GetStream().Read(message, 0, messageLength);
 
-        NetworkMessage netMessage = new NetworkMessage(messageType, message);
-
-        serverPipeIn.Add(netMessage);
+        return new NetworkMessage(messageType, message);
     }
 
     IEnumerator HandleMessage()
     {
+
+        while (true)
+        {
+            yield return null;
+
+            if (!(serverPipeIn == null))
+                break;
+        }
+
         while (true)
         {
             if (serverPipeIn.TryTake(out NetworkMessage message))
