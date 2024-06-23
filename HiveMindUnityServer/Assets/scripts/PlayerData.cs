@@ -40,11 +40,11 @@ public class PlayerData : MonoBehaviour
 
         client.GetStream().Write(BitConverter.GetBytes(numPlayers));
 
-        foreach(GameObject player in serverController.players)
+        foreach(var player in serverController.players)
         {
             //This is temporary and must be switched out with a new playerdata object.
 
-            NetworkMessage newObject = new NetworkMessage("newPlayer", ASCIIEncoding.ASCII.GetBytes(player.GetComponent<PlayerData>().ip));
+            NetworkMessage newObject = new NetworkMessage("newPlayer", ASCIIEncoding.ASCII.GetBytes(((GameObject) player).GetComponent<PlayerData>().ip));
 
             client.GetStream().Write(ASCIIEncoding.ASCII.GetBytes(newObject.messageType + '\n'));
             client.GetStream().Write(BitConverter.GetBytes(newObject.numBytes));
@@ -76,12 +76,11 @@ public class PlayerData : MonoBehaviour
                         UpdatePlayerPosAndRot(message);
                         break;
                     case "killMe":
-                        Destroy(this.gameObject);
+                        serverController.KillPlayer(tcpClient);
                         break;
                     default: break;
                 }
             }
-
             yield return null;
         }
     }

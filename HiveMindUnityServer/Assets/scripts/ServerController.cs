@@ -81,10 +81,17 @@ public class ServerController : MonoBehaviour
 
                 newPlayer.GetComponent<PlayerData>().InitializePlayerData(client);
 
-                players.Add(client.Client.RemoteEndPoint, newPlayer);
+                players.Add(client, newPlayer);
             }
             yield return null;
         }
+    }
+
+    public void KillPlayer(TcpClient remoteClient)
+    {
+        Destroy((GameObject)players[remoteClient]);
+        players.Remove(remoteClient);
+        Debug.Log(players.Count);
     }
 
     private void ClientConnectListener()

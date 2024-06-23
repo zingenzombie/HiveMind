@@ -78,11 +78,13 @@ public class HexTileController : MonoBehaviour
         {
             serverTCPSocket.Close();
             serverTCP.Abort();
+            serverTCP = null;
         }catch(Exception) { }
         
         try
         {
             serverUDP.Abort();
+            serverUDP = null;
         }
         catch (Exception) { }
 
