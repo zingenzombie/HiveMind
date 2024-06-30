@@ -20,8 +20,6 @@ public class GridController : MonoBehaviour
     [SerializeField] GameObject hexTile;
     [SerializeField] GameObject hexTileTemplate;
     [SerializeField] GameObject exitTilePrefab;
-
-    //private NetworkController networkController;
     
     GameObject exitTile;
 
