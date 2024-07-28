@@ -5,16 +5,19 @@ using System.Data;
 using System.IO;
 using System.Net;
 using System.Net.Http;
+using System.Net.Security;
 using System.Net.Sockets;
 using System.Numerics;
 using System.Text;
 using Unity.VisualScripting;
+using UnityEditor.PackageManager;
 using UnityEngine;
 
 public class GridController : MonoBehaviour
 {
     public int corePort;
-    public string coreAddress;
+    public string coreIPString;
+    public IPAddress coreAddress;
 
     [SerializeField] GameObject playerPrefab;
     [SerializeField] GameObject hexTile;
@@ -58,6 +61,11 @@ public class GridController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+
+        //Delete this later and fix
+        if (!IPAddress.TryParse(coreIPString, out coreAddress))
+            coreAddress = Dns.Resolve(coreIPString).AddressList[0];
+
         //This set of lines is a hack and needs to be fixed later
 
         string assetBundleDirectoryPath = Application.dataPath + "/AssetBundles";
@@ -94,31 +102,28 @@ public class GridController : MonoBehaviour
         foreach (DictionaryEntry entry in grid)
             tiles.Add((Key) entry.Key);
 
-        TcpClient tcpClient;
+        /*TcpClient tcpClient;
 
         try
         {
-            tcpClient = new TcpClient(coreAddress, corePort);
+            tcpClient = new TcpClient(coreAddress.ToString(), corePort);
         }
         catch (Exception)
         {
             //throw new Exception("Failed to connect to core.");
             return;
-        }
+        }*/
 
-        if (!tcpClient.Connected)
-            throw new Exception("Failed to connect to core.");
+        //SslStream sslStream = CoreCommunication.EstablishSslStreamFromTcpAsClient(tcpClient);
 
-        byte[] buffer = Encoding.ASCII.GetBytes("client");
-        tcpClient.GetStream().Write(buffer);
+        //CoreCommunication.SendStringToStream(sslStream, "client");
 
-        buffer = Encoding.ASCII.GetBytes("getServers\n");
-        tcpClient.GetStream().Write(buffer);
+        //CoreCommunication.SendStringToStream(sslStream, "getServers");
 
         for (int x = -renderDistance + posX; x < renderDistance + posX; x++)
             for (int y = -renderDistance + posY; y < renderDistance + posY; y++)
             {
-                SpawnTile(x, y, tcpClient);
+                SpawnTile(x, y/*, sslStream*/);
                 tiles.Remove(new Key(x, y));
             }
 
@@ -187,7 +192,7 @@ public class GridController : MonoBehaviour
         ((GameObject)grid[new Key(newX, newY)]).GetComponent<HexTileController>().ContactTileServer();
     }
 
-    void SpawnTile(int x, int y, TcpClient tcpClient)
+    void SpawnTile(int x, int y/*, SslStream tcpClient*/)
     {
 
         if (grid.ContainsKey(new Key(x, y)))

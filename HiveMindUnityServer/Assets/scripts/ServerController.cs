@@ -10,6 +10,12 @@ using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Collections.Concurrent;
+using System.Net.Security;
+using System.Security.Authentication;
+using UnityEditor.PackageManager;
+using System.Security.Cryptography.X509Certificates;
+using JetBrains.Annotations;
+using System.Security.Cryptography;
 
 public class ServerController : MonoBehaviour
 {
@@ -31,7 +37,9 @@ public class ServerController : MonoBehaviour
     [SerializeField] GameObject hexTileTemplate;
     private float tileSize;
 
-    BlockingCollection<TcpClient> playerPipe;
+    private RSACryptoServiceProvider localRSA;
+
+    BlockingCollection<TileStream> playerPipe;
 
     public Hashtable players = new Hashtable();
 
@@ -44,6 +52,8 @@ public class ServerController : MonoBehaviour
     // Start is called before the first frame update
     private void Start()
     {
+        localRSA = new RSACryptoServiceProvider();
+
         ipAddress = IPAddress.Parse(serverIPString);
 
         //Delete this later and fix
@@ -55,7 +65,6 @@ public class ServerController : MonoBehaviour
 
         ContactCore();
 
-
         tileSize = hexTileTemplate.GetComponent<Renderer>().bounds.size.z;
 
         float offsetX = x * tileSize * Mathf.Cos(Mathf.Deg2Rad * 30);
@@ -65,7 +74,7 @@ public class ServerController : MonoBehaviour
 
         hexTile.transform.SetLocalPositionAndRotation(new UnityEngine.Vector3(offsetX, 250 * Mathf.PerlinNoise(offsetX / 5000, offsetY / 5000), offsetY), transform.rotation);
 
-        playerPipe = new BlockingCollection<TcpClient>();
+        playerPipe = new BlockingCollection<TileStream>();
         StartCoroutine(InstantiateNewClients());
 
         ClientConnectListener();
@@ -75,7 +84,7 @@ public class ServerController : MonoBehaviour
     {
         while (true)
         {
-            if(playerPipe.TryTake(out TcpClient client))
+            if(playerPipe.TryTake(out TileStream client))
             {
                 GameObject newPlayer = Instantiate(playerPrefab, hexTile.transform);
 
@@ -87,7 +96,8 @@ public class ServerController : MonoBehaviour
         }
     }
 
-    public void KillPlayer(TcpClient remoteClient)
+    //Needs to be replaced by one using PID instead!
+    public void KillPlayer(TileStream remoteClient)
     {
         Destroy((GameObject)players[remoteClient]);
         players.Remove(remoteClient);
@@ -102,31 +112,33 @@ public class ServerController : MonoBehaviour
 
     void ContactCore()
     {
-        ServerData tmp = new ServerData(requestXY, x, y, serverName, ipAddress.ToString(), port, ownerID);
-        string jsonString = JsonUtility.ToJson(tmp) + '\n';
+        ServerData tmp = new ServerData(requestXY, x, y, serverName, ipAddress.ToString(), port, ownerID, localRSA.ToXmlString(false));
+        string jsonString = JsonUtility.ToJson(tmp);
         byte[] bytes = Encoding.ASCII.GetBytes(jsonString);
 
-        using TcpClient tcpClient = new TcpClient(coreAddress.ToString(), corePort);
+        using TcpClient client = new TcpClient(coreAddress.ToString(), corePort);
 
-        if (!tcpClient.Connected)
-        {
-            Console.WriteLine("Failed to connect to core!");
-            return;
-        }
+        SslStream sslStream = CoreCommunication.EstablishSslStreamFromTcpAsClient(client);
 
-        byte[] buffer = Encoding.ASCII.GetBytes("server");
-        tcpClient.GetStream().Write(buffer);
+        CoreCommunication.SendStringToStream(sslStream, "server");
+        
+        CoreCommunication.SendStringToStream(sslStream, "newServer");
 
-        buffer = Encoding.ASCII.GetBytes("newServer\n");
-        tcpClient.GetStream().Write(buffer);
+        byte[] bytesFinal = new byte[bytes.Length + 1];
 
-        tcpClient.GetStream().Write(bytes);
-        Debug.Log("Wrote " + bytes.Length + " bytes.");
+        int i = 0;
+        foreach(byte b in bytes)
+            bytesFinal[i++] = b;
+
+        bytesFinal[i] = 0x00;
+
+        sslStream.Write(bytesFinal);
+        Debug.Log("Wrote " + bytesFinal.Length + " bytes.");
 
         foreach(var character in bytes)
             Console.WriteLine((char)character);
 
-        string result = CoreCommunication.GetStringFromStream(tcpClient);
+        string result = CoreCommunication.GetStringFromStream(sslStream);
 
         if(!result.Equals("SUCCESS"))
             throw new Exception("Failed to reserve space on core grid. Message received: " + result);
@@ -141,24 +153,28 @@ public class ServerController : MonoBehaviour
 
         while (true)   //we wait for a connection
         {
-            TcpClient client;
+            TileStream client;
             if (server.Pending())
             {
-                client = server.AcceptTcpClient();  //if a connection exists, the server will accept it
+                client = new TileStream(server.AcceptTcpClient());
+                client.ActivateStream(localRSA);
 
-                if (client.Connected)  //while the client is connected, we look for incoming messages
-                {
+                //SslStream sslStream = CoreCommunication.EstablishSslStreamFromTcpAsServer(client);
+
+                //if (sslStream != null)  //while the client is connected, we look for incoming messages
+                //{
                     Thread thread = new Thread(() => HandleNewClient(client));
                     thread.Start();
-                }
-                else
-                {
-                    Debug.Log("Error! TCP client connection attempt received, but connection failed before handling!");
-                }
+                //}
+                //else
+                //{
+                  //  Debug.Log("Error! TCP client connection attempt received, but connection failed before handling!");
+                //}
             }
         }
     }
 
+    /*
     public void SendPlayerPositionToOthers(string ipStr, Transform playerTransform)
     {
         byte[] ip = IPAddress.Parse(ipStr).GetAddressBytes();
@@ -202,12 +218,12 @@ public class ServerController : MonoBehaviour
 
             player.GetComponent<PlayerData>().serverPipeOut.Add(new NetworkMessage("playerPos", message));
         }
-    }
+    }*/
 
-    private void HandleNewClient(TcpClient client)
+    private void HandleNewClient(TileStream client)
     {
 
-        switch (CoreCommunication.GetStringFromStream(client))
+        switch (client.GetStringFromStream())
         {
             case "getAssets":
                 GetAssets(client);
@@ -220,17 +236,19 @@ public class ServerController : MonoBehaviour
         }
     }
 
-    private void JoinServer(TcpClient client)
+    private void JoinServer(TileStream client)
     {
         playerPipe.Add(client);
     }
 
-    private void GetAssets(TcpClient client)
+    private void GetAssets(TileStream client)
     {
 
         string assetBundleDirectoryPath = Application.dataPath + "/AssetBundles";
 
-        string typeOS = CoreCommunication.GetStringFromStream(client);
+        string typeOS = client.GetStringFromStream();
+
+        //string typeOS = CoreCommunication.GetStringFromStream(client);
 
         if (!(typeOS.Equals("w") || typeOS.Equals("m") || typeOS.Equals("l")))
         {
@@ -242,21 +260,33 @@ public class ServerController : MonoBehaviour
 
         string[] fileNames = Directory.GetFiles(assetBundleDirectoryPath + "/" + typeOS);
 
-        client.GetStream().Write(Encoding.ASCII.GetBytes(fileNames.Length.ToString() + '\n'));
+        //client.Write(Encoding.ASCII.GetBytes(fileNames.Length.ToString() + (char) 0x00));
+
+        client.SendBytesToStream(BitConverter.GetBytes(fileNames.Length));
 
         foreach(string fileName in fileNames)
         {
 
-            client.GetStream().Write(Encoding.ASCII.GetBytes(new System.IO.FileInfo(fileName).Name+ '\n'));
-            client.GetStream().Write(Encoding.ASCII.GetBytes(((int) new System.IO.FileInfo(fileName).Length).ToString() + '\n'));
-            
+            client.SendStringToStream(new System.IO.FileInfo(fileName).Name);
+            //client.SendBytesToStream(BitConverter.GetBytes(new System.IO.FileInfo(fileName).Length));
+
+            //client.Write(Encoding.ASCII.GetBytes(new System.IO.FileInfo(fileName).Name + (char) 0x00));
+            //client.Write(Encoding.ASCII.GetBytes(((int) new System.IO.FileInfo(fileName).Length).ToString() + (char) 0x00));
+
             //SendFile() had issues with files above ~16 KB in size on macOS, so this solution was implemented instead.
-            byte[] buffer = new byte[8192]; // 8 KB buffer size
+            /*byte[] buffer = new byte[8192]; // 8 KB buffer size
             int bytesRead;
 
             using (FileStream fileStream = new FileStream(fileName, FileMode.Open, FileAccess.Read))
                 while ((bytesRead = fileStream.Read(buffer, 0, buffer.Length)) > 0)
-                    client.GetStream().Write(buffer, 0, bytesRead);
+                    client.Write(buffer, 0, bytesRead);*/
+
+            byte[] buffer = new byte[new System.IO.FileInfo(fileName).Length];
+
+            using (FileStream fileStream = new FileStream(fileName, FileMode.Open, FileAccess.Read))
+                fileStream.Read(buffer);
+
+            client.SendBytesToStream(buffer);
         }
     }
 }

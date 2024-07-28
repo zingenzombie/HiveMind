@@ -4,6 +4,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
 using System.Net;
+using System.Net.Security;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
@@ -14,9 +15,10 @@ using UnityEngine.Tilemaps;
 
 public class PlayerData : MonoBehaviour
 {
-    public string ip;
+    public string PID;
+    //public string ip;
     public string clientName;
-    public TcpClient tcpClient;
+    public TileStream tileStream;
     public UdpClient udpClient;
     public IPEndPoint remoteEP;
     ServerController serverController;
@@ -25,30 +27,37 @@ public class PlayerData : MonoBehaviour
 
     public BlockingCollection<NetworkMessage> serverPipeIn, serverPipeOut;
 
-    public void InitializePlayerData(TcpClient client)
+    public void InitializePlayerData(TileStream client)
     {
         serverController = GameObject.FindWithTag("ServerController").GetComponent<ServerController>();
 
-        ip = ((IPEndPoint) client.Client.RemoteEndPoint).Address.ToString();
-        tcpClient = client;
-        clientName = CoreCommunication.GetStringFromStream(client);
+        //ip = ((IPEndPoint) client.Client.RemoteEndPoint).Address.ToString();
+
+        tileStream = client;
+        clientName = tileStream.GetStringFromStream();
         
-        byte[] buffer = Encoding.ASCII.GetBytes("ACK\n");
-        tcpClient.GetStream().Write(buffer);
+        //byte[] buffer = Encoding.ASCII.GetBytes("ACK" + (char) 0x00);
+        tileStream.SendStringToStream("ACK");
 
         int numPlayers = serverController.players.Count;
 
-        client.GetStream().Write(BitConverter.GetBytes(numPlayers));
+        //client.Write(BitConverter.GetBytes(numPlayers));
+        tileStream.SendBytesToStream(BitConverter.GetBytes(numPlayers));
 
-        foreach(var player in serverController.players)
+        foreach (var player in serverController.players)
         {
             //This is temporary and must be switched out with a new playerdata object.
 
-            NetworkMessage newObject = new NetworkMessage("newPlayer", ASCIIEncoding.ASCII.GetBytes(((GameObject) player).GetComponent<PlayerData>().ip));
+            NetworkMessage newObject = new NetworkMessage("newPlayer", ASCIIEncoding.ASCII.GetBytes(((GameObject) player).GetComponent<PlayerData>().PID));
 
-            client.GetStream().Write(ASCIIEncoding.ASCII.GetBytes(newObject.messageType + '\n'));
-            client.GetStream().Write(BitConverter.GetBytes(newObject.numBytes));
-            client.GetStream().Write(newObject.message);
+            /*
+            client.Write(ASCIIEncoding.ASCII.GetBytes(newObject.messageType + (char) 0x00));
+            client.Write(BitConverter.GetBytes(newObject.numBytes));
+            client.Write(newObject.message);*/
+
+            tileStream.SendStringToStream(newObject.messageType);
+            tileStream.SendBytesToStream(newObject.message);
+
         }
 
         serverPipeIn = new BlockingCollection<NetworkMessage>(); //Will need to be separated into udp and tcp pipes!
@@ -67,7 +76,7 @@ public class PlayerData : MonoBehaviour
     {
         while (true)
         {
-            if(serverPipeIn.TryTake(out NetworkMessage message))
+            if (serverPipeIn.TryTake(out NetworkMessage message))
             {
                 switch (message.messageType)
                 {
@@ -76,7 +85,7 @@ public class PlayerData : MonoBehaviour
                         UpdatePlayerPosAndRot(message);
                         break;
                     case "killMe":
-                        serverController.KillPlayer(tcpClient);
+                        serverController.KillPlayer(tileStream);
                         break;
                     default: break;
                 }
@@ -110,8 +119,9 @@ public class PlayerData : MonoBehaviour
         while (true)
         {
 
+            /*
             //This is an incredibly inefficient hack that should be replaced asap
-            if (!CoreCommunication.IsConnected(tcpClient))
+            if (!CoreCommunication.IsConnected(tcpClient)) 
             {
                 tcpClient.Close();
 
@@ -119,16 +129,43 @@ public class PlayerData : MonoBehaviour
 
                 //Destroy(this.gameObject);
                 break;
-            }
+            }*/
 
             //Send outgoing TCP messages
             if (serverPipeOut.TryTake(out NetworkMessage newObject))
             {
-                tcpClient.GetStream().Write(ASCIIEncoding.ASCII.GetBytes(newObject.messageType + '\n'));
-                tcpClient.GetStream().Write(BitConverter.GetBytes(newObject.numBytes));
-                tcpClient.GetStream().Write(newObject.message);
+
+                tileStream.SendStringToStream(newObject.messageType);
+                tileStream.SendBytesToStream(newObject.message);
+
+                /*tileStream.Write(ASCIIEncoding.ASCII.GetBytes(newObject.messageType + (char) 0x00));
+                tileStream.Write(BitConverter.GetBytes(newObject.numBytes));
+                tileStream.Write(newObject.message);*/
             }
 
+            //string messageType = CoreCommunication.GetStringFromStream(tileStream);
+
+            if(tileStream.Available > 0)
+            {
+
+                //int messageLength = BitConverter.ToInt32(tileStream.Get)
+
+                //byte[] tmpMessageLength = CoreCommunication.GetBytesFromStream(tileStream, 4);
+                string messageType = tileStream.GetStringFromStream();
+                byte[] message = tileStream.GetBytesFromStream();
+
+                //int messageLength = BitConverter.ToInt32(tmpMessageLength, 0);
+
+                //while (tcpClient.Available < messageLength) { }
+
+                //byte[] message = CoreCommunication.GetBytesFromStream(tileStream, messageLength);
+                NetworkMessage netMessage = new NetworkMessage(messageType, message);
+
+                HandleMessage(netMessage);
+
+            }
+
+            /*
             //Receive incoming TCP messages
             if (tcpClient.Available > 0)
             {
@@ -138,21 +175,21 @@ public class PlayerData : MonoBehaviour
 
                 while (tcpClient.Available < 4) { }
 
-                tcpClient.GetStream().Read(tmpMessageLength, 0, tmpMessageLength.Length);
+                tcpClient.Read(tmpMessageLength, 0, tmpMessageLength.Length);
                 int messageLength = BitConverter.ToInt32(tmpMessageLength, 0);
 
                 while (tcpClient.Available < messageLength) { }
 
                 byte[] message = new byte[messageLength];
-                tcpClient.GetStream().Read(message, 0, messageLength);
+                tcpClient.Read(message, 0, messageLength);
 
                 NetworkMessage netMessage = new NetworkMessage(messageType, message);
 
                 HandleMessage(netMessage);
-            }
+            }*/
         }
     }
-
+    /*
     void UDPThread()
     {
 
@@ -166,7 +203,7 @@ public class PlayerData : MonoBehaviour
             //var data = udpClient.Receive(ref remoteEP);
 
         }
-    }
+    }*/
 
     private void HandleMessage(NetworkMessage message)
     {

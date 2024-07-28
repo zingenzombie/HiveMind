@@ -1,4 +1,5 @@
 ﻿using System.Linq.Expressions;
+using System.Net.Security;
 using System.Net.Sockets;
 using System.Text;
 
@@ -6,7 +7,7 @@ namespace HiveMindCore;
 
 public class ServerRequestHandler : RequestHandler
 {
-    public ServerRequestHandler(TcpClient client, ServerDataHolder holder)
+    public ServerRequestHandler(SslStream client, ServerDataHolder holder)
     {
         HandleIt(client, holder);
     }
@@ -25,15 +26,15 @@ public class ServerRequestHandler : RequestHandler
 
     private void NewServer()
     {
-        string serverRequest = GetStringFromStream();
-        //Console.WriteLine(serverRequest);
+        string serverRequest = CoreCommunication.GetStringFromStream(client);
+        Console.WriteLine(serverRequest);
 
         if (!holder.CreateServer(serverRequest))
         {
-            client.GetStream().Write("FAIL\n"u8);
+            CoreCommunication.SendStringToStream(client, "FAIL");
             return;
         }
         
-        client.GetStream().Write("SUCCESS\n"u8);
+        CoreCommunication.SendStringToStream(client, "SUCCESS");
     }
 }

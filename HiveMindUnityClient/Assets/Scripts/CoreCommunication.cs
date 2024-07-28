@@ -1,79 +1,152 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
+using System.Net.Security;
 using System.Net.Sockets;
-using UnityEngine;
+using System.Security.Authentication;
+using System.Security.Cryptography.X509Certificates;
+using System.Text;
 
 public static class CoreCommunication
 {
 
-    public static string GetStringFromStream(TcpClient client)
+    //Any calls to GetStringFromStream() MUST NOT be called
+    //from the main thread to prevent hanging in the case of
+    //a lagging \n character.
+
+    public static void SendStringToStream(SslStream client, string payload)
+    {
+        byte[] buffer = new byte[payload.Length + 1];
+
+
+        int i = 0;
+        foreach (char c in payload)
+            buffer[i++] = (byte)c;
+
+        client.Write(buffer);
+    }
+
+    public static string GetStringFromStream(SslStream client)
     {
         string request = "";
-        byte[] buffer = new byte[1];
 
         while (true)
         {
+            int read;
 
-            int read = client.GetStream().Read(buffer, 0, 1);
-
-            if (read == 0)
+            try
             {
-                if (IsConnected(client))
-                    continue;
-
-                throw new Exception("Client disconnected before receiving a '\\n' character.");
+                read = client.ReadByte();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+                return "";
             }
 
-            if (((char)buffer[0]).Equals('\n'))
+            if (read.Equals(-1))
+                continue;
+
+            if (read.Equals(0x00))
                 return request;
 
-            request += System.Text.Encoding.UTF8.GetString(buffer);
+            request += (char)read;
         }
-
-        throw new Exception("Client disconnected before receiving a '\\n' character.");
     }
 
-
-    public static bool IsConnected(TcpClient client)
+    //This is most-certainly broken
+    public static byte[] GetBytesFromStream(SslStream sslStream, int numBytes)
     {
+        // Read the  message sent by the client.
+        // The client signals the end of the message using the
+
+        byte[] fileBuffer = new byte[numBytes];
+
+        int bytesRead = 0;
+        while (bytesRead < numBytes)
+        {
+            int read = sslStream.Read(fileBuffer, bytesRead, numBytes - bytesRead);
+            //BROKEN AND SHOULDN'T RELY ON IsConnected()
+            if(read == 0 /*&& !CoreCommunication.IsConnected(sslStream)*/)
+            //Handle stream closed or error connection
+                break;
+
+            bytesRead += read;
+        }
+
+        return fileBuffer;
+    }
+
+    public static SslStream EstablishSslStreamFromTcpAsClient(TcpClient client)
+    {
+
+
+        SslStream sslStream = new SslStream(
+               client.GetStream(),
+               false,
+               new RemoteCertificateValidationCallback(ValidateServerCertificate),
+               null
+               );
+        // The server name must match the name on the server certificate
+
         try
         {
-            if (client != null && client.Client != null && client.Client.Connected)
-            {
-                /* pear to the documentation on Poll:
-                 * When passing SelectMode.SelectRead as a parameter to the Poll method it will return
-                 * -either- true if Socket.Listen(Int32) has been called and a connection is pending;
-                 * -or- true if data is available for reading;
-                 * -or- true if the connection has been closed, reset, or terminated;
-                 * otherwise, returns false
-                 */
-
-                // Detect if client disconnected
-                if (client.Client.Poll(0, SelectMode.SelectRead))
-                {
-                    byte[] buff = new byte[1];
-                    if (client.Client.Receive(buff, SocketFlags.Peek) == 0)
-                    {
-                        // Client disconnected
-                        return false;
-                    }
-                    else
-                    {
-                        return true;
-                    }
-                }
-
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            sslStream.AuthenticateAsClient("honeydragonproductions.com");
+            return sslStream;
         }
-        catch
+        catch (AuthenticationException e)
         {
-            return false;
+            Console.WriteLine("Exception: {0}", e.Message);
+            if (e.InnerException != null)
+            {
+                Console.WriteLine("Inner exception: {0}", e.InnerException.Message);
+            }
+            Console.WriteLine("Authentication failed - closing the connection.");
+            client.Close();
+            return null;
         }
+    }
+
+    public static SslStream EstablishSslStreamFromTcpAsServer(TcpClient client)
+    {
+
+
+        SslStream sslStream = new SslStream(
+               client.GetStream(),
+               false,
+               new RemoteCertificateValidationCallback(ValidateServerCertificate),
+               null
+               );
+        // The server name must match the name on the server certificate
+
+        try
+        {
+            sslStream.AuthenticateAsServer(new X509Certificate());
+            return sslStream;
+        }
+        catch (AuthenticationException e)
+        {
+            Console.WriteLine("Exception: {0}", e.Message);
+            if (e.InnerException != null)
+            {
+                Console.WriteLine("Inner exception: {0}", e.InnerException.Message);
+            }
+            Console.WriteLine("Authentication failed - closing the connection.");
+            client.Close();
+            return null;
+        }
+    }
+
+    public static bool ValidateServerCertificate(
+              object sender,
+              X509Certificate certificate,
+              X509Chain chain,
+              SslPolicyErrors sslPolicyErrors)
+    {
+        if (sslPolicyErrors == SslPolicyErrors.None)
+            return true;
+
+        Console.WriteLine("Certificate error: {0}", sslPolicyErrors);
+
+        // Do not allow this client to communicate with unauthenticated servers.
+        return false;
     }
 }
