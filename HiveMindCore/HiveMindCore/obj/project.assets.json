@@ -2751,19 +2751,19 @@
     ]
   },
   "packageFolders": {
-    "/Users/zingen/.nuget/packages/": {}
+    "/root/.nuget/packages/": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/zingen/Documents/Programming Projects/HiveMind/HiveMindCore/HiveMindCore/HiveMindCore.csproj",
+      "projectUniqueName": "/root/HiveMindCore/HiveMindCore/HiveMindCore.csproj",
       "projectName": "HiveMindCore",
-      "projectPath": "/Users/zingen/Documents/Programming Projects/HiveMind/HiveMindCore/HiveMindCore/HiveMindCore.csproj",
-      "packagesPath": "/Users/zingen/.nuget/packages/",
-      "outputPath": "/Users/zingen/Documents/Programming Projects/HiveMind/HiveMindCore/HiveMindCore/obj/",
+      "projectPath": "/root/HiveMindCore/HiveMindCore/HiveMindCore.csproj",
+      "packagesPath": "/root/.nuget/packages/",
+      "outputPath": "/root/HiveMindCore/HiveMindCore/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "/Users/zingen/.nuget/NuGet/NuGet.Config"
+        "/root/.nuget/NuGet/NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net7.0"
@@ -2808,7 +2808,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/7.0.316/RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "/root/.dotnet/sdk/7.0.407/RuntimeIdentifierGraph.json"
       }
     }
   },

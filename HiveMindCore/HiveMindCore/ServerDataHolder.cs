@@ -43,8 +43,11 @@ public class ServerDataHolder
         [JsonInclude]
         public string OwnerID;
         [JsonInclude]
+        public string PublicKey;
+        [JsonInclude]
         public string LastContact;
 
+        /*
         public ServerData(int x, int y, string name, string ip, int port, string ownerID)
         {
             this.X = x;
@@ -55,7 +58,7 @@ public class ServerDataHolder
             this.OwnerID = ownerID;
             
             LastContact = DateTime.Now.ToString();
-        }
+        }*/
 
         public string GetServerJsonData()
         {
@@ -82,6 +85,10 @@ public class ServerDataHolder
 
         if (servers.ContainsKey(new Key(newServerData.X, newServerData.Y)))
         {
+            //**REMOVE THIS LINE AFTER TESTING!!!**
+            //return true;
+            
+            
             Console.WriteLine("ERROR: Server already exists at " + newServerData.X + ", " + newServerData.Y + ".");
             return false;
         }

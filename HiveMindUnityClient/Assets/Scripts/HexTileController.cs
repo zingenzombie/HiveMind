@@ -4,10 +4,14 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using System.Net.Http;
+using System.Net.Security;
 using System.Net.Sockets;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using UnityEditor;
+using UnityEditor.PackageManager;
 using UnityEngine;
 using static UnityEngine.InputSystem.InputRemoting;
 
@@ -18,11 +22,13 @@ public class HexTileController : MonoBehaviour
     string coreAddress;
     public bool hasServer = false;
     public ServerData serverData;
-    [SerializeField] string playerName;
+    public PlayerInfo player;
 
     public GameObject groundHolder;
     public GameObject templateGroundHolder;
     public GameObject tileObjects;
+
+    private TileStream tileStream;
 
     private Thread serverTCP = null, serverUDP = null;
     public BlockingCollection<NetworkMessage> serverPipeIn, serverPipeOut;
@@ -52,7 +58,7 @@ public class HexTileController : MonoBehaviour
     // Start is called before the first frame update
     void Awake()
     {
-        coreAddress = GameObject.FindWithTag("Grid").GetComponent<GridController>().coreAddress;
+        coreAddress = GameObject.FindWithTag("Grid").GetComponent<GridController>().coreAddress.ToString();
         corePort = GameObject.FindWithTag("Grid").GetComponent<GridController>().corePort;
 
         StartCoroutine(HandleMessage());
@@ -74,9 +80,10 @@ public class HexTileController : MonoBehaviour
         if(!hasServer) 
             return;
 
+        //This is definitely broken
+
         try
         {
-            serverTCPSocket.Close();
             serverTCP.Abort();
             serverTCP = null;
         }catch(Exception) { }
@@ -85,31 +92,29 @@ public class HexTileController : MonoBehaviour
         {
             serverUDP.Abort();
             serverUDP = null;
-        }
-        catch (Exception) { }
+        }catch (Exception) { }
+
+        tileStream.SendStringToStream("killMe");
+        tileStream.SendBytesToStream(new byte[0]);
+
+        tileStream.Close();
 
     }
-    TcpClient serverTCPSocket;
 
     public void ServerTCP()
     {
-        serverTCPSocket = new TcpClient(serverData.Ip, serverData.Port);
 
-        if (!serverTCPSocket.Connected)
-            return;
+        tileStream = new TileStream(new TcpClient(serverData.Ip, serverData.Port));
+        tileStream.ActivateStream(serverData.PublicKey);
 
-        byte[] buffer = Encoding.ASCII.GetBytes("joinServer\n");
-        serverTCPSocket.GetStream().Write(buffer);
+        tileStream.SendStringToStream("joinServer");
 
-        buffer = Encoding.ASCII.GetBytes(playerName + '\n');
-        serverTCPSocket.GetStream().Write(buffer);
+        //Send playerID and verify player
+        tileStream.SendStringToStream(player.GetPlayerPublicRSA());
+        tileStream.SendBytesToStream(player.VerifyPlayer(tileStream.GetBytesFromStream()));
 
-        string acknowledge = CoreCommunication.GetStringFromStream(serverTCPSocket);
-
+        string acknowledge = tileStream.GetStringFromStream();
         Debug.Log(acknowledge);
-
-        serverPipeIn = new BlockingCollection<NetworkMessage>();
-        serverPipeOut = new BlockingCollection<NetworkMessage>();
 
         if (!acknowledge.Equals("ACK"))
         {
@@ -117,19 +122,10 @@ public class HexTileController : MonoBehaviour
             return;
         }
 
-        while (serverTCPSocket.Available < 4) { }
+        tileStream.SendStringToStream(player.username);
 
-        buffer = new byte[4];
-        serverTCPSocket.GetStream().Read(buffer, 0, 4);
-
-        int numPlayers = BitConverter.ToInt32(buffer);
-
-        for(int i = 0; i < numPlayers; i++)
-        {
-            //I will need to construct a player class which newPlayer fills and is stored in the players hashmap.
-            //This should just need to include the player's ip and their avatar prefab for now?
-            NetworkMessage newPlayer = GetNetworkMessage(serverTCPSocket);
-        }
+        serverPipeIn = new BlockingCollection<NetworkMessage>();
+        serverPipeOut = new BlockingCollection<NetworkMessage>();
 
         //Should probably start the UDP thread at some point here, right?
         serverUDP = new Thread(() => ServerUDP());
@@ -143,35 +139,45 @@ public class HexTileController : MonoBehaviour
                 //Send outgoing TCP messages
                 if (serverPipeOut.TryTake(out NetworkMessage newObject))
                 {
-                    serverTCPSocket.GetStream().Write(ASCIIEncoding.ASCII.GetBytes(newObject.messageType + '\n'));
-                    serverTCPSocket.GetStream().Write(BitConverter.GetBytes(newObject.numBytes));
-                    serverTCPSocket.GetStream().Write(newObject.message);
+
+                    tileStream.SendStringToStream(newObject.messageType);
+                    tileStream.SendBytesToStream(newObject.message);
+
                 }
 
                 //Receive incoming TCP messages
-                if (serverTCPSocket.Available > 0)
-                    serverPipeIn.Add(GetNetworkMessage(serverTCPSocket));
+                if(tileStream.Available > 0)
+                    serverPipeIn.Add(GetNetworkMessage(tileStream));
             }
 
         }
-        catch (Exception) { }
+        catch (Exception) {
+
+            Debug.Log("Failed to run message loop");
+
+        }
     }
 
-    public NetworkMessage GetNetworkMessage(TcpClient serverTCPSocket)
+    public NetworkMessage GetNetworkMessage(TileStream tileStream)
     {
-        string messageType = CoreCommunication.GetStringFromStream(serverTCPSocket);
+        string messageType = tileStream.GetStringFromStream();
 
-        byte[] tmpMessageLength = new byte[4];
+        int messageLength = BitConverter.ToInt32(tileStream.GetBytesFromStream(), 0);
+
+        /*byte[] tmpMessageLength = new byte[4];
 
         while (serverTCPSocket.Available < 4) { }
+        
+        serverTCPSocket.Read(tmpMessageLength, 0, tmpMessageLength.Length);
+        int messageLength = BitConverter.ToInt32(tmpMessageLength, 0);*/
 
-        serverTCPSocket.GetStream().Read(tmpMessageLength, 0, tmpMessageLength.Length);
-        int messageLength = BitConverter.ToInt32(tmpMessageLength, 0);
+        //while (serverTCPSocket.Available < messageLength) { }
 
-        while (serverTCPSocket.Available < messageLength) { }
+        //byte[] message = new byte[messageLength];
 
-        byte[] message = new byte[messageLength];
-        serverTCPSocket.GetStream().Read(message, 0, messageLength);
+        byte[] message = tileStream.GetBytesFromStream();
+
+        //serverTCPSocket.GetStream().Read(message, 0, messageLength);
 
         return new NetworkMessage(messageType, message);
     }
@@ -194,7 +200,7 @@ public class HexTileController : MonoBehaviour
                 switch (message.messageType)
                 {
                     case "PlayerPos":
-                        //Debug.Log(message.message.ToString());
+                        Debug.Log(message.message.ToString());
                         break;
                     default: break;
                 }
@@ -210,9 +216,6 @@ public class HexTileController : MonoBehaviour
 
         byte[] buffer = Encoding.ASCII.GetBytes("joinServer\n");
         server.Send(buffer, buffer.Length);
-
-
-
     }
 
     public void ActivateTile()
@@ -283,34 +286,20 @@ public class HexTileController : MonoBehaviour
 
     public void ContactCore(BlockingCollection<ServerData> pipe)
     {
-        TcpClient tcpClient;
 
-        try
-        {
-            tcpClient = new TcpClient(coreAddress, corePort);
-        }
-        catch (Exception)
-        {
-            //throw new Exception("Failed to connect to core.");
-            return;
-        }
+        using TcpClient client = new TcpClient(coreAddress.ToString(), corePort);
 
-        if (!tcpClient.Connected)
-            throw new Exception("Failed to connect to core.");
+        SslStream sslStream = CoreCommunication.EstablishSslStreamFromTcpAsClient(client);
 
-        byte[] buffer = Encoding.ASCII.GetBytes("client");
-        tcpClient.GetStream().Write(buffer);
+        CoreCommunication.SendStringToStream(sslStream, "client");
 
-        buffer = Encoding.ASCII.GetBytes("getServer\n");
-        tcpClient.GetStream().Write(buffer);
+        CoreCommunication.SendStringToStream(sslStream, "getServer");
 
-        buffer = Encoding.ASCII.GetBytes(x.ToString() + '\n');
-        tcpClient.GetStream().Write(buffer);
+        CoreCommunication.SendStringToStream(sslStream, x.ToString());
 
-        buffer = Encoding.ASCII.GetBytes(y.ToString() + '\n');
-        tcpClient.GetStream().Write(buffer);
+        CoreCommunication.SendStringToStream(sslStream, y.ToString());
 
-        string serverJSON = CoreCommunication.GetStringFromStream(tcpClient);
+        string serverJSON = CoreCommunication.GetStringFromStream(sslStream);
 
         if (serverJSON.Equals("DoesNotExist"))
             return;
@@ -367,82 +356,64 @@ public class HexTileController : MonoBehaviour
 
     public void ContactServerAndRequestObjects()
     {
-        TcpClient tcpClient;
+        TileStream tileStream;
 
         try
         {
-            tcpClient = new TcpClient(serverData.Ip, serverData.Port);
-        }catch(Exception)
+            tileStream = new TileStream(new TcpClient(serverData.Ip, serverData.Port));
+            tileStream.ActivateStream(serverData.PublicKey);
+        }
+        catch(Exception)
         {
             return;
         }
 
-        if (!tcpClient.Connected)
+        if (!tileStream.Connected)
         {
             Console.WriteLine("Failed to connect to server of tile " + transform.parent.name + ".");
             return;
         }
 
-        ServerConnectAndGetGameObjects(tcpClient);
+        ServerConnectAndGetGameObjects(tileStream);
     }
 
-    public void ServerConnectAndGetGameObjects(TcpClient server)
+    public void ServerConnectAndGetGameObjects(TileStream server)
     {
 
-        byte[] buffer = Encoding.ASCII.GetBytes("getAssets\n");
-        server.GetStream().Write(buffer);
+        server.SendStringToStream("getAssets");
 
         switch (Application.platform)
         {
             case RuntimePlatform.WindowsPlayer:
             case RuntimePlatform.WindowsEditor:
-                server.GetStream().Write(Encoding.ASCII.GetBytes("w\n"));
+                server.SendStringToStream("w");
                 break;
             case RuntimePlatform.OSXPlayer:
             case RuntimePlatform.OSXEditor:
-                server.GetStream().Write(Encoding.ASCII.GetBytes("m\n"));
+                server.SendStringToStream("m");
                 break;
             case RuntimePlatform.LinuxPlayer:
             case RuntimePlatform.LinuxEditor:
-                server.GetStream().Write(Encoding.ASCII.GetBytes("l\n"));
+                server.SendStringToStream("l");
                 break;
             default:
                 throw new Exception("Unsupported OS");
         }
 
-        string numFilesStr = CoreCommunication.GetStringFromStream(server);
+        int numFiles = BitConverter.ToInt32(server.GetBytesFromStream());
 
-        int numFiles;
+        string assetBundleDirectoryPath = Application.dataPath + "/AssetBundles/" + x + "," + y + "/";
 
-        if (Int32.TryParse(numFilesStr, out numFiles))
+        if (!Directory.Exists(assetBundleDirectoryPath))
+            Directory.CreateDirectory(assetBundleDirectoryPath);
+
+        for(int i = 0; i < numFiles; i++)
         {
+            string fileName = server.GetStringFromStream();
 
-            string assetBundleDirectoryPath = Application.dataPath + "/AssetBundles/" + x + "," + y + "/";
+            byte[] fileBuffer = server.GetBytesFromStream();
 
-            if (!Directory.Exists(assetBundleDirectoryPath))
-                Directory.CreateDirectory(assetBundleDirectoryPath);
-
-            for(int i = 0; i < numFiles; i++)
-            {
-                string fileName = CoreCommunication.GetStringFromStream(server);
-
-                //This does not verify that the given string is a long!!!
-                int fileSize = Int32.Parse(CoreCommunication.GetStringFromStream(server));
-
-                byte[] fileBuffer = new byte[fileSize];
-
-                int bytesRead = 0;
-                while (bytesRead < fileSize)
-                {
-                    int read = server.GetStream().Read(fileBuffer, bytesRead, fileSize - bytesRead);
-                    if(read == 0 && !CoreCommunication.IsConnected(server))
-                        //Handle stream closed or error connection
-                        break;
-
-                    bytesRead += read;
-                }
-                System.IO.File.WriteAllBytes(assetBundleDirectoryPath + fileName, fileBuffer);
-            }
+            System.IO.File.WriteAllBytes(assetBundleDirectoryPath + fileName, fileBuffer);
         }
     }
 }

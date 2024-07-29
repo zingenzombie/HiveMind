@@ -8,6 +8,7 @@ public class ServerData
     public string Ip;
     public int Port;
     public string OwnerID;
+    public string PublicKey;
     public string LastContact;
 
     public ServerData(bool requestTile, int x, int y, string name, string ip, int port, string ownerID)

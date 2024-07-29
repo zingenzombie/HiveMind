@@ -8,9 +8,10 @@ public class ServerData
     public string Ip;
     public int Port;
     public string OwnerID;
+    public string PublicKey;
     public string LastContact;
 
-    public ServerData(bool requestTile, int x, int y, string name, string ip, int port, string ownerID)
+    public ServerData(bool requestTile, int x, int y, string name, string ip, int port, string ownerID, string PublicKey)
     {
         this.RequestTile = requestTile;
         this.X = x;
@@ -19,6 +20,7 @@ public class ServerData
         this.Ip = ip;
         this.Port = port;
         this.OwnerID = ownerID;
+        this.PublicKey = PublicKey;
 
         LastContact = "";
     }
