@@ -18,6 +18,7 @@ public class GridController : MonoBehaviour
     public int corePort;
     public string coreIPString;
     public IPAddress coreAddress;
+    public GameObject player;
 
     [SerializeField] GameObject playerPrefab;
     [SerializeField] GameObject hexTile;
@@ -89,8 +90,6 @@ public class GridController : MonoBehaviour
         exitTileMove.x = 0;
         exitTileMove.y = 0;
 
-
-        GameObject player = Instantiate(playerPrefab);
         player.transform.SetPositionAndRotation(((GameObject)grid[new Key(0, 0)]).transform.GetChild(1).transform.position, player.transform.rotation);
     }
 
@@ -211,6 +210,7 @@ public class GridController : MonoBehaviour
         tile.name = x + ", " + y;
         tileController.x = x;
         tileController.y = y;
+        tileController.player = player.GetComponent<PlayerInfo>();
         tileController.ActivateTile();
     }
 }

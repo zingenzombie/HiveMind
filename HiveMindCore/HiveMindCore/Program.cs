@@ -1,6 +1,7 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
 using System.Collections;
+using System.ComponentModel;
 using System.Net;
 using System.Net.Security;
 using System.Net.Sockets;
@@ -12,10 +13,31 @@ X509Certificate2 serverCertificate;
 
 ServerDataHolder holder;
 
-Main();
+bool maintain = true;
 
-void Main()
+Main(args);
+
+void HandleArgs(string[] args)
 {
+    foreach (var s in args)
+    {
+        switch (s)
+        {
+            case "-disableMaintainer":
+                maintain = false;
+                break;
+            default:
+                Console.WriteLine("Invalid argument received!");
+                throw new Exception("Invalid command-line argument received.");
+        }
+    }
+}
+
+void Main(string[] args)
+{
+
+    HandleArgs(args);
+    
     static async Task<IPAddress?> GetExternalIpAddress()
     {
         var externalIpString = (await new HttpClient().GetStringAsync("http://icanhazip.com"))
@@ -36,8 +58,11 @@ void Main()
 
     holder = new ServerDataHolder();
 
-    //Thread maintainer = new Thread(() => MaintainList());
-    //maintainer.Start();
+    if (maintain)
+    {
+        Thread maintainer = new Thread(() => MaintainList());
+        maintainer.Start();
+    }
 
     TcpListener server = new TcpListener(IPAddress.Any, port);
 
@@ -139,11 +164,11 @@ void MaintainList()
         {
             var serverData = (KeyValuePair<ServerDataHolder.Key, ServerDataHolder.ServerData>) enumerator.Current;
 
-            TcpClient tcpClient;
+            TileStream tcpClient;
 
             try
             {
-                tcpClient = new TcpClient(serverData.Value.Ip, serverData.Value.Port);
+                tcpClient = new TileStream(new TcpClient(serverData.Value.Ip, serverData.Value.Port));
             }
             catch
             {
@@ -157,7 +182,8 @@ void MaintainList()
                 Console.WriteLine("Goodbye " + serverData.Value.X + ", " + serverData.Value.Y + ".");
                 holder.DeleteServer(serverData.Value.X, serverData.Value.Y);
             }
-            tcpClient.GetStream().Write("\n"u8);
+            
+            tcpClient.SendStringToStream("\0");
         }
         ((IDisposable)enumerator).Dispose();
     }

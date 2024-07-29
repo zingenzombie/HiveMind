@@ -75,9 +75,22 @@ public class ServerController : MonoBehaviour
         hexTile.transform.SetLocalPositionAndRotation(new UnityEngine.Vector3(offsetX, 250 * Mathf.PerlinNoise(offsetX / 5000, offsetY / 5000), offsetY), transform.rotation);
 
         playerPipe = new BlockingCollection<TileStream>();
+
         StartCoroutine(InstantiateNewClients());
 
+        Thread checkIn = new Thread(() => CheckIn());
+
         ClientConnectListener();
+    }
+
+    void CheckIn()
+    {
+        foreach(GameObject player in players)
+        {
+            PlayerData.IsConnected(player.GetComponent<PlayerData>().tileStream);
+        }
+
+        Thread.Sleep(5000);
     }
 
     IEnumerator InstantiateNewClients()
@@ -159,17 +172,8 @@ public class ServerController : MonoBehaviour
                 client = new TileStream(server.AcceptTcpClient());
                 client.ActivateStream(localRSA);
 
-                //SslStream sslStream = CoreCommunication.EstablishSslStreamFromTcpAsServer(client);
-
-                //if (sslStream != null)  //while the client is connected, we look for incoming messages
-                //{
-                    Thread thread = new Thread(() => HandleNewClient(client));
-                    thread.Start();
-                //}
-                //else
-                //{
-                  //  Debug.Log("Error! TCP client connection attempt received, but connection failed before handling!");
-                //}
+                Thread thread = new Thread(() => HandleNewClient(client));
+                thread.Start();
             }
         }
     }

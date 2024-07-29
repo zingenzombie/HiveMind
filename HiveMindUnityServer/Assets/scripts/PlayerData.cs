@@ -4,10 +4,13 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
 using System.Net;
+using System.Net.Http;
 using System.Net.Security;
 using System.Net.Sockets;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
+using UnityEditor.PackageManager;
 //using UnityEditor.PackageManager;
 //using UnityEditor.VersionControl;
 using UnityEngine;
@@ -15,9 +18,8 @@ using UnityEngine.Tilemaps;
 
 public class PlayerData : MonoBehaviour
 {
-    public string PID;
-    //public string ip;
-    public string clientName;
+    public string playerID;
+    public string username;
     public TileStream tileStream;
     public UdpClient udpClient;
     public IPEndPoint remoteEP;
@@ -28,36 +30,41 @@ public class PlayerData : MonoBehaviour
     public BlockingCollection<NetworkMessage> serverPipeIn, serverPipeOut;
 
     public void InitializePlayerData(TileStream client)
-    {
-        serverController = GameObject.FindWithTag("ServerController").GetComponent<ServerController>();
-
-        //ip = ((IPEndPoint) client.Client.RemoteEndPoint).Address.ToString();
+    {        serverController = GameObject.FindWithTag("ServerController").GetComponent<ServerController>();
 
         tileStream = client;
-        clientName = tileStream.GetStringFromStream();
+
+        //Get playerID and verify player
+        playerID = tileStream.GetStringFromStream();
         
-        //byte[] buffer = Encoding.ASCII.GetBytes("ACK" + (char) 0x00);
+        if (!VerifyPlayer())
+        {
+            serverController.KillPlayer(tileStream);
+            Debug.Log("Client rejected");
+            return;
+        }
+
+        Debug.Log("Client verified");
+
         tileStream.SendStringToStream("ACK");
 
-        int numPlayers = serverController.players.Count;
-
-        //client.Write(BitConverter.GetBytes(numPlayers));
-        tileStream.SendBytesToStream(BitConverter.GetBytes(numPlayers));
+        username = tileStream.GetStringFromStream();
 
         foreach (var player in serverController.players)
         {
             //This is temporary and must be switched out with a new playerdata object.
 
-            NetworkMessage newObject = new NetworkMessage("newPlayer", ASCIIEncoding.ASCII.GetBytes(((GameObject) player).GetComponent<PlayerData>().PID));
-
-            /*
-            client.Write(ASCIIEncoding.ASCII.GetBytes(newObject.messageType + (char) 0x00));
-            client.Write(BitConverter.GetBytes(newObject.numBytes));
-            client.Write(newObject.message);*/
+            NetworkMessage newObject = new NetworkMessage("newPlayer", ASCIIEncoding.ASCII.GetBytes(((GameObject) player).GetComponent<PlayerData>().playerID));
 
             tileStream.SendStringToStream(newObject.messageType);
             tileStream.SendBytesToStream(newObject.message);
 
+            //This should send the other clients positions at time of joining
+            /*
+            NetworkMessage newObject = new NetworkMessage("newPlayer", ASCIIEncoding.ASCII.GetBytes(((GameObject)player).GetComponent<PlayerData>().playerID));
+
+            tileStream.SendStringToStream(newObject.messageType);
+            tileStream.SendBytesToStream(newObject.message);*/
         }
 
         serverPipeIn = new BlockingCollection<NetworkMessage>(); //Will need to be separated into udp and tcp pipes!
@@ -81,7 +88,7 @@ public class PlayerData : MonoBehaviour
                 switch (message.messageType)
                 {
                     case "PlayerPos":
-                        //Debug.Log(message.message.ToString());
+                        Debug.Log(message.message.ToString());
                         UpdatePlayerPosAndRot(message);
                         break;
                     case "killMe":
@@ -118,18 +125,13 @@ public class PlayerData : MonoBehaviour
 
         while (true)
         {
-
-            /*
-            //This is an incredibly inefficient hack that should be replaced asap
-            if (!CoreCommunication.IsConnected(tcpClient)) 
+            if (!tileStream.Connected) 
             {
-                tcpClient.Close();
-
+                tileStream.Close();
                 HandleMessage(new NetworkMessage("killMe", new byte[0]));
 
-                //Destroy(this.gameObject);
                 break;
-            }*/
+            }
 
             //Send outgoing TCP messages
             if (serverPipeOut.TryTake(out NetworkMessage newObject))
@@ -137,58 +139,63 @@ public class PlayerData : MonoBehaviour
 
                 tileStream.SendStringToStream(newObject.messageType);
                 tileStream.SendBytesToStream(newObject.message);
-
-                /*tileStream.Write(ASCIIEncoding.ASCII.GetBytes(newObject.messageType + (char) 0x00));
-                tileStream.Write(BitConverter.GetBytes(newObject.numBytes));
-                tileStream.Write(newObject.message);*/
             }
-
-            //string messageType = CoreCommunication.GetStringFromStream(tileStream);
 
             if(tileStream.Available > 0)
             {
 
-                //int messageLength = BitConverter.ToInt32(tileStream.Get)
-
-                //byte[] tmpMessageLength = CoreCommunication.GetBytesFromStream(tileStream, 4);
                 string messageType = tileStream.GetStringFromStream();
                 byte[] message = tileStream.GetBytesFromStream();
 
-                //int messageLength = BitConverter.ToInt32(tmpMessageLength, 0);
-
-                //while (tcpClient.Available < messageLength) { }
-
-                //byte[] message = CoreCommunication.GetBytesFromStream(tileStream, messageLength);
                 NetworkMessage netMessage = new NetworkMessage(messageType, message);
 
                 HandleMessage(netMessage);
 
             }
-
-            /*
-            //Receive incoming TCP messages
-            if (tcpClient.Available > 0)
-            {
-                string messageType = CoreCommunication.GetStringFromStream(tcpClient);
-
-                byte[] tmpMessageLength = new byte[4];
-
-                while (tcpClient.Available < 4) { }
-
-                tcpClient.Read(tmpMessageLength, 0, tmpMessageLength.Length);
-                int messageLength = BitConverter.ToInt32(tmpMessageLength, 0);
-
-                while (tcpClient.Available < messageLength) { }
-
-                byte[] message = new byte[messageLength];
-                tcpClient.Read(message, 0, messageLength);
-
-                NetworkMessage netMessage = new NetworkMessage(messageType, message);
-
-                HandleMessage(netMessage);
-            }*/
         }
     }
+    public static bool IsConnected(TileStream _tcpClient)
+    {
+        try
+        {
+            if (_tcpClient != null && _tcpClient.Client != null && _tcpClient.Client.Connected)
+            {
+                /* pear to the documentation on Poll:
+                    * When passing SelectMode.SelectRead as a parameter to the Poll method it will return 
+                    * -either- true if Socket.Listen(Int32) has been called and a connection is pending;
+                    * -or- true if data is available for reading; 
+                    * -or- true if the connection has been closed, reset, or terminated; 
+                    * otherwise, returns false
+                    */
+
+                // Detect if client disconnected
+                if (_tcpClient.Client.Poll(0, SelectMode.SelectRead))
+                {
+                    byte[] buff = new byte[1];
+                    if (_tcpClient.Client.Receive(buff, SocketFlags.Peek) == 0)
+                    {
+                        // Client disconnected
+                        return false;
+                    }
+                    else
+                    {
+                        return true;
+                    }
+                }
+
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
     /*
     void UDPThread()
     {
@@ -208,5 +215,30 @@ public class PlayerData : MonoBehaviour
     private void HandleMessage(NetworkMessage message)
     {
         serverPipeIn.Add(message);
+    }
+
+    private bool VerifyPlayer()
+    {
+
+        //Generate challenge
+        RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider();
+
+        byte[] challengeKey = new byte[100];
+        rng.GetBytes(challengeKey);
+
+        //Encrypt challenge with playerKey and send
+
+        RSACryptoServiceProvider rsa = new RSACryptoServiceProvider();
+        rsa.FromXmlString(playerID);
+
+        tileStream.SendBytesToStream(rsa.Encrypt(challengeKey, false));
+
+        byte[] response = tileStream.GetBytesFromStream();
+
+        for(int i = 0; i < challengeKey.Length; i++)
+            if (challengeKey[i] != response[i])
+                return false;
+
+        return true;
     }
 }

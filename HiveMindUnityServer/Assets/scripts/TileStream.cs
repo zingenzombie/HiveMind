@@ -3,10 +3,13 @@ using System.Diagnostics;
 using System.IO;
 using System.Net.Security;
 using System.Net.Sockets;
+using System.Runtime.InteropServices.ComTypes;
 using System.Security.Authentication;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using UnityEditor.PackageManager;
+using static UnityEditor.IMGUI.Controls.PrimitiveBoundsHandle;
 
 public class TileStream : TcpClient
 {
@@ -74,65 +77,84 @@ public class TileStream : TcpClient
 
     public void SendBytesToStream(byte[] payload)
     {
-        //payload = remoteRSA.Encrypt(payload, false);
+        byte[] encryptedData;
         using (MemoryStream ms = new MemoryStream())
         {
             using (CryptoStream cs = new CryptoStream(ms, encryptor, CryptoStreamMode.Write))
             {
                 cs.Write(payload, 0, payload.Length);
-                cs.FlushFinalBlock();
             }
-            GetStream().Write(BitConverter.GetBytes(ms.ToArray().Length));
-            GetStream().Write(ms.ToArray());
+            encryptedData = ms.ToArray();
+        }
+
+        // Send the length of the encrypted data
+        byte[] lengthBytes = BitConverter.GetBytes(encryptedData.Length);
+        GetStream().Write(lengthBytes, 0, lengthBytes.Length);
+
+        // Send the encrypted data in chunks
+        int chunkSize = 8192;
+        for (int i = 0; i < encryptedData.Length; i += chunkSize)
+        {
+            int size = Math.Min(chunkSize, encryptedData.Length - i);
+            GetStream().Write(encryptedData, i, size);
         }
     }
 
     public byte[] GetBytesFromStream()
     {
+        // Read the length of the encrypted data
+        byte[] lengthBytes = new byte[4];
+        ReadExactly(GetStream(), lengthBytes, 4);
+        int length = BitConverter.ToInt32(lengthBytes);
 
-        byte[] payloadLength = new byte[4];
+        // Define chunk size and buffer
+        int chunkSize = 8192;
+        byte[] buffer = new byte[chunkSize];
 
-        while (Available < 4) { }
-
-        GetStream().Read(payloadLength, 0, 4);
-
-        int length = BitConverter.ToInt32(payloadLength);
-
-        byte[] payload = new byte[length];
-
-        while (Available < length) { }
-        GetStream().Read(payload, 0, length);
-
-        //return localRSA.Decrypt(payload, false);
-
-        using (MemoryStream ms = new MemoryStream(payload))
+        // Use a MemoryStream to store the received encrypted data
+        using (MemoryStream encryptedStream = new MemoryStream())
         {
-            using (CryptoStream cs = new CryptoStream(ms, decryptor, CryptoStreamMode.Read))
+            int totalBytesRead = 0;
+            while (totalBytesRead < length)
             {
-                using (MemoryStream output = new MemoryStream())
-                {
-                    cs.CopyTo(output);
-                    return output.ToArray();
-                }
+                int bytesToRead = Math.Min(chunkSize, length - totalBytesRead);
+                int bytesRead = GetStream().Read(buffer, 0, bytesToRead);
+                if (bytesRead == 0)
+                    break; // Connection closed
+
+                encryptedStream.Write(buffer, 0, bytesRead);
+                totalBytesRead += bytesRead;
+            }
+
+            // Decrypt and return the payload
+            using (MemoryStream payloadStream = new MemoryStream(encryptedStream.ToArray()))
+            using (CryptoStream cs = new CryptoStream(payloadStream, decryptor, CryptoStreamMode.Read))
+            using (MemoryStream output = new MemoryStream())
+            {
+                cs.CopyTo(output);
+                return output.ToArray();
             }
         }
     }
 
-    void SendStringToStreamRSA(string payload)
+    static void ReadExactly(NetworkStream stream, byte[] buffer, int length)
     {
-        SendBytesToStreamRSA(Encoding.ASCII.GetBytes(payload));
-    }
-
-    string GetStringFromStreamRSA()
-    {
-        return Encoding.ASCII.GetString(GetBytesFromStreamRSA());
+        int offset = 0;
+        while (offset < length)
+        {
+            int bytesRead = stream.Read(buffer, offset, length - offset);
+            if (bytesRead == 0)
+                throw new IOException("Unexpected end of stream");
+            offset += bytesRead;
+        }
     }
 
     void SendBytesToStreamRSA(byte[] payload)
     {
-        payload = serverRSA.Encrypt(payload, false);
 
+        payload = serverRSA.Encrypt(payload, false);
         GetStream().Write(BitConverter.GetBytes(payload.Length));
+
         GetStream().Write(payload);
     }
 
@@ -151,7 +173,7 @@ public class TileStream : TcpClient
 
         while (Available < length) { }
         GetStream().Read(payload, 0, length);
-        
+
         return serverRSA.Decrypt(payload, false);
     }
 }

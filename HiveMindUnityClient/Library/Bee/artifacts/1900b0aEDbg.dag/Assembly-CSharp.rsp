@@ -370,6 +370,7 @@
 "Assets/Scripts/MoveExit.cs"
 "Assets/Scripts/NetworkMessage.cs"
 "Assets/Scripts/PlayerController.cs"
+"Assets/Scripts/PlayerInfo.cs"
 "Assets/Scripts/PlayerLook.cs"
 "Assets/Scripts/ServerData.cs"
 "Assets/Scripts/TileStream.cs"
