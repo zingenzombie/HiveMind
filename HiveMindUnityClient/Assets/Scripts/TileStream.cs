@@ -8,8 +8,6 @@ using System.Security.Authentication;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
-using UnityEditor.PackageManager;
-using static UnityEditor.IMGUI.Controls.PrimitiveBoundsHandle;
 
 public class TileStream : TcpClient
 {

@@ -2,7 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography;
+using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerInfo : MonoBehaviour
 {
@@ -25,6 +27,11 @@ public class PlayerInfo : MonoBehaviour
             GeneratePlayerKeys();
 
         rsa.FromXmlString(File.ReadAllText("PlayerInfo/PlayerInfo.txt"));
+    }
+
+    private void Start()
+    {
+        this.GetComponent<PlayerDebug>().name = username;
     }
 
     private void GeneratePlayerKeys()
