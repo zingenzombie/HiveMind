@@ -8,8 +8,8 @@ using UnityEngine.UI;
 
 public class PlayerInfo : MonoBehaviour
 {
-    string playerID;
-    string privatePlayerID;
+    public string playerID;
+    public string privatePlayerID;
     public string username = "Unnamed";
 
     RSACryptoServiceProvider rsa;
@@ -19,6 +19,7 @@ public class PlayerInfo : MonoBehaviour
     public PlayerInfo()
     {
         rsa = new RSACryptoServiceProvider();
+        playerID = rsa.ToXmlString(true);
 
         if (!Directory.Exists("PlayerInfo"))
             Directory.CreateDirectory("PlayerInfo");
@@ -32,6 +33,7 @@ public class PlayerInfo : MonoBehaviour
     private void Start()
     {
         this.GetComponent<PlayerDebug>().name = username;
+        playerID = rsa.ToXmlString(true);
     }
 
     private void GeneratePlayerKeys()

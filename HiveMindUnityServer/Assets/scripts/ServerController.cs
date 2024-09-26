@@ -16,6 +16,7 @@ using UnityEditor.PackageManager;
 using System.Security.Cryptography.X509Certificates;
 using JetBrains.Annotations;
 using System.Security.Cryptography;
+using System.Collections.Generic;
 
 public class ServerController : MonoBehaviour
 {
@@ -41,7 +42,7 @@ public class ServerController : MonoBehaviour
 
     BlockingCollection<TileStream> playerPipe;
 
-    public Hashtable players = new Hashtable();
+    public Dictionary<string, PlayerData> players = new Dictionary<string, PlayerData>();
 
     private void OnApplicationQuit()
     {
@@ -85,12 +86,27 @@ public class ServerController : MonoBehaviour
 
     void CheckIn()
     {
-        foreach(GameObject player in players)
+        foreach(PlayerData player in players.Values)
         {
-            PlayerData.IsConnected(player.GetComponent<PlayerData>().tileStream);
+            PlayerData.IsConnected(player.tileStream);
         }
 
         Thread.Sleep(5000);
+    }
+
+    public void ShoutMessage(string type, string message)
+    {
+        Debug.Log($"Shouting: {message}");
+        foreach (PlayerData playerData in players.Values)
+        {
+            var nwm = new NetworkMessage(type, Encoding.ASCII.GetBytes(message));
+            playerData.serverPipeOut.Add(nwm);
+        }
+    }
+
+    public void KillServer()
+    {
+
     }
 
     IEnumerator InstantiateNewClients()
@@ -101,21 +117,18 @@ public class ServerController : MonoBehaviour
             {
                 GameObject newPlayer = Instantiate(playerPrefab, hexTile.transform);
 
-                newPlayer.GetComponent<PlayerData>().InitializePlayerData(client);
+                var newComp = newPlayer.GetComponent<PlayerData>();
+                newComp.InitializePlayerData(client);
 
-                players.Add(client, newPlayer);
+                ShoutMessage("newPlayer", $"{newComp.playerID}");
+
+                players.Add(newComp.playerID, newComp);
             }
             yield return null;
         }
     }
 
     //Needs to be replaced by one using PID instead!
-    public void KillPlayer(TileStream remoteClient)
-    {
-        Destroy((GameObject)players[remoteClient]);
-        players.Remove(remoteClient);
-        Debug.Log(players.Count);
-    }
 
     private void ClientConnectListener()
     {
@@ -133,7 +146,17 @@ public class ServerController : MonoBehaviour
 
         SslStream sslStream = CoreCommunication.EstablishSslStreamFromTcpAsClient(client);
 
+        var verifiedText = CoreCommunication.GetStringFromStream(sslStream);
+        var requestInfoText = CoreCommunication.GetStringFromStream(sslStream);
+
+        Debug.Log(verifiedText);
+        Debug.Log(requestInfoText);
+
+        //telling the core what kind of connection this is
         CoreCommunication.SendStringToStream(sslStream, "server");
+
+        var recognizedTypeConf = CoreCommunication.GetStringFromStream(sslStream);
+        Debug.Log(recognizedTypeConf);
         
         CoreCommunication.SendStringToStream(sslStream, "newServer");
 
@@ -145,16 +168,19 @@ public class ServerController : MonoBehaviour
 
         bytesFinal[i] = 0x00;
 
+        var dataReciReq = CoreCommunication.GetStringFromStream(sslStream);
+        Debug.Log(dataReciReq);
+
         sslStream.Write(bytesFinal);
-        Debug.Log("Wrote " + bytesFinal.Length + " bytes.");
+        Debug.Log($"Sent over server info (of size: {bytesFinal.Length} bytes)");
 
-        foreach(var character in bytes)
-            Console.WriteLine((char)character);
+        var dataReciAck = CoreCommunication.GetStringFromStream(sslStream);
+        Debug.Log(dataReciAck);
 
-        string result = CoreCommunication.GetStringFromStream(sslStream);
+        var tileReqAck = CoreCommunication.GetStringFromStream(sslStream);
 
-        if(!result.Equals("SUCCESS"))
-            throw new Exception("Failed to reserve space on core grid. Message received: " + result);
+        var tileAssignAck = CoreCommunication.GetStringFromStream(sslStream);
+        Debug.Log(tileReqAck + tileAssignAck);
     }
 
     private void ListenForClientsTCP()

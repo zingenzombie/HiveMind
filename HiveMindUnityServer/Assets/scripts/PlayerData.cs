@@ -30,7 +30,8 @@ public class PlayerData : MonoBehaviour
     public BlockingCollection<NetworkMessage> serverPipeIn, serverPipeOut;
 
     public void InitializePlayerData(TileStream client)
-    {        serverController = GameObject.FindWithTag("ServerController").GetComponent<ServerController>();
+    {        
+        serverController = GameObject.FindWithTag("ServerController").GetComponent<ServerController>();
 
         tileStream = client;
 
@@ -39,7 +40,7 @@ public class PlayerData : MonoBehaviour
         
         if (!VerifyPlayer())
         {
-            serverController.KillPlayer(tileStream);
+            //serverController.KillPlayer(tileStream);
             Debug.Log("Client rejected");
             return;
         }
@@ -48,24 +49,7 @@ public class PlayerData : MonoBehaviour
 
         tileStream.SendStringToStream("ACK");
 
-        username = tileStream.GetStringFromStream();
-
-        foreach (var player in serverController.players)
-        {
-            //This is temporary and must be switched out with a new playerdata object.
-
-            NetworkMessage newObject = new NetworkMessage("newPlayer", ASCIIEncoding.ASCII.GetBytes(((GameObject) player).GetComponent<PlayerData>().playerID));
-
-            tileStream.SendStringToStream(newObject.messageType);
-            tileStream.SendBytesToStream(newObject.message);
-
-            //This should send the other clients positions at time of joining
-            /*
-            NetworkMessage newObject = new NetworkMessage("newPlayer", ASCIIEncoding.ASCII.GetBytes(((GameObject)player).GetComponent<PlayerData>().playerID));
-
-            tileStream.SendStringToStream(newObject.messageType);
-            tileStream.SendBytesToStream(newObject.message);*/
-        }
+        username = playerID;
 
         serverPipeIn = new BlockingCollection<NetworkMessage>(); //Will need to be separated into udp and tcp pipes!
         serverPipeOut = new BlockingCollection<NetworkMessage>();
@@ -85,14 +69,15 @@ public class PlayerData : MonoBehaviour
         {
             if (serverPipeIn.TryTake(out NetworkMessage message))
             {
-                switch (message.messageType)
+                var exec = Encoding.ASCII.GetString(message.message);
+                Debug.Log(exec);
+                switch (exec)
                 {
                     case "PlayerPos":
-                        Debug.Log(message.message.ToString());
                         UpdatePlayerPosAndRot(message);
                         break;
                     case "killMe":
-                        serverController.KillPlayer(tileStream);
+                        //serverController.KillPlayer(tileStream);
                         break;
                     default: break;
                 }
@@ -103,21 +88,22 @@ public class PlayerData : MonoBehaviour
 
     void UpdatePlayerPosAndRot(NetworkMessage message)
     {
-        Debug.Log(message.message);
+        Debug.Log(message.messageType);
+        byte[] transformInfo = Encoding.ASCII.GetBytes(message.messageType);
         //***CHECK THAT MESSAGE TIME IS NEWER THAN CURRENT UPDATE***
 
-        float posX = BitConverter.ToSingle(message.message, 0);
-        float posY = BitConverter.ToSingle(message.message, 4);
-        float posZ = BitConverter.ToSingle(message.message, 8);
+        float posX = BitConverter.ToSingle(transformInfo, 0);
+        float posY = BitConverter.ToSingle(transformInfo, 4);
+        float posZ = BitConverter.ToSingle(transformInfo, 8);
 
-        float rotX = BitConverter.ToSingle(message.message, 12);
-        float rotY = BitConverter.ToSingle(message.message, 16);
-        float rotZ = BitConverter.ToSingle(message.message, 20);
-        float rotW = BitConverter.ToSingle(message.message, 24);
+        float rotX = BitConverter.ToSingle(transformInfo, 12);
+        float rotY = BitConverter.ToSingle(transformInfo, 16);
+        float rotZ = BitConverter.ToSingle(transformInfo, 20);
+        float rotW = BitConverter.ToSingle(transformInfo, 24);
 
         transform.SetPositionAndRotation(new Vector3(posX,posY,posZ), new Quaternion(rotX, rotY, rotZ, rotW));
 
-
+        serverController.ShoutMessage("updatePT", $"{playerID}|/|{message}");
     }
 
     void TCPThread()
@@ -136,7 +122,6 @@ public class PlayerData : MonoBehaviour
             //Send outgoing TCP messages
             if (serverPipeOut.TryTake(out NetworkMessage newObject))
             {
-
                 tileStream.SendStringToStream(newObject.messageType);
                 tileStream.SendBytesToStream(newObject.message);
             }
@@ -149,8 +134,9 @@ public class PlayerData : MonoBehaviour
 
                 NetworkMessage netMessage = new NetworkMessage(messageType, message);
 
+                //Debug.Log($"Recieved message from {playerID} saying: (Type: {Encoding.ASCII.GetString(message)})");
+               // Debug.Log($"(message: {messageType})");
                 HandleMessage(netMessage);
-
             }
         }
     }
