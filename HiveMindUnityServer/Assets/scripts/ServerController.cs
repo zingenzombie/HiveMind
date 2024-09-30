@@ -37,17 +37,25 @@ public class ServerController : MonoBehaviour
     [SerializeField] GameObject playerPrefab;
     [SerializeField] GameObject hexTileTemplate;
     private float tileSize;
+    public bool initialized = false;
 
     private RSACryptoServiceProvider localRSA;
 
-    BlockingCollection<TileStream> playerPipe;
+    BlockingCollection<TileStream> playerPipe = new BlockingCollection<TileStream>();
+
+    Thread coreListener;
+    BlockingCollection<string> CoreMessages = new BlockingCollection<string>();
 
     public Dictionary<string, PlayerData> players = new Dictionary<string, PlayerData>();
+
+    SslStream coreConnection;
 
     private void OnApplicationQuit()
     {
         if(listen != null)
             listen.Abort();
+        if(coreListener != null)
+            coreListener.Abort();
     }
 
     // Start is called before the first frame update
@@ -64,7 +72,7 @@ public class ServerController : MonoBehaviour
         //groundHolder = hexTile.transform.GetChild(0).gameObject;
         groundHolder = hexTile.transform.GetChild(1).gameObject;
 
-        ContactCore();
+        InitializeWithCore();
 
         tileSize = hexTileTemplate.GetComponent<Renderer>().bounds.size.z;
 
@@ -75,13 +83,36 @@ public class ServerController : MonoBehaviour
 
         hexTile.transform.SetLocalPositionAndRotation(new UnityEngine.Vector3(offsetX, 250 * Mathf.PerlinNoise(offsetX / 5000, offsetY / 5000), offsetY), transform.rotation);
 
-        playerPipe = new BlockingCollection<TileStream>();
-
         StartCoroutine(InstantiateNewClients());
 
         Thread checkIn = new Thread(() => CheckIn());
+        Thread checkWithCore = new Thread(() => CheckWithCore());
+
+        StartCoroutine(ReadCoreMessages());
 
         ClientConnectListener();
+    }
+
+    void CheckWithCore()
+    {
+        while (true)
+        {
+            Thread.Sleep(5000);
+            string coreMes = CoreCommunication.GetStringFromStream(coreConnection);
+            CoreMessages.Add(coreMes);
+        }
+    }
+
+    IEnumerator ReadCoreMessages()
+    {
+        while (true)
+        {
+            if (CoreMessages.TryTake(out string mes))
+                Debug.Log(mes);
+
+
+            yield return new WaitForSeconds(100);
+        }
     }
 
     void CheckIn()
@@ -136,7 +167,7 @@ public class ServerController : MonoBehaviour
         listen.Start();
     }
 
-    void ContactCore()
+    void InitializeWithCore()
     {
         ServerData tmp = new ServerData(requestXY, x, y, serverName, ipAddress.ToString(), port, ownerID, localRSA.ToXmlString(false));
         string jsonString = JsonUtility.ToJson(tmp);
@@ -145,6 +176,7 @@ public class ServerController : MonoBehaviour
         using TcpClient client = new TcpClient(coreAddress.ToString(), corePort);
 
         SslStream sslStream = CoreCommunication.EstablishSslStreamFromTcpAsClient(client);
+        coreConnection = sslStream;
 
         var verifiedText = CoreCommunication.GetStringFromStream(sslStream);
         var requestInfoText = CoreCommunication.GetStringFromStream(sslStream);
@@ -177,10 +209,18 @@ public class ServerController : MonoBehaviour
         var dataReciAck = CoreCommunication.GetStringFromStream(sslStream);
         Debug.Log(dataReciAck);
 
-        var tileReqAck = CoreCommunication.GetStringFromStream(sslStream);
+        var dataParseAttempt = CoreCommunication.GetStringFromStream(sslStream);
+        Debug.Log(dataParseAttempt);
 
-        var tileAssignAck = CoreCommunication.GetStringFromStream(sslStream);
-        Debug.Log(tileReqAck + tileAssignAck);
+        var setupText = CoreCommunication.GetStringFromStream(sslStream);
+        Debug.Log(setupText);
+
+        var tileReqAck = CoreCommunication.GetStringFromStream(sslStream);
+        var tileReqResult = CoreCommunication.GetStringFromStream(sslStream);
+        Debug.Log(tileReqAck + tileReqResult);
+
+        if(tileReqResult.Contains("GRANTED"))
+            initialized = true;
     }
 
     private void ListenForClientsTCP()
