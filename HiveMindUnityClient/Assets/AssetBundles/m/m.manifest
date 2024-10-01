@@ -1,0 +1,7 @@
+ManifestFileVersion: 0
+CRC: 577409900
+AssetBundleManifest:
+  AssetBundleInfos:
+    Info_0:
+      Name: hivedrone
+      Dependencies: {}

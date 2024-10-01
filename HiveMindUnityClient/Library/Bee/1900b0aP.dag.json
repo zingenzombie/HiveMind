@@ -182,8 +182,8 @@
       "DisplayName": "Writing UnityEngine.TestRunner.UnityAdditionalFile.txt",
       "ActionType": "WriteFile",
       "PayloadOffset": 107,
-      "PayloadLength": 31,
-      "PayloadDebugContentSnippet": "D:\\HiveMind\\HiveMindUnityClien",
+      "PayloadLength": 73,
+      "PayloadDebugContentSnippet": "C:\\Users\\chase\\Documents\\Progr",
       "Inputs": [],
       "Outputs": [
         "Library/Bee/artifacts/1900b0aP.dag/UnityEngine.TestRunner.UnityAdditionalFile.txt"
@@ -194,8 +194,8 @@
       "Annotation": "WriteText Library/Bee/artifacts/1900b0aP.dag/UnityEngine.TestRunner.rsp",
       "DisplayName": "Writing UnityEngine.TestRunner.rsp",
       "ActionType": "WriteFile",
-      "PayloadOffset": 231,
-      "PayloadLength": 45482,
+      "PayloadOffset": 273,
+      "PayloadLength": 45509,
       "PayloadDebugContentSnippet": "-target:library\r\n-out:\"Library",
       "Inputs": [],
       "Outputs": [
@@ -207,9 +207,9 @@
       "Annotation": "WriteText Library/Bee/artifacts/1900b0aP.dag/UnityEngine.TestRunner.rsp2",
       "DisplayName": "Writing UnityEngine.TestRunner.rsp2",
       "ActionType": "WriteFile",
-      "PayloadOffset": 45807,
-      "PayloadLength": 44,
-      "PayloadDebugContentSnippet": "/pathmap:\"D:\\HiveMind\\HiveMind",
+      "PayloadOffset": 45876,
+      "PayloadLength": 86,
+      "PayloadDebugContentSnippet": "/pathmap:\"C:\\Users\\chase\\Docum",
       "Inputs": [],
       "Outputs": [
         "Library/Bee/artifacts/1900b0aP.dag/UnityEngine.TestRunner.rsp2"
@@ -1673,7 +1673,7 @@
       "Annotation": "WriteText Library/Bee/artifacts/1900b0aP.dag/UnityEngine.TestRunner.dll.mvfrm.rsp",
       "DisplayName": "Writing UnityEngine.TestRunner.dll.mvfrm.rsp",
       "ActionType": "WriteFile",
-      "PayloadOffset": 45954,
+      "PayloadOffset": 46065,
       "PayloadLength": 5794,
       "PayloadDebugContentSnippet": "Library\\Bee\\artifacts\\mvdfrm\\U",
       "Inputs": [],
@@ -1838,9 +1838,9 @@
       "Annotation": "WriteText Library/Bee/artifacts/1900b0aP.dag/UnityEngine.UI.UnityAdditionalFile.txt",
       "DisplayName": "Writing UnityEngine.UI.UnityAdditionalFile.txt",
       "ActionType": "WriteFile",
-      "PayloadOffset": 51853,
-      "PayloadLength": 31,
-      "PayloadDebugContentSnippet": "D:\\HiveMind\\HiveMindUnityClien",
+      "PayloadOffset": 51964,
+      "PayloadLength": 73,
+      "PayloadDebugContentSnippet": "C:\\Users\\chase\\Documents\\Progr",
       "Inputs": [],
       "Outputs": [
         "Library/Bee/artifacts/1900b0aP.dag/UnityEngine.UI.UnityAdditionalFile.txt"
@@ -1851,8 +1851,8 @@
       "Annotation": "WriteText Library/Bee/artifacts/1900b0aP.dag/UnityEngine.UI.rsp",
       "DisplayName": "Writing UnityEngine.UI.rsp",
       "ActionType": "WriteFile",
-      "PayloadOffset": 51969,
-      "PayloadLength": 39027,
+      "PayloadOffset": 52122,
+      "PayloadLength": 39054,
       "PayloadDebugContentSnippet": "-target:library\r\n-out:\"Library",
       "Inputs": [],
       "Outputs": [
@@ -1864,9 +1864,9 @@
       "Annotation": "WriteText Library/Bee/artifacts/1900b0aP.dag/UnityEngine.UI.rsp2",
       "DisplayName": "Writing UnityEngine.UI.rsp2",
       "ActionType": "WriteFile",
-      "PayloadOffset": 91082,
-      "PayloadLength": 44,
-      "PayloadDebugContentSnippet": "/pathmap:\"D:\\HiveMind\\HiveMind",
+      "PayloadOffset": 91262,
+      "PayloadLength": 86,
+      "PayloadDebugContentSnippet": "/pathmap:\"C:\\Users\\chase\\Docum",
       "Inputs": [],
       "Outputs": [
         "Library/Bee/artifacts/1900b0aP.dag/UnityEngine.UI.rsp2"
@@ -2204,7 +2204,7 @@
       "Annotation": "WriteText Library/Bee/artifacts/1900b0aP.dag/UnityEngine.UI.dll.mvfrm.rsp",
       "DisplayName": "Writing UnityEngine.UI.dll.mvfrm.rsp",
       "ActionType": "WriteFile",
-      "PayloadOffset": 91221,
+      "PayloadOffset": 91443,
       "PayloadLength": 5888,
       "PayloadDebugContentSnippet": "Library\\Bee\\artifacts\\mvdfrm\\U",
       "Inputs": [],
@@ -2371,9 +2371,9 @@
       "Annotation": "WriteText Library/Bee/artifacts/1900b0aP.dag/Adrenak.UniVoice.Runtime.UnityAdditionalFile.txt",
       "DisplayName": "Writing Adrenak.UniVoice.Runtime.UnityAdditionalFile.txt",
       "ActionType": "WriteFile",
-      "PayloadOffset": 97224,
-      "PayloadLength": 31,
-      "PayloadDebugContentSnippet": "D:\\HiveMind\\HiveMindUnityClien",
+      "PayloadOffset": 97446,
+      "PayloadLength": 73,
+      "PayloadDebugContentSnippet": "C:\\Users\\chase\\Documents\\Progr",
       "Inputs": [],
       "Outputs": [
         "Library/Bee/artifacts/1900b0aP.dag/Adrenak.UniVoice.Runtime.UnityAdditionalFile.txt"
@@ -2384,8 +2384,8 @@
       "Annotation": "WriteText Library/Bee/artifacts/1900b0aP.dag/Adrenak.UniVoice.Runtime.rsp",
       "DisplayName": "Writing Adrenak.UniVoice.Runtime.rsp",
       "ActionType": "WriteFile",
-      "PayloadOffset": 97350,
-      "PayloadLength": 32530,
+      "PayloadOffset": 97614,
+      "PayloadLength": 32557,
       "PayloadDebugContentSnippet": "-target:library\r\n-out:\"Library",
       "Inputs": [],
       "Outputs": [
@@ -2397,9 +2397,9 @@
       "Annotation": "WriteText Library/Bee/artifacts/1900b0aP.dag/Adrenak.UniVoice.Runtime.rsp2",
       "DisplayName": "Writing Adrenak.UniVoice.Runtime.rsp2",
       "ActionType": "WriteFile",
-      "PayloadOffset": 129976,
-      "PayloadLength": 44,
-      "PayloadDebugContentSnippet": "/pathmap:\"D:\\HiveMind\\HiveMind",
+      "PayloadOffset": 130267,
+      "PayloadLength": 86,
+      "PayloadDebugContentSnippet": "/pathmap:\"C:\\Users\\chase\\Docum",
       "Inputs": [],
       "Outputs": [
         "Library/Bee/artifacts/1900b0aP.dag/Adrenak.UniVoice.Runtime.rsp2"
@@ -2665,7 +2665,7 @@
       "Annotation": "WriteText Library/Bee/artifacts/1900b0aP.dag/Adrenak.UniVoice.Runtime.dll.mvfrm.rsp",
       "DisplayName": "Writing Adrenak.UniVoice.Runtime.dll.mvfrm.rsp",
       "ActionType": "WriteFile",
-      "PayloadOffset": 130125,
+      "PayloadOffset": 130458,
       "PayloadLength": 5964,
       "PayloadDebugContentSnippet": "Library\\Bee\\artifacts\\mvdfrm\\U",
       "Inputs": [],
@@ -2834,9 +2834,9 @@
       "Annotation": "WriteText Library/Bee/artifacts/1900b0aP.dag/Unity.InputSystem.UnityAdditionalFile.txt",
       "DisplayName": "Writing Unity.InputSystem.UnityAdditionalFile.txt",
       "ActionType": "WriteFile",
-      "PayloadOffset": 136197,
-      "PayloadLength": 31,
-      "PayloadDebugContentSnippet": "D:\\HiveMind\\HiveMindUnityClien",
+      "PayloadOffset": 136530,
+      "PayloadLength": 73,
+      "PayloadDebugContentSnippet": "C:\\Users\\chase\\Documents\\Progr",
       "Inputs": [],
       "Outputs": [
         "Library/Bee/artifacts/1900b0aP.dag/Unity.InputSystem.UnityAdditionalFile.txt"
@@ -2847,8 +2847,8 @@
       "Annotation": "WriteText Library/Bee/artifacts/1900b0aP.dag/Unity.InputSystem.rsp",
       "DisplayName": "Writing Unity.InputSystem.rsp",
       "ActionType": "WriteFile",
-      "PayloadOffset": 136316,
-      "PayloadLength": 69413,
+      "PayloadOffset": 136691,
+      "PayloadLength": 69440,
       "PayloadDebugContentSnippet": "-target:library\r\n-out:\"Library",
       "Inputs": [],
       "Outputs": [
@@ -2860,9 +2860,9 @@
       "Annotation": "WriteText Library/Bee/artifacts/1900b0aP.dag/Unity.InputSystem.rsp2",
       "DisplayName": "Writing Unity.InputSystem.rsp2",
       "ActionType": "WriteFile",
-      "PayloadOffset": 205818,
-      "PayloadLength": 44,
-      "PayloadDebugContentSnippet": "/pathmap:\"D:\\HiveMind\\HiveMind",
+      "PayloadOffset": 206220,
+      "PayloadLength": 86,
+      "PayloadDebugContentSnippet": "/pathmap:\"C:\\Users\\chase\\Docum",
       "Inputs": [],
       "Outputs": [
         "Library/Bee/artifacts/1900b0aP.dag/Unity.InputSystem.rsp2"
@@ -3473,7 +3473,7 @@
       "Annotation": "WriteText Library/Bee/artifacts/1900b0aP.dag/Unity.InputSystem.dll.mvfrm.rsp",
       "DisplayName": "Writing Unity.InputSystem.dll.mvfrm.rsp",
       "ActionType": "WriteFile",
-      "PayloadOffset": 205960,
+      "PayloadOffset": 206404,
       "PayloadLength": 5964,
       "PayloadDebugContentSnippet": "Library\\Bee\\artifacts\\mvdfrm\\U",
       "Inputs": [],
@@ -3642,9 +3642,9 @@
       "Annotation": "WriteText Library/Bee/artifacts/1900b0aP.dag/Unity.TextMeshPro.UnityAdditionalFile.txt",
       "DisplayName": "Writing Unity.TextMeshPro.UnityAdditionalFile.txt",
       "ActionType": "WriteFile",
-      "PayloadOffset": 212032,
-      "PayloadLength": 31,
-      "PayloadDebugContentSnippet": "D:\\HiveMind\\HiveMindUnityClien",
+      "PayloadOffset": 212476,
+      "PayloadLength": 73,
+      "PayloadDebugContentSnippet": "C:\\Users\\chase\\Documents\\Progr",
       "Inputs": [],
       "Outputs": [
         "Library/Bee/artifacts/1900b0aP.dag/Unity.TextMeshPro.UnityAdditionalFile.txt"
@@ -3655,8 +3655,8 @@
       "Annotation": "WriteText Library/Bee/artifacts/1900b0aP.dag/Unity.TextMeshPro.rsp",
       "DisplayName": "Writing Unity.TextMeshPro.rsp",
       "ActionType": "WriteFile",
-      "PayloadOffset": 212151,
-      "PayloadLength": 37051,
+      "PayloadOffset": 212637,
+      "PayloadLength": 37078,
       "PayloadDebugContentSnippet": "-target:library\r\n-out:\"Library",
       "Inputs": [],
       "Outputs": [
@@ -3668,9 +3668,9 @@
       "Annotation": "WriteText Library/Bee/artifacts/1900b0aP.dag/Unity.TextMeshPro.rsp2",
       "DisplayName": "Writing Unity.TextMeshPro.rsp2",
       "ActionType": "WriteFile",
-      "PayloadOffset": 249291,
-      "PayloadLength": 44,
-      "PayloadDebugContentSnippet": "/pathmap:\"D:\\HiveMind\\HiveMind",
+      "PayloadOffset": 249804,
+      "PayloadLength": 86,
+      "PayloadDebugContentSnippet": "/pathmap:\"C:\\Users\\chase\\Docum",
       "Inputs": [],
       "Outputs": [
         "Library/Bee/artifacts/1900b0aP.dag/Unity.TextMeshPro.rsp2"
@@ -3969,7 +3969,7 @@
       "Annotation": "WriteText Library/Bee/artifacts/1900b0aP.dag/Unity.TextMeshPro.dll.mvfrm.rsp",
       "DisplayName": "Writing Unity.TextMeshPro.dll.mvfrm.rsp",
       "ActionType": "WriteFile",
-      "PayloadOffset": 249433,
+      "PayloadOffset": 249988,
       "PayloadLength": 5964,
       "PayloadDebugContentSnippet": "Library\\Bee\\artifacts\\mvdfrm\\U",
       "Inputs": [],
@@ -4138,9 +4138,9 @@
       "Annotation": "WriteText Library/Bee/artifacts/1900b0aP.dag/Unity.Timeline.UnityAdditionalFile.txt",
       "DisplayName": "Writing Unity.Timeline.UnityAdditionalFile.txt",
       "ActionType": "WriteFile",
-      "PayloadOffset": 255502,
-      "PayloadLength": 31,
-      "PayloadDebugContentSnippet": "D:\\HiveMind\\HiveMindUnityClien",
+      "PayloadOffset": 256057,
+      "PayloadLength": 73,
+      "PayloadDebugContentSnippet": "C:\\Users\\chase\\Documents\\Progr",
       "Inputs": [],
       "Outputs": [
         "Library/Bee/artifacts/1900b0aP.dag/Unity.Timeline.UnityAdditionalFile.txt"
@@ -4151,8 +4151,8 @@
       "Annotation": "WriteText Library/Bee/artifacts/1900b0aP.dag/Unity.Timeline.rsp",
       "DisplayName": "Writing Unity.Timeline.rsp",
       "ActionType": "WriteFile",
-      "PayloadOffset": 255618,
-      "PayloadLength": 38135,
+      "PayloadOffset": 256215,
+      "PayloadLength": 38162,
       "PayloadDebugContentSnippet": "-target:library\r\n-out:\"Library",
       "Inputs": [],
       "Outputs": [
@@ -4164,9 +4164,9 @@
       "Annotation": "WriteText Library/Bee/artifacts/1900b0aP.dag/Unity.Timeline.rsp2",
       "DisplayName": "Writing Unity.Timeline.rsp2",
       "ActionType": "WriteFile",
-      "PayloadOffset": 293839,
-      "PayloadLength": 44,
-      "PayloadDebugContentSnippet": "/pathmap:\"D:\\HiveMind\\HiveMind",
+      "PayloadOffset": 294463,
+      "PayloadLength": 86,
+      "PayloadDebugContentSnippet": "/pathmap:\"C:\\Users\\chase\\Docum",
       "Inputs": [],
       "Outputs": [
         "Library/Bee/artifacts/1900b0aP.dag/Unity.Timeline.rsp2"
@@ -4479,7 +4479,7 @@
       "Annotation": "WriteText Library/Bee/artifacts/1900b0aP.dag/Unity.Timeline.dll.mvfrm.rsp",
       "DisplayName": "Writing Unity.Timeline.dll.mvfrm.rsp",
       "ActionType": "WriteFile",
-      "PayloadOffset": 293978,
+      "PayloadOffset": 294644,
       "PayloadLength": 5964,
       "PayloadDebugContentSnippet": "Library\\Bee\\artifacts\\mvdfrm\\U",
       "Inputs": [],
@@ -4648,9 +4648,9 @@
       "Annotation": "WriteText Library/Bee/artifacts/1900b0aP.dag/Unity.InputSystem.ForUI.UnityAdditionalFile.txt",
       "DisplayName": "Writing Unity.InputSystem.ForUI.UnityAdditionalFile.txt",
       "ActionType": "WriteFile",
-      "PayloadOffset": 300056,
-      "PayloadLength": 31,
-      "PayloadDebugContentSnippet": "D:\\HiveMind\\HiveMindUnityClien",
+      "PayloadOffset": 300722,
+      "PayloadLength": 73,
+      "PayloadDebugContentSnippet": "C:\\Users\\chase\\Documents\\Progr",
       "Inputs": [],
       "Outputs": [
         "Library/Bee/artifacts/1900b0aP.dag/Unity.InputSystem.ForUI.UnityAdditionalFile.txt"
@@ -4661,8 +4661,8 @@
       "Annotation": "WriteText Library/Bee/artifacts/1900b0aP.dag/Unity.InputSystem.ForUI.rsp",
       "DisplayName": "Writing Unity.InputSystem.ForUI.rsp",
       "ActionType": "WriteFile",
-      "PayloadOffset": 300181,
-      "PayloadLength": 32105,
+      "PayloadOffset": 300889,
+      "PayloadLength": 32132,
       "PayloadDebugContentSnippet": "-target:library\r\n-out:\"Library",
       "Inputs": [],
       "Outputs": [
@@ -4674,9 +4674,9 @@
       "Annotation": "WriteText Library/Bee/artifacts/1900b0aP.dag/Unity.InputSystem.ForUI.rsp2",
       "DisplayName": "Writing Unity.InputSystem.ForUI.rsp2",
       "ActionType": "WriteFile",
-      "PayloadOffset": 332381,
-      "PayloadLength": 44,
-      "PayloadDebugContentSnippet": "/pathmap:\"D:\\HiveMind\\HiveMind",
+      "PayloadOffset": 333116,
+      "PayloadLength": 86,
+      "PayloadDebugContentSnippet": "/pathmap:\"C:\\Users\\chase\\Docum",
       "Inputs": [],
       "Outputs": [
         "Library/Bee/artifacts/1900b0aP.dag/Unity.InputSystem.ForUI.rsp2"
@@ -4938,7 +4938,7 @@
       "Annotation": "WriteText Library/Bee/artifacts/1900b0aP.dag/Unity.InputSystem.ForUI.dll.mvfrm.rsp",
       "DisplayName": "Writing Unity.InputSystem.ForUI.dll.mvfrm.rsp",
       "ActionType": "WriteFile",
-      "PayloadOffset": 332529,
+      "PayloadOffset": 333306,
       "PayloadLength": 6043,
       "PayloadDebugContentSnippet": "Library\\Bee\\artifacts\\mvdfrm\\U",
       "Inputs": [],
@@ -5109,9 +5109,9 @@
       "Annotation": "WriteText Library/Bee/artifacts/1900b0aP.dag/Unity.VisualScripting.Core.UnityAdditionalFile.txt",
       "DisplayName": "Writing Unity.VisualScripting.Core.UnityAdditionalFile.txt",
       "ActionType": "WriteFile",
-      "PayloadOffset": 338689,
-      "PayloadLength": 31,
-      "PayloadDebugContentSnippet": "D:\\HiveMind\\HiveMindUnityClien",
+      "PayloadOffset": 339466,
+      "PayloadLength": 73,
+      "PayloadDebugContentSnippet": "C:\\Users\\chase\\Documents\\Progr",
       "Inputs": [],
       "Outputs": [
         "Library/Bee/artifacts/1900b0aP.dag/Unity.VisualScripting.Core.UnityAdditionalFile.txt"
@@ -5122,8 +5122,8 @@
       "Annotation": "WriteText Library/Bee/artifacts/1900b0aP.dag/Unity.VisualScripting.Core.rsp",
       "DisplayName": "Writing Unity.VisualScripting.Core.rsp",
       "ActionType": "WriteFile",
-      "PayloadOffset": 338817,
-      "PayloadLength": 86013,
+      "PayloadOffset": 339636,
+      "PayloadLength": 86040,
       "PayloadDebugContentSnippet": "-target:library\r\n-out:\"Library",
       "Inputs": [],
       "Outputs": [
@@ -5135,9 +5135,9 @@
       "Annotation": "WriteText Library/Bee/artifacts/1900b0aP.dag/Unity.VisualScripting.Core.rsp2",
       "DisplayName": "Writing Unity.VisualScripting.Core.rsp2",
       "ActionType": "WriteFile",
-      "PayloadOffset": 424928,
-      "PayloadLength": 44,
-      "PayloadDebugContentSnippet": "/pathmap:\"D:\\HiveMind\\HiveMind",
+      "PayloadOffset": 425774,
+      "PayloadLength": 86,
+      "PayloadDebugContentSnippet": "/pathmap:\"C:\\Users\\chase\\Docum",
       "Inputs": [],
       "Outputs": [
         "Library/Bee/artifacts/1900b0aP.dag/Unity.VisualScripting.Core.rsp2"
@@ -5807,7 +5807,7 @@
       "Annotation": "WriteText Library/Bee/artifacts/1900b0aP.dag/Unity.VisualScripting.Core.dll.mvfrm.rsp",
       "DisplayName": "Writing Unity.VisualScripting.Core.dll.mvfrm.rsp",
       "ActionType": "WriteFile",
-      "PayloadOffset": 425079,
+      "PayloadOffset": 425967,
       "PayloadLength": 6043,
       "PayloadDebugContentSnippet": "Library\\Bee\\artifacts\\mvdfrm\\U",
       "Inputs": [],
@@ -5978,9 +5978,9 @@
       "Annotation": "WriteText Library/Bee/artifacts/1900b0aP.dag/Unity.VisualScripting.Flow.UnityAdditionalFile.txt",
       "DisplayName": "Writing Unity.VisualScripting.Flow.UnityAdditionalFile.txt",
       "ActionType": "WriteFile",
-      "PayloadOffset": 431239,
-      "PayloadLength": 31,
-      "PayloadDebugContentSnippet": "D:\\HiveMind\\HiveMindUnityClien",
+      "PayloadOffset": 432127,
+      "PayloadLength": 73,
+      "PayloadDebugContentSnippet": "C:\\Users\\chase\\Documents\\Progr",
       "Inputs": [],
       "Outputs": [
         "Library/Bee/artifacts/1900b0aP.dag/Unity.VisualScripting.Flow.UnityAdditionalFile.txt"
@@ -5991,8 +5991,8 @@
       "Annotation": "WriteText Library/Bee/artifacts/1900b0aP.dag/Unity.VisualScripting.Flow.rsp",
       "DisplayName": "Writing Unity.VisualScripting.Flow.rsp",
       "ActionType": "WriteFile",
-      "PayloadOffset": 431367,
-      "PayloadLength": 81423,
+      "PayloadOffset": 432297,
+      "PayloadLength": 81450,
       "PayloadDebugContentSnippet": "-target:library\r\n-out:\"Library",
       "Inputs": [],
       "Outputs": [
@@ -6004,9 +6004,9 @@
       "Annotation": "WriteText Library/Bee/artifacts/1900b0aP.dag/Unity.VisualScripting.Flow.rsp2",
       "DisplayName": "Writing Unity.VisualScripting.Flow.rsp2",
       "ActionType": "WriteFile",
-      "PayloadOffset": 512888,
-      "PayloadLength": 44,
-      "PayloadDebugContentSnippet": "/pathmap:\"D:\\HiveMind\\HiveMind",
+      "PayloadOffset": 513845,
+      "PayloadLength": 86,
+      "PayloadDebugContentSnippet": "/pathmap:\"C:\\Users\\chase\\Docum",
       "Inputs": [],
       "Outputs": [
         "Library/Bee/artifacts/1900b0aP.dag/Unity.VisualScripting.Flow.rsp2"
@@ -6670,7 +6670,7 @@
       "Annotation": "WriteText Library/Bee/artifacts/1900b0aP.dag/Unity.VisualScripting.Flow.dll.mvfrm.rsp",
       "DisplayName": "Writing Unity.VisualScripting.Flow.dll.mvfrm.rsp",
       "ActionType": "WriteFile",
-      "PayloadOffset": 513039,
+      "PayloadOffset": 514038,
       "PayloadLength": 6131,
       "PayloadDebugContentSnippet": "Library\\Bee\\artifacts\\mvdfrm\\U",
       "Inputs": [],
@@ -6843,9 +6843,9 @@
       "Annotation": "WriteText Library/Bee/artifacts/1900b0aP.dag/Unity.VisualScripting.State.UnityAdditionalFile.txt",
       "DisplayName": "Writing Unity.VisualScripting.State.UnityAdditionalFile.txt",
       "ActionType": "WriteFile",
-      "PayloadOffset": 519288,
-      "PayloadLength": 31,
-      "PayloadDebugContentSnippet": "D:\\HiveMind\\HiveMindUnityClien",
+      "PayloadOffset": 520287,
+      "PayloadLength": 73,
+      "PayloadDebugContentSnippet": "C:\\Users\\chase\\Documents\\Progr",
       "Inputs": [],
       "Outputs": [
         "Library/Bee/artifacts/1900b0aP.dag/Unity.VisualScripting.State.UnityAdditionalFile.txt"
@@ -6856,8 +6856,8 @@
       "Annotation": "WriteText Library/Bee/artifacts/1900b0aP.dag/Unity.VisualScripting.State.rsp",
       "DisplayName": "Writing Unity.VisualScripting.State.rsp",
       "ActionType": "WriteFile",
-      "PayloadOffset": 519417,
-      "PayloadLength": 35271,
+      "PayloadOffset": 520458,
+      "PayloadLength": 35298,
       "PayloadDebugContentSnippet": "-target:library\r\n-out:\"Library",
       "Inputs": [],
       "Outputs": [
@@ -6869,9 +6869,9 @@
       "Annotation": "WriteText Library/Bee/artifacts/1900b0aP.dag/Unity.VisualScripting.State.rsp2",
       "DisplayName": "Writing Unity.VisualScripting.State.rsp2",
       "ActionType": "WriteFile",
-      "PayloadOffset": 554787,
-      "PayloadLength": 44,
-      "PayloadDebugContentSnippet": "/pathmap:\"D:\\HiveMind\\HiveMind",
+      "PayloadOffset": 555855,
+      "PayloadLength": 86,
+      "PayloadDebugContentSnippet": "/pathmap:\"C:\\Users\\chase\\Docum",
       "Inputs": [],
       "Outputs": [
         "Library/Bee/artifacts/1900b0aP.dag/Unity.VisualScripting.State.rsp2"
@@ -7164,7 +7164,7 @@
       "Annotation": "WriteText Library/Bee/artifacts/1900b0aP.dag/Unity.VisualScripting.State.dll.mvfrm.rsp",
       "DisplayName": "Writing Unity.VisualScripting.State.dll.mvfrm.rsp",
       "ActionType": "WriteFile",
-      "PayloadOffset": 554939,
+      "PayloadOffset": 556049,
       "PayloadLength": 6140,
       "PayloadDebugContentSnippet": "Library\\Bee\\artifacts\\mvdfrm\\U",
       "Inputs": [],
@@ -7337,9 +7337,9 @@
       "Annotation": "WriteText Library/Bee/artifacts/1900b0aP.dag/Assembly-CSharp.UnityAdditionalFile.txt",
       "DisplayName": "Writing Assembly-CSharp.UnityAdditionalFile.txt",
       "ActionType": "WriteFile",
-      "PayloadOffset": 561185,
-      "PayloadLength": 31,
-      "PayloadDebugContentSnippet": "D:\\HiveMind\\HiveMindUnityClien",
+      "PayloadOffset": 562295,
+      "PayloadLength": 73,
+      "PayloadDebugContentSnippet": "C:\\Users\\chase\\Documents\\Progr",
       "Inputs": [],
       "Outputs": [
         "Library/Bee/artifacts/1900b0aP.dag/Assembly-CSharp.UnityAdditionalFile.txt"
@@ -7350,8 +7350,8 @@
       "Annotation": "WriteText Library/Bee/artifacts/1900b0aP.dag/Assembly-CSharp.rsp",
       "DisplayName": "Writing Assembly-CSharp.rsp",
       "ActionType": "WriteFile",
-      "PayloadOffset": 561302,
-      "PayloadLength": 32824,
+      "PayloadOffset": 562454,
+      "PayloadLength": 35226,
       "PayloadDebugContentSnippet": "-target:library\r\n-out:\"Library",
       "Inputs": [],
       "Outputs": [
@@ -7363,7 +7363,7 @@
       "Annotation": "WriteText Library/Bee/artifacts/1900b0aP.dag/Assembly-CSharp.rsp2",
       "DisplayName": "Writing Assembly-CSharp.rsp2",
       "ActionType": "WriteFile",
-      "PayloadOffset": 594213,
+      "PayloadOffset": 597767,
       "PayloadLength": 0,
       "PayloadDebugContentSnippet": "",
       "Inputs": [],
@@ -7585,10 +7585,45 @@
         "Assets/Scripts/MoveExit.cs",
         "Assets/Scripts/NetworkMessage.cs",
         "Assets/Scripts/PlayerController.cs",
+        "Assets/Scripts/PlayerDebug.cs",
         "Assets/Scripts/PlayerInfo.cs",
         "Assets/Scripts/PlayerLook.cs",
         "Assets/Scripts/ServerData.cs",
         "Assets/Scripts/TileStream.cs",
+        "Assets/TextMesh Pro/Examples & Extras/Scripts/Benchmark01.cs",
+        "Assets/TextMesh Pro/Examples & Extras/Scripts/Benchmark01_UGUI.cs",
+        "Assets/TextMesh Pro/Examples & Extras/Scripts/Benchmark02.cs",
+        "Assets/TextMesh Pro/Examples & Extras/Scripts/Benchmark03.cs",
+        "Assets/TextMesh Pro/Examples & Extras/Scripts/Benchmark04.cs",
+        "Assets/TextMesh Pro/Examples & Extras/Scripts/CameraController.cs",
+        "Assets/TextMesh Pro/Examples & Extras/Scripts/ChatController.cs",
+        "Assets/TextMesh Pro/Examples & Extras/Scripts/DropdownSample.cs",
+        "Assets/TextMesh Pro/Examples & Extras/Scripts/EnvMapAnimator.cs",
+        "Assets/TextMesh Pro/Examples & Extras/Scripts/ObjectSpin.cs",
+        "Assets/TextMesh Pro/Examples & Extras/Scripts/ShaderPropAnimator.cs",
+        "Assets/TextMesh Pro/Examples & Extras/Scripts/SimpleScript.cs",
+        "Assets/TextMesh Pro/Examples & Extras/Scripts/SkewTextExample.cs",
+        "Assets/TextMesh Pro/Examples & Extras/Scripts/TeleType.cs",
+        "Assets/TextMesh Pro/Examples & Extras/Scripts/TextConsoleSimulator.cs",
+        "Assets/TextMesh Pro/Examples & Extras/Scripts/TextMeshProFloatingText.cs",
+        "Assets/TextMesh Pro/Examples & Extras/Scripts/TextMeshSpawner.cs",
+        "Assets/TextMesh Pro/Examples & Extras/Scripts/TMPro_InstructionOverlay.cs",
+        "Assets/TextMesh Pro/Examples & Extras/Scripts/TMP_DigitValidator.cs",
+        "Assets/TextMesh Pro/Examples & Extras/Scripts/TMP_ExampleScript_01.cs",
+        "Assets/TextMesh Pro/Examples & Extras/Scripts/TMP_FrameRateCounter.cs",
+        "Assets/TextMesh Pro/Examples & Extras/Scripts/TMP_PhoneNumberValidator.cs",
+        "Assets/TextMesh Pro/Examples & Extras/Scripts/TMP_TextEventCheck.cs",
+        "Assets/TextMesh Pro/Examples & Extras/Scripts/TMP_TextEventHandler.cs",
+        "Assets/TextMesh Pro/Examples & Extras/Scripts/TMP_TextInfoDebugTool.cs",
+        "Assets/TextMesh Pro/Examples & Extras/Scripts/TMP_TextSelector_A.cs",
+        "Assets/TextMesh Pro/Examples & Extras/Scripts/TMP_TextSelector_B.cs",
+        "Assets/TextMesh Pro/Examples & Extras/Scripts/TMP_UiFrameRateCounter.cs",
+        "Assets/TextMesh Pro/Examples & Extras/Scripts/VertexColorCycler.cs",
+        "Assets/TextMesh Pro/Examples & Extras/Scripts/VertexJitter.cs",
+        "Assets/TextMesh Pro/Examples & Extras/Scripts/VertexShakeA.cs",
+        "Assets/TextMesh Pro/Examples & Extras/Scripts/VertexShakeB.cs",
+        "Assets/TextMesh Pro/Examples & Extras/Scripts/VertexZoom.cs",
+        "Assets/TextMesh Pro/Examples & Extras/Scripts/WarpTextExample.cs",
         "C:/Program Files/Unity/Hub/Editor/2022.3.10f1/Editor/Data/Tools/Unity.SourceGenerators/Unity.Properties.SourceGenerator.dll",
         "C:/Program Files/Unity/Hub/Editor/2022.3.10f1/Editor/Data/Tools/Unity.SourceGenerators/Unity.SourceGenerators.dll",
         "Library/Bee/artifacts/1900b0aP.dag/Assembly-CSharp.rsp"
@@ -7705,7 +7740,7 @@
       "Annotation": "WriteText Library/Bee/artifacts/1900b0aP.dag/Assembly-CSharp.dll.mvfrm.rsp",
       "DisplayName": "Writing Assembly-CSharp.dll.mvfrm.rsp",
       "ActionType": "WriteFile",
-      "PayloadOffset": 594309,
+      "PayloadOffset": 597863,
       "PayloadLength": 6548,
       "PayloadDebugContentSnippet": "Library\\Bee\\artifacts\\mvdfrm\\U",
       "Inputs": [],
@@ -7885,14 +7920,14 @@
       "DebugActionIndex": 143
     },
     {
-      "Annotation": "CopyFiles Library/Bee/PlayerScriptAssemblies/UnityEngine.TestRunner.dll",
+      "Annotation": "CopyFiles Library/PlayerScriptAssemblies/UnityEngine.TestRunner.dll",
       "DisplayName": "Copying UnityEngine.TestRunner.dll",
       "ActionType": "CopyFiles",
       "Inputs": [
         "Library/Bee/artifacts/1900b0aP.dag/UnityEngine.TestRunner.dll"
       ],
       "Outputs": [
-        "Library/Bee/PlayerScriptAssemblies/UnityEngine.TestRunner.dll"
+        "Library/PlayerScriptAssemblies/UnityEngine.TestRunner.dll"
       ],
       "ToBuildDependencies": [
         4
@@ -7900,14 +7935,14 @@
       "DebugActionIndex": 144
     },
     {
-      "Annotation": "CopyFiles Library/Bee/PlayerScriptAssemblies/UnityEngine.TestRunner.pdb",
+      "Annotation": "CopyFiles Library/PlayerScriptAssemblies/UnityEngine.TestRunner.pdb",
       "DisplayName": "Copying UnityEngine.TestRunner.pdb",
       "ActionType": "CopyFiles",
       "Inputs": [
         "Library/Bee/artifacts/1900b0aP.dag/UnityEngine.TestRunner.pdb"
       ],
       "Outputs": [
-        "Library/Bee/PlayerScriptAssemblies/UnityEngine.TestRunner.pdb"
+        "Library/PlayerScriptAssemblies/UnityEngine.TestRunner.pdb"
       ],
       "ToBuildDependencies": [
         4
@@ -7915,14 +7950,14 @@
       "DebugActionIndex": 145
     },
     {
-      "Annotation": "CopyFiles Library/Bee/PlayerScriptAssemblies/UnityEngine.UI.dll",
+      "Annotation": "CopyFiles Library/PlayerScriptAssemblies/UnityEngine.UI.dll",
       "DisplayName": "Copying UnityEngine.UI.dll",
       "ActionType": "CopyFiles",
       "Inputs": [
         "Library/Bee/artifacts/1900b0aP.dag/UnityEngine.UI.dll"
       ],
       "Outputs": [
-        "Library/Bee/PlayerScriptAssemblies/UnityEngine.UI.dll"
+        "Library/PlayerScriptAssemblies/UnityEngine.UI.dll"
       ],
       "ToBuildDependencies": [
         78
@@ -7930,14 +7965,14 @@
       "DebugActionIndex": 146
     },
     {
-      "Annotation": "CopyFiles Library/Bee/PlayerScriptAssemblies/UnityEngine.UI.pdb",
+      "Annotation": "CopyFiles Library/PlayerScriptAssemblies/UnityEngine.UI.pdb",
       "DisplayName": "Copying UnityEngine.UI.pdb",
       "ActionType": "CopyFiles",
       "Inputs": [
         "Library/Bee/artifacts/1900b0aP.dag/UnityEngine.UI.pdb"
       ],
       "Outputs": [
-        "Library/Bee/PlayerScriptAssemblies/UnityEngine.UI.pdb"
+        "Library/PlayerScriptAssemblies/UnityEngine.UI.pdb"
       ],
       "ToBuildDependencies": [
         78
@@ -7945,14 +7980,14 @@
       "DebugActionIndex": 147
     },
     {
-      "Annotation": "CopyFiles Library/Bee/PlayerScriptAssemblies/Adrenak.UniVoice.Runtime.dll",
+      "Annotation": "CopyFiles Library/PlayerScriptAssemblies/Adrenak.UniVoice.Runtime.dll",
       "DisplayName": "Copying Adrenak.UniVoice.Runtime.dll",
       "ActionType": "CopyFiles",
       "Inputs": [
         "Library/Bee/artifacts/1900b0aP.dag/Adrenak.UniVoice.Runtime.dll"
       ],
       "Outputs": [
-        "Library/Bee/PlayerScriptAssemblies/Adrenak.UniVoice.Runtime.dll"
+        "Library/PlayerScriptAssemblies/Adrenak.UniVoice.Runtime.dll"
       ],
       "ToBuildDependencies": [
         85
@@ -7960,14 +7995,14 @@
       "DebugActionIndex": 148
     },
     {
-      "Annotation": "CopyFiles Library/Bee/PlayerScriptAssemblies/Adrenak.UniVoice.Runtime.pdb",
+      "Annotation": "CopyFiles Library/PlayerScriptAssemblies/Adrenak.UniVoice.Runtime.pdb",
       "DisplayName": "Copying Adrenak.UniVoice.Runtime.pdb",
       "ActionType": "CopyFiles",
       "Inputs": [
         "Library/Bee/artifacts/1900b0aP.dag/Adrenak.UniVoice.Runtime.pdb"
       ],
       "Outputs": [
-        "Library/Bee/PlayerScriptAssemblies/Adrenak.UniVoice.Runtime.pdb"
+        "Library/PlayerScriptAssemblies/Adrenak.UniVoice.Runtime.pdb"
       ],
       "ToBuildDependencies": [
         85
@@ -7975,14 +8010,14 @@
       "DebugActionIndex": 149
     },
     {
-      "Annotation": "CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.InputSystem.dll",
+      "Annotation": "CopyFiles Library/PlayerScriptAssemblies/Unity.InputSystem.dll",
       "DisplayName": "Copying Unity.InputSystem.dll",
       "ActionType": "CopyFiles",
       "Inputs": [
         "Library/Bee/artifacts/1900b0aP.dag/Unity.InputSystem.dll"
       ],
       "Outputs": [
-        "Library/Bee/PlayerScriptAssemblies/Unity.InputSystem.dll"
+        "Library/PlayerScriptAssemblies/Unity.InputSystem.dll"
       ],
       "ToBuildDependencies": [
         92
@@ -7990,14 +8025,14 @@
       "DebugActionIndex": 150
     },
     {
-      "Annotation": "CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.InputSystem.pdb",
+      "Annotation": "CopyFiles Library/PlayerScriptAssemblies/Unity.InputSystem.pdb",
       "DisplayName": "Copying Unity.InputSystem.pdb",
       "ActionType": "CopyFiles",
       "Inputs": [
         "Library/Bee/artifacts/1900b0aP.dag/Unity.InputSystem.pdb"
       ],
       "Outputs": [
-        "Library/Bee/PlayerScriptAssemblies/Unity.InputSystem.pdb"
+        "Library/PlayerScriptAssemblies/Unity.InputSystem.pdb"
       ],
       "ToBuildDependencies": [
         92
@@ -8005,14 +8040,14 @@
       "DebugActionIndex": 151
     },
     {
-      "Annotation": "CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.TextMeshPro.dll",
+      "Annotation": "CopyFiles Library/PlayerScriptAssemblies/Unity.TextMeshPro.dll",
       "DisplayName": "Copying Unity.TextMeshPro.dll",
       "ActionType": "CopyFiles",
       "Inputs": [
         "Library/Bee/artifacts/1900b0aP.dag/Unity.TextMeshPro.dll"
       ],
       "Outputs": [
-        "Library/Bee/PlayerScriptAssemblies/Unity.TextMeshPro.dll"
+        "Library/PlayerScriptAssemblies/Unity.TextMeshPro.dll"
       ],
       "ToBuildDependencies": [
         98
@@ -8020,14 +8055,14 @@
       "DebugActionIndex": 152
     },
     {
-      "Annotation": "CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.TextMeshPro.pdb",
+      "Annotation": "CopyFiles Library/PlayerScriptAssemblies/Unity.TextMeshPro.pdb",
       "DisplayName": "Copying Unity.TextMeshPro.pdb",
       "ActionType": "CopyFiles",
       "Inputs": [
         "Library/Bee/artifacts/1900b0aP.dag/Unity.TextMeshPro.pdb"
       ],
       "Outputs": [
-        "Library/Bee/PlayerScriptAssemblies/Unity.TextMeshPro.pdb"
+        "Library/PlayerScriptAssemblies/Unity.TextMeshPro.pdb"
       ],
       "ToBuildDependencies": [
         98
@@ -8035,14 +8070,14 @@
       "DebugActionIndex": 153
     },
     {
-      "Annotation": "CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.Timeline.dll",
+      "Annotation": "CopyFiles Library/PlayerScriptAssemblies/Unity.Timeline.dll",
       "DisplayName": "Copying Unity.Timeline.dll",
       "ActionType": "CopyFiles",
       "Inputs": [
         "Library/Bee/artifacts/1900b0aP.dag/Unity.Timeline.dll"
       ],
       "Outputs": [
-        "Library/Bee/PlayerScriptAssemblies/Unity.Timeline.dll"
+        "Library/PlayerScriptAssemblies/Unity.Timeline.dll"
       ],
       "ToBuildDependencies": [
         104
@@ -8050,14 +8085,14 @@
       "DebugActionIndex": 154
     },
     {
-      "Annotation": "CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.Timeline.pdb",
+      "Annotation": "CopyFiles Library/PlayerScriptAssemblies/Unity.Timeline.pdb",
       "DisplayName": "Copying Unity.Timeline.pdb",
       "ActionType": "CopyFiles",
       "Inputs": [
         "Library/Bee/artifacts/1900b0aP.dag/Unity.Timeline.pdb"
       ],
       "Outputs": [
-        "Library/Bee/PlayerScriptAssemblies/Unity.Timeline.pdb"
+        "Library/PlayerScriptAssemblies/Unity.Timeline.pdb"
       ],
       "ToBuildDependencies": [
         104
@@ -8065,14 +8100,14 @@
       "DebugActionIndex": 155
     },
     {
-      "Annotation": "CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.InputSystem.ForUI.dll",
+      "Annotation": "CopyFiles Library/PlayerScriptAssemblies/Unity.InputSystem.ForUI.dll",
       "DisplayName": "Copying Unity.InputSystem.ForUI.dll",
       "ActionType": "CopyFiles",
       "Inputs": [
         "Library/Bee/artifacts/1900b0aP.dag/Unity.InputSystem.ForUI.dll"
       ],
       "Outputs": [
-        "Library/Bee/PlayerScriptAssemblies/Unity.InputSystem.ForUI.dll"
+        "Library/PlayerScriptAssemblies/Unity.InputSystem.ForUI.dll"
       ],
       "ToBuildDependencies": [
         110
@@ -8080,14 +8115,14 @@
       "DebugActionIndex": 156
     },
     {
-      "Annotation": "CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.InputSystem.ForUI.pdb",
+      "Annotation": "CopyFiles Library/PlayerScriptAssemblies/Unity.InputSystem.ForUI.pdb",
       "DisplayName": "Copying Unity.InputSystem.ForUI.pdb",
       "ActionType": "CopyFiles",
       "Inputs": [
         "Library/Bee/artifacts/1900b0aP.dag/Unity.InputSystem.ForUI.pdb"
       ],
       "Outputs": [
-        "Library/Bee/PlayerScriptAssemblies/Unity.InputSystem.ForUI.pdb"
+        "Library/PlayerScriptAssemblies/Unity.InputSystem.ForUI.pdb"
       ],
       "ToBuildDependencies": [
         110
@@ -8095,14 +8130,14 @@
       "DebugActionIndex": 157
     },
     {
-      "Annotation": "CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.VisualScripting.Core.dll",
+      "Annotation": "CopyFiles Library/PlayerScriptAssemblies/Unity.VisualScripting.Core.dll",
       "DisplayName": "Copying Unity.VisualScripting.Core.dll",
       "ActionType": "CopyFiles",
       "Inputs": [
         "Library/Bee/artifacts/1900b0aP.dag/Unity.VisualScripting.Core.dll"
       ],
       "Outputs": [
-        "Library/Bee/PlayerScriptAssemblies/Unity.VisualScripting.Core.dll"
+        "Library/PlayerScriptAssemblies/Unity.VisualScripting.Core.dll"
       ],
       "ToBuildDependencies": [
         117
@@ -8110,14 +8145,14 @@
       "DebugActionIndex": 158
     },
     {
-      "Annotation": "CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.VisualScripting.Core.pdb",
+      "Annotation": "CopyFiles Library/PlayerScriptAssemblies/Unity.VisualScripting.Core.pdb",
       "DisplayName": "Copying Unity.VisualScripting.Core.pdb",
       "ActionType": "CopyFiles",
       "Inputs": [
         "Library/Bee/artifacts/1900b0aP.dag/Unity.VisualScripting.Core.pdb"
       ],
       "Outputs": [
-        "Library/Bee/PlayerScriptAssemblies/Unity.VisualScripting.Core.pdb"
+        "Library/PlayerScriptAssemblies/Unity.VisualScripting.Core.pdb"
       ],
       "ToBuildDependencies": [
         117
@@ -8125,14 +8160,14 @@
       "DebugActionIndex": 159
     },
     {
-      "Annotation": "CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.VisualScripting.Flow.dll",
+      "Annotation": "CopyFiles Library/PlayerScriptAssemblies/Unity.VisualScripting.Flow.dll",
       "DisplayName": "Copying Unity.VisualScripting.Flow.dll",
       "ActionType": "CopyFiles",
       "Inputs": [
         "Library/Bee/artifacts/1900b0aP.dag/Unity.VisualScripting.Flow.dll"
       ],
       "Outputs": [
-        "Library/Bee/PlayerScriptAssemblies/Unity.VisualScripting.Flow.dll"
+        "Library/PlayerScriptAssemblies/Unity.VisualScripting.Flow.dll"
       ],
       "ToBuildDependencies": [
         123
@@ -8140,14 +8175,14 @@
       "DebugActionIndex": 160
     },
     {
-      "Annotation": "CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.VisualScripting.Flow.pdb",
+      "Annotation": "CopyFiles Library/PlayerScriptAssemblies/Unity.VisualScripting.Flow.pdb",
       "DisplayName": "Copying Unity.VisualScripting.Flow.pdb",
       "ActionType": "CopyFiles",
       "Inputs": [
         "Library/Bee/artifacts/1900b0aP.dag/Unity.VisualScripting.Flow.pdb"
       ],
       "Outputs": [
-        "Library/Bee/PlayerScriptAssemblies/Unity.VisualScripting.Flow.pdb"
+        "Library/PlayerScriptAssemblies/Unity.VisualScripting.Flow.pdb"
       ],
       "ToBuildDependencies": [
         123
@@ -8155,14 +8190,14 @@
       "DebugActionIndex": 161
     },
     {
-      "Annotation": "CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.VisualScripting.State.dll",
+      "Annotation": "CopyFiles Library/PlayerScriptAssemblies/Unity.VisualScripting.State.dll",
       "DisplayName": "Copying Unity.VisualScripting.State.dll",
       "ActionType": "CopyFiles",
       "Inputs": [
         "Library/Bee/artifacts/1900b0aP.dag/Unity.VisualScripting.State.dll"
       ],
       "Outputs": [
-        "Library/Bee/PlayerScriptAssemblies/Unity.VisualScripting.State.dll"
+        "Library/PlayerScriptAssemblies/Unity.VisualScripting.State.dll"
       ],
       "ToBuildDependencies": [
         130
@@ -8170,14 +8205,14 @@
       "DebugActionIndex": 162
     },
     {
-      "Annotation": "CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.VisualScripting.State.pdb",
+      "Annotation": "CopyFiles Library/PlayerScriptAssemblies/Unity.VisualScripting.State.pdb",
       "DisplayName": "Copying Unity.VisualScripting.State.pdb",
       "ActionType": "CopyFiles",
       "Inputs": [
         "Library/Bee/artifacts/1900b0aP.dag/Unity.VisualScripting.State.pdb"
       ],
       "Outputs": [
-        "Library/Bee/PlayerScriptAssemblies/Unity.VisualScripting.State.pdb"
+        "Library/PlayerScriptAssemblies/Unity.VisualScripting.State.pdb"
       ],
       "ToBuildDependencies": [
         130
@@ -8185,14 +8220,14 @@
       "DebugActionIndex": 163
     },
     {
-      "Annotation": "CopyFiles Library/Bee/PlayerScriptAssemblies/Assembly-CSharp.dll",
+      "Annotation": "CopyFiles Library/PlayerScriptAssemblies/Assembly-CSharp.dll",
       "DisplayName": "Copying Assembly-CSharp.dll",
       "ActionType": "CopyFiles",
       "Inputs": [
         "Library/Bee/artifacts/1900b0aP.dag/Assembly-CSharp.dll"
       ],
       "Outputs": [
-        "Library/Bee/PlayerScriptAssemblies/Assembly-CSharp.dll"
+        "Library/PlayerScriptAssemblies/Assembly-CSharp.dll"
       ],
       "ToBuildDependencies": [
         137
@@ -8200,14 +8235,14 @@
       "DebugActionIndex": 164
     },
     {
-      "Annotation": "CopyFiles Library/Bee/PlayerScriptAssemblies/Assembly-CSharp.pdb",
+      "Annotation": "CopyFiles Library/PlayerScriptAssemblies/Assembly-CSharp.pdb",
       "DisplayName": "Copying Assembly-CSharp.pdb",
       "ActionType": "CopyFiles",
       "Inputs": [
         "Library/Bee/artifacts/1900b0aP.dag/Assembly-CSharp.pdb"
       ],
       "Outputs": [
-        "Library/Bee/PlayerScriptAssemblies/Assembly-CSharp.pdb"
+        "Library/PlayerScriptAssemblies/Assembly-CSharp.pdb"
       ],
       "ToBuildDependencies": [
         137
@@ -8217,21 +8252,21 @@
     {
       "Annotation": "BuildPlayerDataGenerator Library/BuildPlayerData/Player/RuntimeInitializeOnLoads.json (+1 other)",
       "DisplayName": "BuildPlayerDataGenerator RuntimeInitializeOnLoads",
-      "Action": "\"C:/Program Files/Unity/Hub/Editor/2022.3.10f1/Editor/Data\\Tools\\netcorerun\\netcorerun.exe\" \"C:/Program Files/Unity/Hub/Editor/2022.3.10f1/Editor/Data/Tools/BuildPlayerDataGenerator/BuildPlayerDataGenerator.exe\" -a=\"D:\\HiveMind\\HiveMindUnityClient\\Library\\Bee\\PlayerScriptAssemblies\\Adrenak.UniVoice.Runtime.dll\" -a=\"D:\\HiveMind\\HiveMindUnityClient\\Library\\Bee\\PlayerScriptAssemblies\\Assembly-CSharp.dll\" -a=\"D:\\HiveMind\\HiveMindUnityClient\\Library\\Bee\\PlayerScriptAssemblies\\Unity.InputSystem.dll\" -a=\"D:\\HiveMind\\HiveMindUnityClient\\Library\\Bee\\PlayerScriptAssemblies\\Unity.InputSystem.ForUI.dll\" -a=\"D:\\HiveMind\\HiveMindUnityClient\\Library\\Bee\\PlayerScriptAssemblies\\Unity.TextMeshPro.dll\" -a=\"D:\\HiveMind\\HiveMindUnityClient\\Library\\Bee\\PlayerScriptAssemblies\\Unity.Timeline.dll\" -a=\"D:\\HiveMind\\HiveMindUnityClient\\Library\\Bee\\PlayerScriptAssemblies\\Unity.VisualScripting.Core.dll\" -a=\"D:\\HiveMind\\HiveMindUnityClient\\Library\\Bee\\PlayerScriptAssemblies\\Unity.VisualScripting.Flow.dll\" -a=\"D:\\HiveMind\\HiveMindUnityClient\\Library\\Bee\\PlayerScriptAssemblies\\Unity.VisualScripting.State.dll\" -a=\"D:\\HiveMind\\HiveMindUnityClient\\Library\\Bee\\PlayerScriptAssemblies\\UnityEngine.TestRunner.dll\" -a=\"D:\\HiveMind\\HiveMindUnityClient\\Library\\Bee\\PlayerScriptAssemblies\\UnityEngine.UI.dll\" -a=\"D:\\HiveMind\\HiveMindUnityClient\\Library\\PackageCache\\com.unity.ext.nunit@1.0.6\\net35\\unity-custom\\nunit.framework.dll\" -a=\"D:\\HiveMind\\HiveMindUnityClient\\Library\\PackageCache\\com.unity.visualscripting@1.9.0\\Runtime\\VisualScripting.Flow\\Dependencies\\NCalc\\Unity.VisualScripting.Antlr3.Runtime.dll\" -s=\"C:\\Program Files\\Unity\\Hub\\Editor\\2022.3.10f1\\Editor\\Data\\Managed\\UnityEngine\" -s=\"C:\\Program Files\\Unity\\Hub\\Editor\\2022.3.10f1\\Editor\\Data\\NetStandard\\compat\\2.1.0\\shims\\netfx\" -s=\"C:\\Program Files\\Unity\\Hub\\Editor\\2022.3.10f1\\Editor\\Data\\NetStandard\\compat\\2.1.0\\shims\\netstandard\" -s=\"C:\\Program Files\\Unity\\Hub\\Editor\\2022.3.10f1\\Editor\\Data\\NetStandard\\Extensions\\2.0.0\" -s=\"C:\\Program Files\\Unity\\Hub\\Editor\\2022.3.10f1\\Editor\\Data\\NetStandard\\ref\\2.1.0\" -s=\"D:\\HiveMind\\HiveMindUnityClient\\Library\\Bee\\PlayerScriptAssemblies\" -s=\"D:\\HiveMind\\HiveMindUnityClient\\Library\\PackageCache\\com.unity.ext.nunit@1.0.6\\net35\\unity-custom\" -s=\"D:\\HiveMind\\HiveMindUnityClient\\Library\\PackageCache\\com.unity.visualscripting@1.9.0\\Runtime\\VisualScripting.Flow\\Dependencies\\NCalc\" -o=\"Library/BuildPlayerData/Player\" -rn=\"RuntimeInitializeOnLoads.json\" -tn=\"TypeDb-All.json\"",
+      "Action": "\"C:/Program Files/Unity/Hub/Editor/2022.3.10f1/Editor/Data\\Tools\\netcorerun\\netcorerun.exe\" \"C:/Program Files/Unity/Hub/Editor/2022.3.10f1/Editor/Data/Tools/BuildPlayerDataGenerator/BuildPlayerDataGenerator.exe\" -a=\"C:\\Users\\chase\\Documents\\ProgrammingProjects\\HiveMind\\HiveMindUnityClient\\Library\\PlayerScriptAssemblies\\Adrenak.UniVoice.Runtime.dll\" -a=\"C:\\Users\\chase\\Documents\\ProgrammingProjects\\HiveMind\\HiveMindUnityClient\\Library\\PlayerScriptAssemblies\\Assembly-CSharp.dll\" -a=\"C:\\Users\\chase\\Documents\\ProgrammingProjects\\HiveMind\\HiveMindUnityClient\\Library\\PlayerScriptAssemblies\\Unity.InputSystem.dll\" -a=\"C:\\Users\\chase\\Documents\\ProgrammingProjects\\HiveMind\\HiveMindUnityClient\\Library\\PlayerScriptAssemblies\\Unity.InputSystem.ForUI.dll\" -a=\"C:\\Users\\chase\\Documents\\ProgrammingProjects\\HiveMind\\HiveMindUnityClient\\Library\\PlayerScriptAssemblies\\Unity.TextMeshPro.dll\" -a=\"C:\\Users\\chase\\Documents\\ProgrammingProjects\\HiveMind\\HiveMindUnityClient\\Library\\PlayerScriptAssemblies\\Unity.Timeline.dll\" -a=\"C:\\Users\\chase\\Documents\\ProgrammingProjects\\HiveMind\\HiveMindUnityClient\\Library\\PlayerScriptAssemblies\\Unity.VisualScripting.Core.dll\" -a=\"C:\\Users\\chase\\Documents\\ProgrammingProjects\\HiveMind\\HiveMindUnityClient\\Library\\PlayerScriptAssemblies\\Unity.VisualScripting.Flow.dll\" -a=\"C:\\Users\\chase\\Documents\\ProgrammingProjects\\HiveMind\\HiveMindUnityClient\\Library\\PlayerScriptAssemblies\\Unity.VisualScripting.State.dll\" -a=\"C:\\Users\\chase\\Documents\\ProgrammingProjects\\HiveMind\\HiveMindUnityClient\\Library\\PlayerScriptAssemblies\\UnityEngine.TestRunner.dll\" -a=\"C:\\Users\\chase\\Documents\\ProgrammingProjects\\HiveMind\\HiveMindUnityClient\\Library\\PlayerScriptAssemblies\\UnityEngine.UI.dll\" -a=\"C:\\Users\\chase\\Documents\\ProgrammingProjects\\HiveMind\\HiveMindUnityClient\\Library\\PackageCache\\com.unity.ext.nunit@1.0.6\\net35\\unity-custom\\nunit.framework.dll\" -a=\"C:\\Users\\chase\\Documents\\ProgrammingProjects\\HiveMind\\HiveMindUnityClient\\Library\\PackageCache\\com.unity.visualscripting@1.9.0\\Runtime\\VisualScripting.Flow\\Dependencies\\NCalc\\Unity.VisualScripting.Antlr3.Runtime.dll\" -s=\"C:\\Program Files\\Unity\\Hub\\Editor\\2022.3.10f1\\Editor\\Data\\Managed\\UnityEngine\" -s=\"C:\\Program Files\\Unity\\Hub\\Editor\\2022.3.10f1\\Editor\\Data\\NetStandard\\compat\\2.1.0\\shims\\netfx\" -s=\"C:\\Program Files\\Unity\\Hub\\Editor\\2022.3.10f1\\Editor\\Data\\NetStandard\\compat\\2.1.0\\shims\\netstandard\" -s=\"C:\\Program Files\\Unity\\Hub\\Editor\\2022.3.10f1\\Editor\\Data\\NetStandard\\Extensions\\2.0.0\" -s=\"C:\\Program Files\\Unity\\Hub\\Editor\\2022.3.10f1\\Editor\\Data\\NetStandard\\ref\\2.1.0\" -s=\"C:\\Users\\chase\\Documents\\ProgrammingProjects\\HiveMind\\HiveMindUnityClient\\Library\\PlayerScriptAssemblies\" -s=\"C:\\Users\\chase\\Documents\\ProgrammingProjects\\HiveMind\\HiveMindUnityClient\\Library\\PackageCache\\com.unity.ext.nunit@1.0.6\\net35\\unity-custom\" -s=\"C:\\Users\\chase\\Documents\\ProgrammingProjects\\HiveMind\\HiveMindUnityClient\\Library\\PackageCache\\com.unity.visualscripting@1.9.0\\Runtime\\VisualScripting.Flow\\Dependencies\\NCalc\" -o=\"Library/BuildPlayerData/Player\" -rn=\"RuntimeInitializeOnLoads.json\" -tn=\"TypeDb-All.json\"",
       "Inputs": [
         "C:/Program Files/Unity/Hub/Editor/2022.3.10f1/Editor/Data/Tools/netcorerun/netcorerun.exe",
         "C:/Program Files/Unity/Hub/Editor/2022.3.10f1/Editor/Data/Tools/BuildPlayerDataGenerator/BuildPlayerDataGenerator.exe",
-        "Library/Bee/PlayerScriptAssemblies/Adrenak.UniVoice.Runtime.dll",
-        "Library/Bee/PlayerScriptAssemblies/Assembly-CSharp.dll",
-        "Library/Bee/PlayerScriptAssemblies/Unity.InputSystem.dll",
-        "Library/Bee/PlayerScriptAssemblies/Unity.InputSystem.ForUI.dll",
-        "Library/Bee/PlayerScriptAssemblies/Unity.TextMeshPro.dll",
-        "Library/Bee/PlayerScriptAssemblies/Unity.Timeline.dll",
-        "Library/Bee/PlayerScriptAssemblies/Unity.VisualScripting.Core.dll",
-        "Library/Bee/PlayerScriptAssemblies/Unity.VisualScripting.Flow.dll",
-        "Library/Bee/PlayerScriptAssemblies/Unity.VisualScripting.State.dll",
-        "Library/Bee/PlayerScriptAssemblies/UnityEngine.TestRunner.dll",
-        "Library/Bee/PlayerScriptAssemblies/UnityEngine.UI.dll",
+        "Library/PlayerScriptAssemblies/Adrenak.UniVoice.Runtime.dll",
+        "Library/PlayerScriptAssemblies/Assembly-CSharp.dll",
+        "Library/PlayerScriptAssemblies/Unity.InputSystem.dll",
+        "Library/PlayerScriptAssemblies/Unity.InputSystem.ForUI.dll",
+        "Library/PlayerScriptAssemblies/Unity.TextMeshPro.dll",
+        "Library/PlayerScriptAssemblies/Unity.Timeline.dll",
+        "Library/PlayerScriptAssemblies/Unity.VisualScripting.Core.dll",
+        "Library/PlayerScriptAssemblies/Unity.VisualScripting.Flow.dll",
+        "Library/PlayerScriptAssemblies/Unity.VisualScripting.State.dll",
+        "Library/PlayerScriptAssemblies/UnityEngine.TestRunner.dll",
+        "Library/PlayerScriptAssemblies/UnityEngine.UI.dll",
         "Library/PackageCache/com.unity.ext.nunit@1.0.6/net35/unity-custom/nunit.framework.dll",
         "Library/PackageCache/com.unity.visualscripting@1.9.0/Runtime/VisualScripting.Flow/Dependencies/NCalc/Unity.VisualScripting.Antlr3.Runtime.dll"
       ],
@@ -8387,9 +8422,6 @@
       "File": "Library/Bee/1900b0aP-inputdata.json"
     },
     {
-      "File": "Library/Bee/PlayerScriptAssemblies/Unity.InputSystem.TestFramework.dll"
-    },
-    {
       "File": "Library/PackageCache/com.adrenak.univoice@3.0.0/Runtime/csc.rsp"
     },
     {
@@ -8424,6 +8456,9 @@
     },
     {
       "File": "Library/PackageCache/com.unity.visualscripting@1.9.0/Runtime/VisualScripting.State/csc.rsp"
+    },
+    {
+      "File": "Library/PlayerScriptAssemblies/Unity.InputSystem.TestFramework.dll"
     }
   ],
   "GlobSignatures": [
@@ -8458,6 +8493,6 @@
   "SharedResources": [],
   "Scanners": [],
   "Identifier": "Library/Bee/1900b0aP.dag.json",
-  "PayloadsFile": "D:/HiveMind/HiveMindUnityClient/Library/Bee/1900b0aP.dag.payloads",
+  "PayloadsFile": "C:/Users/chase/Documents/ProgrammingProjects/HiveMind/HiveMindUnityClient/Library/Bee/1900b0aP.dag.payloads",
   "RelativePathToRoot": "../.."
 }
