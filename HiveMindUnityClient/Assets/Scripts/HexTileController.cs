@@ -11,7 +11,6 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using UnityEditor;
-using UnityEditor.PackageManager;
 using UnityEngine;
 using static UnityEngine.InputSystem.InputRemoting;
 
@@ -122,7 +121,7 @@ public class HexTileController : MonoBehaviour
             return;
         }
 
-        tileStream.SendStringToStream(player.username);
+        //tileStream.SendStringToStream(player.username);
 
         serverPipeIn = new BlockingCollection<NetworkMessage>();
         serverPipeOut = new BlockingCollection<NetworkMessage>();
@@ -139,7 +138,7 @@ public class HexTileController : MonoBehaviour
                 //Send outgoing TCP messages
                 if (serverPipeOut.TryTake(out NetworkMessage newObject))
                 {
-
+                    //Debug.Log($"Sending Message to server: (Type): {newObject.messageType} (message): {Encoding.ASCII.GetString(newObject.message)}");
                     tileStream.SendStringToStream(newObject.messageType);
                     tileStream.SendBytesToStream(newObject.message);
 
@@ -151,18 +150,16 @@ public class HexTileController : MonoBehaviour
             }
 
         }
-        catch (Exception) {
+        catch (Exception e) {
 
             Debug.Log("Failed to run message loop");
-
+            Debug.Log(e.Message);
         }
     }
 
     public NetworkMessage GetNetworkMessage(TileStream tileStream)
     {
         string messageType = tileStream.GetStringFromStream();
-
-        int messageLength = BitConverter.ToInt32(tileStream.GetBytesFromStream(), 0);
 
         /*byte[] tmpMessageLength = new byte[4];
 
@@ -197,8 +194,12 @@ public class HexTileController : MonoBehaviour
         {
             if (serverPipeIn.TryTake(out NetworkMessage message))
             {
+                Debug.Log($"Got message (Type): {message.messageType}\n (message):{Encoding.ASCII.GetString(message.message)}");
                 switch (message.messageType)
                 {
+                    case "tempType":
+                        Debug.Log(message.message.ToString());
+                        break;
                     case "PlayerPos":
                         Debug.Log(message.message.ToString());
                         break;

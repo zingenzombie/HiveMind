@@ -5,17 +5,11 @@ using System.Net.Sockets;
 using System.Text;
 using System;
 using System.Threading;
-using UnityEditor;
 using System.IO;
-using System.Net.Http;
-using System.Threading.Tasks;
 using System.Collections.Concurrent;
 using System.Net.Security;
-using System.Security.Authentication;
-using UnityEditor.PackageManager;
-using System.Security.Cryptography.X509Certificates;
-using JetBrains.Annotations;
 using System.Security.Cryptography;
+using System.Collections.Generic;
 
 public class ServerController : MonoBehaviour
 {
@@ -34,19 +28,29 @@ public class ServerController : MonoBehaviour
     public string ownerID;
 
     [SerializeField] GameObject playerPrefab;
+    [SerializeField] GameObject Players;
+    [SerializeField] GameObject DynamicObjects;
     [SerializeField] GameObject hexTileTemplate;
     private float tileSize;
+    public bool initialized = false;
 
     private RSACryptoServiceProvider localRSA;
 
-    BlockingCollection<TileStream> playerPipe;
+    BlockingCollection<TileStream> playerPipe = new BlockingCollection<TileStream>();
 
-    public Hashtable players = new Hashtable();
+    Thread coreListener;
+    BlockingCollection<string> CoreMessages = new BlockingCollection<string>();
+
+    public Dictionary<string, GameObject> players = new Dictionary<string, GameObject>();
+
+    SslStream coreConnection;
 
     private void OnApplicationQuit()
     {
         if(listen != null)
             listen.Abort();
+        if(coreListener != null)
+            coreListener.Abort();
     }
 
     // Start is called before the first frame update
@@ -63,7 +67,7 @@ public class ServerController : MonoBehaviour
         //groundHolder = hexTile.transform.GetChild(0).gameObject;
         groundHolder = hexTile.transform.GetChild(1).gameObject;
 
-        ContactCore();
+        InitializeWithCore();
 
         tileSize = hexTileTemplate.GetComponent<Renderer>().bounds.size.z;
 
@@ -74,23 +78,72 @@ public class ServerController : MonoBehaviour
 
         hexTile.transform.SetLocalPositionAndRotation(new UnityEngine.Vector3(offsetX, 250 * Mathf.PerlinNoise(offsetX / 5000, offsetY / 5000), offsetY), transform.rotation);
 
-        playerPipe = new BlockingCollection<TileStream>();
-
         StartCoroutine(InstantiateNewClients());
 
         Thread checkIn = new Thread(() => CheckIn());
+        Thread checkWithCore = new Thread(() => CheckWithCore());
+
+        StartCoroutine(ReadCoreMessages());
 
         ClientConnectListener();
     }
 
+    void CheckWithCore()
+    {
+        while (true)
+        {
+            Thread.Sleep(5000);
+            string coreMes = CoreCommunication.GetStringFromStream(coreConnection);
+            CoreMessages.Add(coreMes);
+        }
+    }
+
+    IEnumerator ReadCoreMessages()
+    {
+        while (true)
+        {
+            if (CoreMessages.TryTake(out string mes))
+                Debug.Log(mes);
+
+
+            yield return new WaitForSeconds(100);
+        }
+    }
+
     void CheckIn()
     {
-        foreach(GameObject player in players)
+        foreach(GameObject player in players.Values)
         {
             PlayerData.IsConnected(player.GetComponent<PlayerData>().tileStream);
         }
 
         Thread.Sleep(5000);
+    }
+
+    public void ShoutMessage(string type, string message)
+    {
+        Debug.Log($"Shouting: {message}");
+        foreach (GameObject playerData in players.Values)
+        {
+            var nwm = new NetworkMessage(type, Encoding.ASCII.GetBytes(message));
+            playerData.GetComponent<PlayerData>().serverPipeOut.Add(nwm);
+        }
+    }
+
+    public void KillPlayer(string playerID)
+    {
+        //This probably won't work for reasons
+
+        Destroy(players[playerID]);
+
+        players.Remove(playerID);
+
+        //Also announce player destruction to other players.
+    }
+
+    public void KillServer()
+    {
+
     }
 
     IEnumerator InstantiateNewClients()
@@ -99,23 +152,20 @@ public class ServerController : MonoBehaviour
         {
             if(playerPipe.TryTake(out TileStream client))
             {
-                GameObject newPlayer = Instantiate(playerPrefab, hexTile.transform);
+                GameObject newPlayer = Instantiate(playerPrefab, Players.transform);
 
-                newPlayer.GetComponent<PlayerData>().InitializePlayerData(client);
+                var newComp = newPlayer.GetComponent<PlayerData>();
+                newComp.InitializePlayerData(client);
 
-                players.Add(client, newPlayer);
+                ShoutMessage("newPlayer", $"{newComp.playerID}");
+
+                players.Add(newComp.playerID, newPlayer);
             }
             yield return null;
         }
     }
 
     //Needs to be replaced by one using PID instead!
-    public void KillPlayer(TileStream remoteClient)
-    {
-        Destroy((GameObject)players[remoteClient]);
-        players.Remove(remoteClient);
-        Debug.Log(players.Count);
-    }
 
     private void ClientConnectListener()
     {
@@ -123,7 +173,7 @@ public class ServerController : MonoBehaviour
         listen.Start();
     }
 
-    void ContactCore()
+    void InitializeWithCore()
     {
         ServerData tmp = new ServerData(requestXY, x, y, serverName, ipAddress.ToString(), port, ownerID, localRSA.ToXmlString(false));
         string jsonString = JsonUtility.ToJson(tmp);
@@ -132,7 +182,9 @@ public class ServerController : MonoBehaviour
         using TcpClient client = new TcpClient(coreAddress.ToString(), corePort);
 
         SslStream sslStream = CoreCommunication.EstablishSslStreamFromTcpAsClient(client);
+        coreConnection = sslStream;
 
+        //telling the core what kind of connection this is
         CoreCommunication.SendStringToStream(sslStream, "server");
         
         CoreCommunication.SendStringToStream(sslStream, "newServer");
@@ -146,15 +198,13 @@ public class ServerController : MonoBehaviour
         bytesFinal[i] = 0x00;
 
         sslStream.Write(bytesFinal);
-        Debug.Log("Wrote " + bytesFinal.Length + " bytes.");
+        Debug.Log($"Sent over server info (of size: {bytesFinal.Length} bytes)");
 
-        foreach(var character in bytes)
-            Console.WriteLine((char)character);
+        var tileReqResult = CoreCommunication.GetStringFromStream(sslStream);
+        Debug.Log(/*tileReqAck + */tileReqResult);
 
-        string result = CoreCommunication.GetStringFromStream(sslStream);
-
-        if(!result.Equals("SUCCESS"))
-            throw new Exception("Failed to reserve space on core grid. Message received: " + result);
+        if(tileReqResult.Contains("GRANTED"))
+            initialized = true;
     }
 
     private void ListenForClientsTCP()

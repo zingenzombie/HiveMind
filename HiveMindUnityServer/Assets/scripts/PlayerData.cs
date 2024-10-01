@@ -1,20 +1,11 @@
 using System;
 using System.Collections;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Data;
 using System.Net;
-using System.Net.Http;
-using System.Net.Security;
 using System.Net.Sockets;
 using System.Security.Cryptography;
-using System.Text;
 using System.Threading;
-using UnityEditor.PackageManager;
-//using UnityEditor.PackageManager;
-//using UnityEditor.VersionControl;
 using UnityEngine;
-using UnityEngine.Tilemaps;
 
 public class PlayerData : MonoBehaviour
 {
@@ -25,12 +16,15 @@ public class PlayerData : MonoBehaviour
     public IPEndPoint remoteEP;
     ServerController serverController;
 
+    Coroutine messageHandler;
+
     Thread udpThread, tcpThread;
 
     public BlockingCollection<NetworkMessage> serverPipeIn, serverPipeOut;
 
     public void InitializePlayerData(TileStream client)
-    {        serverController = GameObject.FindWithTag("ServerController").GetComponent<ServerController>();
+    {        
+        serverController = GameObject.FindWithTag("ServerController").GetComponent<ServerController>();
 
         tileStream = client;
 
@@ -39,7 +33,7 @@ public class PlayerData : MonoBehaviour
         
         if (!VerifyPlayer())
         {
-            serverController.KillPlayer(tileStream);
+            //serverController.KillPlayer(tileStream);
             Debug.Log("Client rejected");
             return;
         }
@@ -48,29 +42,12 @@ public class PlayerData : MonoBehaviour
 
         tileStream.SendStringToStream("ACK");
 
-        username = tileStream.GetStringFromStream();
-
-        foreach (var player in serverController.players)
-        {
-            //This is temporary and must be switched out with a new playerdata object.
-
-            NetworkMessage newObject = new NetworkMessage("newPlayer", ASCIIEncoding.ASCII.GetBytes(((GameObject) player).GetComponent<PlayerData>().playerID));
-
-            tileStream.SendStringToStream(newObject.messageType);
-            tileStream.SendBytesToStream(newObject.message);
-
-            //This should send the other clients positions at time of joining
-            /*
-            NetworkMessage newObject = new NetworkMessage("newPlayer", ASCIIEncoding.ASCII.GetBytes(((GameObject)player).GetComponent<PlayerData>().playerID));
-
-            tileStream.SendStringToStream(newObject.messageType);
-            tileStream.SendBytesToStream(newObject.message);*/
-        }
+        username = playerID;
 
         serverPipeIn = new BlockingCollection<NetworkMessage>(); //Will need to be separated into udp and tcp pipes!
         serverPipeOut = new BlockingCollection<NetworkMessage>();
 
-        StartCoroutine(HandleMessages());
+        messageHandler = StartCoroutine(HandleMessages());
 
         tcpThread = new Thread(() => TCPThread());
         tcpThread.Start();
@@ -85,14 +62,15 @@ public class PlayerData : MonoBehaviour
         {
             if (serverPipeIn.TryTake(out NetworkMessage message))
             {
-                switch (message.messageType)
+                var exec = message.messageType;
+                Debug.Log(exec);
+                switch (exec)
                 {
                     case "PlayerPos":
-                        Debug.Log(message.message.ToString());
                         UpdatePlayerPosAndRot(message);
                         break;
                     case "killMe":
-                        serverController.KillPlayer(tileStream);
+                        HandleKill();
                         break;
                     default: break;
                 }
@@ -101,23 +79,39 @@ public class PlayerData : MonoBehaviour
         }
     }
 
+    private void OnDestroy()
+    {
+
+        serverPipeIn.Dispose();
+        serverPipeOut.Dispose();
+        tcpThread.Abort();
+        //udpThread.Abort();
+
+        StopCoroutine(messageHandler);
+
+    }
+
+    private void HandleKill()
+    {
+        serverController.KillPlayer(playerID);
+    }
+
     void UpdatePlayerPosAndRot(NetworkMessage message)
     {
-        Debug.Log(message.message);
+        Debug.Log(message.messageType);
+        byte[] transformInfo = message.message;
         //***CHECK THAT MESSAGE TIME IS NEWER THAN CURRENT UPDATE***
 
-        float posX = BitConverter.ToSingle(message.message, 0);
-        float posY = BitConverter.ToSingle(message.message, 4);
-        float posZ = BitConverter.ToSingle(message.message, 8);
+        float posX = BitConverter.ToSingle(transformInfo, 0);
+        float posY = BitConverter.ToSingle(transformInfo, 4);
+        float posZ = BitConverter.ToSingle(transformInfo, 8);
 
-        float rotX = BitConverter.ToSingle(message.message, 12);
-        float rotY = BitConverter.ToSingle(message.message, 16);
-        float rotZ = BitConverter.ToSingle(message.message, 20);
-        float rotW = BitConverter.ToSingle(message.message, 24);
+        float rotX = BitConverter.ToSingle(transformInfo, 12);
+        float rotY = BitConverter.ToSingle(transformInfo, 16);
+        float rotZ = BitConverter.ToSingle(transformInfo, 20);
+        float rotW = BitConverter.ToSingle(transformInfo, 24);
 
         transform.SetPositionAndRotation(new Vector3(posX,posY,posZ), new Quaternion(rotX, rotY, rotZ, rotW));
-
-
     }
 
     void TCPThread()
@@ -134,14 +128,13 @@ public class PlayerData : MonoBehaviour
             }
 
             //Send outgoing TCP messages
-            if (serverPipeOut.TryTake(out NetworkMessage newObject))
+            while(serverPipeOut.TryTake(out NetworkMessage newObject))
             {
-
                 tileStream.SendStringToStream(newObject.messageType);
                 tileStream.SendBytesToStream(newObject.message);
             }
 
-            if(tileStream.Available > 0)
+            while(tileStream.Available > 0)
             {
 
                 string messageType = tileStream.GetStringFromStream();
@@ -149,8 +142,9 @@ public class PlayerData : MonoBehaviour
 
                 NetworkMessage netMessage = new NetworkMessage(messageType, message);
 
+                //Debug.Log($"Recieved message from {playerID} saying: (Type: {Encoding.ASCII.GetString(message)})");
+               // Debug.Log($"(message: {messageType})");
                 HandleMessage(netMessage);
-
             }
         }
     }
