@@ -5,16 +5,9 @@ using System.Net.Sockets;
 using System.Text;
 using System;
 using System.Threading;
-using UnityEditor;
 using System.IO;
-using System.Net.Http;
-using System.Threading.Tasks;
 using System.Collections.Concurrent;
 using System.Net.Security;
-using System.Security.Authentication;
-using UnityEditor.PackageManager;
-using System.Security.Cryptography.X509Certificates;
-using JetBrains.Annotations;
 using System.Security.Cryptography;
 using System.Collections.Generic;
 
@@ -35,6 +28,8 @@ public class ServerController : MonoBehaviour
     public string ownerID;
 
     [SerializeField] GameObject playerPrefab;
+    [SerializeField] GameObject Players;
+    [SerializeField] GameObject DynamicObjects;
     [SerializeField] GameObject hexTileTemplate;
     private float tileSize;
     public bool initialized = false;
@@ -46,7 +41,7 @@ public class ServerController : MonoBehaviour
     Thread coreListener;
     BlockingCollection<string> CoreMessages = new BlockingCollection<string>();
 
-    public Dictionary<string, PlayerData> players = new Dictionary<string, PlayerData>();
+    public Dictionary<string, GameObject> players = new Dictionary<string, GameObject>();
 
     SslStream coreConnection;
 
@@ -117,9 +112,9 @@ public class ServerController : MonoBehaviour
 
     void CheckIn()
     {
-        foreach(PlayerData player in players.Values)
+        foreach(GameObject player in players.Values)
         {
-            PlayerData.IsConnected(player.tileStream);
+            PlayerData.IsConnected(player.GetComponent<PlayerData>().tileStream);
         }
 
         Thread.Sleep(5000);
@@ -128,11 +123,22 @@ public class ServerController : MonoBehaviour
     public void ShoutMessage(string type, string message)
     {
         Debug.Log($"Shouting: {message}");
-        foreach (PlayerData playerData in players.Values)
+        foreach (GameObject playerData in players.Values)
         {
             var nwm = new NetworkMessage(type, Encoding.ASCII.GetBytes(message));
-            playerData.serverPipeOut.Add(nwm);
+            playerData.GetComponent<PlayerData>().serverPipeOut.Add(nwm);
         }
+    }
+
+    public void KillPlayer(string playerID)
+    {
+        //This probably won't work for reasons
+
+        Destroy(players[playerID]);
+
+        players.Remove(playerID);
+
+        //Also announce player destruction to other players.
     }
 
     public void KillServer()
@@ -146,14 +152,14 @@ public class ServerController : MonoBehaviour
         {
             if(playerPipe.TryTake(out TileStream client))
             {
-                GameObject newPlayer = Instantiate(playerPrefab, hexTile.transform);
+                GameObject newPlayer = Instantiate(playerPrefab, Players.transform);
 
                 var newComp = newPlayer.GetComponent<PlayerData>();
                 newComp.InitializePlayerData(client);
 
                 ShoutMessage("newPlayer", $"{newComp.playerID}");
 
-                players.Add(newComp.playerID, newComp);
+                players.Add(newComp.playerID, newPlayer);
             }
             yield return null;
         }
@@ -178,17 +184,8 @@ public class ServerController : MonoBehaviour
         SslStream sslStream = CoreCommunication.EstablishSslStreamFromTcpAsClient(client);
         coreConnection = sslStream;
 
-        var verifiedText = CoreCommunication.GetStringFromStream(sslStream);
-        var requestInfoText = CoreCommunication.GetStringFromStream(sslStream);
-
-        Debug.Log(verifiedText);
-        Debug.Log(requestInfoText);
-
         //telling the core what kind of connection this is
         CoreCommunication.SendStringToStream(sslStream, "server");
-
-        var recognizedTypeConf = CoreCommunication.GetStringFromStream(sslStream);
-        Debug.Log(recognizedTypeConf);
         
         CoreCommunication.SendStringToStream(sslStream, "newServer");
 
@@ -200,24 +197,11 @@ public class ServerController : MonoBehaviour
 
         bytesFinal[i] = 0x00;
 
-        var dataReciReq = CoreCommunication.GetStringFromStream(sslStream);
-        Debug.Log(dataReciReq);
-
         sslStream.Write(bytesFinal);
         Debug.Log($"Sent over server info (of size: {bytesFinal.Length} bytes)");
 
-        var dataReciAck = CoreCommunication.GetStringFromStream(sslStream);
-        Debug.Log(dataReciAck);
-
-        var dataParseAttempt = CoreCommunication.GetStringFromStream(sslStream);
-        Debug.Log(dataParseAttempt);
-
-        var setupText = CoreCommunication.GetStringFromStream(sslStream);
-        Debug.Log(setupText);
-
-        var tileReqAck = CoreCommunication.GetStringFromStream(sslStream);
         var tileReqResult = CoreCommunication.GetStringFromStream(sslStream);
-        Debug.Log(tileReqAck + tileReqResult);
+        Debug.Log(/*tileReqAck + */tileReqResult);
 
         if(tileReqResult.Contains("GRANTED"))
             initialized = true;

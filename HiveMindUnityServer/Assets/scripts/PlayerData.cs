@@ -1,20 +1,11 @@
 using System;
 using System.Collections;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Data;
 using System.Net;
-using System.Net.Http;
-using System.Net.Security;
 using System.Net.Sockets;
 using System.Security.Cryptography;
-using System.Text;
 using System.Threading;
-using UnityEditor.PackageManager;
-//using UnityEditor.PackageManager;
-//using UnityEditor.VersionControl;
 using UnityEngine;
-using UnityEngine.Tilemaps;
 
 public class PlayerData : MonoBehaviour
 {
@@ -24,6 +15,8 @@ public class PlayerData : MonoBehaviour
     public UdpClient udpClient;
     public IPEndPoint remoteEP;
     ServerController serverController;
+
+    Coroutine messageHandler;
 
     Thread udpThread, tcpThread;
 
@@ -54,7 +47,7 @@ public class PlayerData : MonoBehaviour
         serverPipeIn = new BlockingCollection<NetworkMessage>(); //Will need to be separated into udp and tcp pipes!
         serverPipeOut = new BlockingCollection<NetworkMessage>();
 
-        StartCoroutine(HandleMessages());
+        messageHandler = StartCoroutine(HandleMessages());
 
         tcpThread = new Thread(() => TCPThread());
         tcpThread.Start();
@@ -69,7 +62,7 @@ public class PlayerData : MonoBehaviour
         {
             if (serverPipeIn.TryTake(out NetworkMessage message))
             {
-                var exec = Encoding.ASCII.GetString(message.message);
+                var exec = message.messageType;
                 Debug.Log(exec);
                 switch (exec)
                 {
@@ -77,7 +70,7 @@ public class PlayerData : MonoBehaviour
                         UpdatePlayerPosAndRot(message);
                         break;
                     case "killMe":
-                        //serverController.KillPlayer(tileStream);
+                        HandleKill();
                         break;
                     default: break;
                 }
@@ -86,10 +79,27 @@ public class PlayerData : MonoBehaviour
         }
     }
 
+    private void OnDestroy()
+    {
+
+        serverPipeIn.Dispose();
+        serverPipeOut.Dispose();
+        tcpThread.Abort();
+        //udpThread.Abort();
+
+        StopCoroutine(messageHandler);
+
+    }
+
+    private void HandleKill()
+    {
+        serverController.KillPlayer(playerID);
+    }
+
     void UpdatePlayerPosAndRot(NetworkMessage message)
     {
         Debug.Log(message.messageType);
-        byte[] transformInfo = Encoding.ASCII.GetBytes(message.messageType);
+        byte[] transformInfo = message.message;
         //***CHECK THAT MESSAGE TIME IS NEWER THAN CURRENT UPDATE***
 
         float posX = BitConverter.ToSingle(transformInfo, 0);
@@ -102,8 +112,6 @@ public class PlayerData : MonoBehaviour
         float rotW = BitConverter.ToSingle(transformInfo, 24);
 
         transform.SetPositionAndRotation(new Vector3(posX,posY,posZ), new Quaternion(rotX, rotY, rotZ, rotW));
-
-        serverController.ShoutMessage("updatePT", $"{playerID}|/|{message}");
     }
 
     void TCPThread()
@@ -120,13 +128,13 @@ public class PlayerData : MonoBehaviour
             }
 
             //Send outgoing TCP messages
-            if (serverPipeOut.TryTake(out NetworkMessage newObject))
+            while(serverPipeOut.TryTake(out NetworkMessage newObject))
             {
                 tileStream.SendStringToStream(newObject.messageType);
                 tileStream.SendBytesToStream(newObject.message);
             }
 
-            if(tileStream.Available > 0)
+            while(tileStream.Available > 0)
             {
 
                 string messageType = tileStream.GetStringFromStream();

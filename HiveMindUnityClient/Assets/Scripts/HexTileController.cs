@@ -121,7 +121,7 @@ public class HexTileController : MonoBehaviour
             return;
         }
 
-        tileStream.SendStringToStream(player.username);
+        //tileStream.SendStringToStream(player.username);
 
         serverPipeIn = new BlockingCollection<NetworkMessage>();
         serverPipeOut = new BlockingCollection<NetworkMessage>();
@@ -138,7 +138,7 @@ public class HexTileController : MonoBehaviour
                 //Send outgoing TCP messages
                 if (serverPipeOut.TryTake(out NetworkMessage newObject))
                 {
-                    Debug.Log($"Sending Message to server: (Type): {newObject.messageType} (message): {Encoding.ASCII.GetString(newObject.message)}");
+                    //Debug.Log($"Sending Message to server: (Type): {newObject.messageType} (message): {Encoding.ASCII.GetString(newObject.message)}");
                     tileStream.SendStringToStream(newObject.messageType);
                     tileStream.SendBytesToStream(newObject.message);
 
@@ -150,10 +150,10 @@ public class HexTileController : MonoBehaviour
             }
 
         }
-        catch (Exception) {
+        catch (Exception e) {
 
             Debug.Log("Failed to run message loop");
-
+            Debug.Log(e.Message);
         }
     }
 
