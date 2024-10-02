@@ -80,14 +80,14 @@ public class ServerController : MonoBehaviour
 
         StartCoroutine(InstantiateNewClients());
 
-        Thread checkIn = new Thread(() => CheckIn());
-        Thread checkWithCore = new Thread(() => CheckWithCore());
+        //Thread checkIn = new Thread(() => CheckIn());
+        //Thread checkWithCore = new Thread(() => CheckWithCore());
 
-        StartCoroutine(ReadCoreMessages());
+        //StartCoroutine(ReadCoreMessages());
 
         ClientConnectListener();
     }
-
+    /*
     void CheckWithCore()
     {
         while (true)
@@ -96,8 +96,9 @@ public class ServerController : MonoBehaviour
             string coreMes = CoreCommunication.GetStringFromStream(coreConnection);
             CoreMessages.Add(coreMes);
         }
-    }
+    }*/
 
+    /*
     IEnumerator ReadCoreMessages()
     {
         while (true)
@@ -108,8 +109,10 @@ public class ServerController : MonoBehaviour
 
             yield return new WaitForSeconds(100);
         }
-    }
+    }*/
 
+    //This CANNOT be done from any thread besides the one handling the client's TCP stream!!!
+    /*
     void CheckIn()
     {
         foreach(GameObject player in players.Values)
@@ -118,8 +121,27 @@ public class ServerController : MonoBehaviour
         }
 
         Thread.Sleep(5000);
+    }*/
+
+    public void ShoutMessage(NetworkMessage message, bool sendToNeighbors = true)
+    {
+        Debug.Log($"Shouting: {message.messageType}");
+        foreach (GameObject playerData in players.Values)
+            playerData.GetComponent<PlayerData>().serverPipeOut.Add(message);
+
+        if (!sendToNeighbors)
+            return;
+
+        //Implement neighbor communication and replace below foreach with list of neighbors.
+
+        /*
+        foreach (GameObject playerData in players.Values)
+            playerData.GetComponent<PlayerData>().serverPipeOut.Add(message);*/
     }
 
+    //I love the idea, but i think we should depreciate this and replace it with ShoutMessage(NetworkMessage message).
+    //This will allow us to send any sort of NetworkMessage, and it will make it easier to forward messages.
+    //We could also just leave both.
     public void ShoutMessage(string type, string message)
     {
         Debug.Log($"Shouting: {message}");
@@ -228,52 +250,6 @@ public class ServerController : MonoBehaviour
         }
     }
 
-    /*
-    public void SendPlayerPositionToOthers(string ipStr, Transform playerTransform)
-    {
-        byte[] ip = IPAddress.Parse(ipStr).GetAddressBytes();
-
-        byte[] posX = BitConverter.GetBytes(playerTransform.position.x);
-        byte[] posY = BitConverter.GetBytes(playerTransform.position.y);
-        byte[] posZ = BitConverter.GetBytes(playerTransform.position.z);
-
-        byte[] rotX = BitConverter.GetBytes(playerTransform.rotation.x);
-        byte[] rotY = BitConverter.GetBytes(playerTransform.rotation.y);
-        byte[] rotZ = BitConverter.GetBytes(playerTransform.rotation.z);
-        byte[] rotW = BitConverter.GetBytes(playerTransform.rotation.w);
-
-        byte[] message = new byte[28 + ip.Length];
-
-        for (int i = 0; i < 28; i++)
-        {
-            if (i < 4)
-                message[i] = posX[i];
-            else if (i < 8)
-                message[i] = posY[i - 4];
-            else if (i < 12)
-                message[i] = posZ[i - 8];
-            else if (i < 16)
-                message[i] = rotX[i - 12];
-            else if (i < 20)
-                message[i] = rotY[i - 16];
-            else if (i < 24)
-                message[i] = rotZ[i - 20];
-            else
-                message[i] = rotW[i - 24];
-        }
-
-        for(int i = 0; i < ip.Length; i++)
-            message[28 + i] = ip[i];
-
-        foreach(GameObject player in players)
-        {
-            if (player.GetComponent<PlayerData>().ip == ipStr)
-                continue;
-
-            player.GetComponent<PlayerData>().serverPipeOut.Add(new NetworkMessage("playerPos", message));
-        }
-    }*/
-
     private void HandleNewClient(TileStream client)
     {
 
@@ -285,14 +261,12 @@ public class ServerController : MonoBehaviour
             case "joinServer":
                 JoinServer(client);
                 break;
+            case "updateAvatar":
+                UpdateAvatar(client);
+                break;
 
             default: break;
         }
-    }
-
-    private void JoinServer(TileStream client)
-    {
-        playerPipe.Add(client);
     }
 
     private void GetAssets(TileStream client)
@@ -301,8 +275,6 @@ public class ServerController : MonoBehaviour
         string assetBundleDirectoryPath = Application.dataPath + "/AssetBundles";
 
         string typeOS = client.GetStringFromStream();
-
-        //string typeOS = CoreCommunication.GetStringFromStream(client);
 
         if (!(typeOS.Equals("w") || typeOS.Equals("m") || typeOS.Equals("l")))
         {
@@ -314,26 +286,12 @@ public class ServerController : MonoBehaviour
 
         string[] fileNames = Directory.GetFiles(assetBundleDirectoryPath + "/" + typeOS);
 
-        //client.Write(Encoding.ASCII.GetBytes(fileNames.Length.ToString() + (char) 0x00));
-
         client.SendBytesToStream(BitConverter.GetBytes(fileNames.Length));
 
-        foreach(string fileName in fileNames)
+        foreach (string fileName in fileNames)
         {
 
             client.SendStringToStream(new System.IO.FileInfo(fileName).Name);
-            //client.SendBytesToStream(BitConverter.GetBytes(new System.IO.FileInfo(fileName).Length));
-
-            //client.Write(Encoding.ASCII.GetBytes(new System.IO.FileInfo(fileName).Name + (char) 0x00));
-            //client.Write(Encoding.ASCII.GetBytes(((int) new System.IO.FileInfo(fileName).Length).ToString() + (char) 0x00));
-
-            //SendFile() had issues with files above ~16 KB in size on macOS, so this solution was implemented instead.
-            /*byte[] buffer = new byte[8192]; // 8 KB buffer size
-            int bytesRead;
-
-            using (FileStream fileStream = new FileStream(fileName, FileMode.Open, FileAccess.Read))
-                while ((bytesRead = fileStream.Read(buffer, 0, buffer.Length)) > 0)
-                    client.Write(buffer, 0, bytesRead);*/
 
             byte[] buffer = new byte[new System.IO.FileInfo(fileName).Length];
 
@@ -342,5 +300,32 @@ public class ServerController : MonoBehaviour
 
             client.SendBytesToStream(buffer);
         }
+    }
+
+    private void JoinServer(TileStream client)
+    {
+        playerPipe.Add(client);
+    }
+
+    void UpdateAvatar(TileStream client)
+    {
+
+        /*Steps:
+
+        * Prove client is who they say they are and are a part of this server.
+
+        * Download avatar hash. This can be used to verify that a local copy of the avatar
+        doesn't exist (saving on storage + bandwidth).
+        
+
+        * Download avatar AssetBundle.
+
+        * Set client avatar to downloaded avatar.
+        */
+
+        /*Avatar File Format:
+        "ClientID" folder containing "lastOnline" (text document), "w", "m", and "l" folders (the actual
+        platform-specific AssetBundles).
+         */
     }
 }

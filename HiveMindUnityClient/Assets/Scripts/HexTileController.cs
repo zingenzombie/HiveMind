@@ -160,21 +160,7 @@ public class HexTileController : MonoBehaviour
     public NetworkMessage GetNetworkMessage(TileStream tileStream)
     {
         string messageType = tileStream.GetStringFromStream();
-
-        /*byte[] tmpMessageLength = new byte[4];
-
-        while (serverTCPSocket.Available < 4) { }
-        
-        serverTCPSocket.Read(tmpMessageLength, 0, tmpMessageLength.Length);
-        int messageLength = BitConverter.ToInt32(tmpMessageLength, 0);*/
-
-        //while (serverTCPSocket.Available < messageLength) { }
-
-        //byte[] message = new byte[messageLength];
-
         byte[] message = tileStream.GetBytesFromStream();
-
-        //serverTCPSocket.GetStream().Read(message, 0, messageLength);
 
         return new NetworkMessage(messageType, message);
     }

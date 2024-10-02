@@ -113,6 +113,12 @@ public class PlayerData : MonoBehaviour
 
         transform.SetPositionAndRotation(new Vector3(posX,posY,posZ), new Quaternion(rotX, rotY, rotZ, rotW));
     }
+    
+    */
+    void HandleUpdateAvatar()
+    {
+
+    }
 
     void TCPThread()
     {
