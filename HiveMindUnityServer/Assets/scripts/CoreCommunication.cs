@@ -4,6 +4,7 @@ using System.Net.Sockets;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using UnityEngine;
 
 public static class CoreCommunication
 {
@@ -95,6 +96,7 @@ public static class CoreCommunication
         catch (AuthenticationException e)
         {
             Console.WriteLine("Exception: {0}", e.Message);
+            Debug.Log(e);
             if (e.InnerException != null)
             {
                 Console.WriteLine("Inner exception: {0}", e.InnerException.Message);

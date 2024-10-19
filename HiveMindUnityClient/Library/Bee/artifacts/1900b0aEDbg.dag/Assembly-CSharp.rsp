@@ -109,7 +109,6 @@
 -define:ENABLE_UNITY_COLLECTIONS_CHECKS
 -define:ENABLE_BURST_AOT
 -define:UNITY_TEAM_LICENSE
--define:UNITY_PRO_LICENSE
 -define:ENABLE_CUSTOM_RENDER_TEXTURE
 -define:ENABLE_DIRECTOR
 -define:ENABLE_LOCALIZATION
@@ -367,6 +366,7 @@
 "Assets/Scripts/ExitUpAndDown.cs"
 "Assets/Scripts/GridController.cs"
 "Assets/Scripts/HexTileController.cs"
+"Assets/Scripts/HiveClientEvents.cs"
 "Assets/Scripts/MoveExit.cs"
 "Assets/Scripts/NetworkMessage.cs"
 "Assets/Scripts/PlayerController.cs"
@@ -374,6 +374,7 @@
 "Assets/Scripts/PlayerInfo.cs"
 "Assets/Scripts/PlayerLook.cs"
 "Assets/Scripts/ServerData.cs"
+"Assets/Scripts/ServerPlayer.cs"
 "Assets/Scripts/TileStream.cs"
 "Assets/TextMesh Pro/Examples & Extras/Scripts/Benchmark01.cs"
 "Assets/TextMesh Pro/Examples & Extras/Scripts/Benchmark01_UGUI.cs"

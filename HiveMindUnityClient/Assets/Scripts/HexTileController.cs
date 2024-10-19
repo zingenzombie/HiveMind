@@ -10,12 +10,13 @@ using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
-using UnityEditor;
 using UnityEngine;
 using static UnityEngine.InputSystem.InputRemoting;
 
 public class HexTileController : MonoBehaviour
 {
+    public delegate void handleIncomingMessage(NetworkMessage pkg);
+
     int corePort;
     public int x, y;
     string coreAddress;
@@ -26,13 +27,15 @@ public class HexTileController : MonoBehaviour
     public GameObject groundHolder;
     public GameObject templateGroundHolder;
     public GameObject tileObjects;
+    public bool verified = false;
 
-    private TileStream tileStream;
+    public TileStream tileStream;
 
     private Thread serverTCP = null, serverUDP = null;
     public BlockingCollection<NetworkMessage> serverPipeIn, serverPipeOut;
 
     public Hashtable players = new Hashtable();
+    public bool activeTile = false;
 
 
     /* *** Welcome to the HexTileControler ***
@@ -60,9 +63,30 @@ public class HexTileController : MonoBehaviour
         coreAddress = GameObject.FindWithTag("Grid").GetComponent<GridController>().coreAddress.ToString();
         corePort = GameObject.FindWithTag("Grid").GetComponent<GridController>().corePort;
 
-        StartCoroutine(HandleMessage());
-
+        HiveClientEvents.OnEnteredNewTile += HandleClientEnteredNewTile;
         //ClearServer();
+    }
+
+    private void OnDisable()
+    {
+        HiveClientEvents.OnEnteredNewTile -= HandleClientEnteredNewTile;
+        Disconnect();
+    }
+
+    private void HandleClientEnteredNewTile(HexTileController tile)
+    {
+        if (tile == null) return;
+        else if (tile == this)
+        {
+            activeTile = true;
+            Debug.Log($"You entered {x},{y}");
+            ContactTileServer();
+        }
+        else
+        {
+            activeTile = false;
+            Disconnect();
+        }
     }
 
     public void ContactTileServer()
@@ -70,7 +94,7 @@ public class HexTileController : MonoBehaviour
         if (!hasServer)
             return;
 
-        serverTCP = new Thread(() => ServerTCP());
+        serverTCP = new Thread(() => ServerTCP(HandleIncomingMessage));
         serverTCP.Start();
     }
 
@@ -93,37 +117,70 @@ public class HexTileController : MonoBehaviour
             serverUDP = null;
         }catch (Exception) { }
 
-        tileStream.SendStringToStream("killMe");
-        tileStream.SendBytesToStream(new byte[0]);
+        tileStream.SendStringToStream("KillMe");
+        tileStream.SendBytesToStream(new byte[] {});
 
         tileStream.Close();
-
     }
 
-    public void ServerTCP()
+    private void HandleIncomingMessage(NetworkMessage packet)
     {
-
-        tileStream = new TileStream(new TcpClient(serverData.Ip, serverData.Port));
-        tileStream.ActivateStream(serverData.PublicKey);
-
-        tileStream.SendStringToStream("joinServer");
-
-        //Send playerID and verify player
-        tileStream.SendStringToStream(player.GetPlayerPublicRSA());
-        tileStream.SendBytesToStream(player.VerifyPlayer(tileStream.GetBytesFromStream()));
-
-        string acknowledge = tileStream.GetStringFromStream();
-        Debug.Log(acknowledge);
-
-        if (!acknowledge.Equals("ACK"))
+        var type = packet.messageType;
+        switch (type)
         {
-            Debug.Log("Failed to receive ACK from tile server!");
-            return;
+            case "UpdateTransform":
+                HandleUpdatePlayerTransform(packet.message);
+                break;
+            default:
+                break;
         }
+    }
 
-        //tileStream.SendStringToStream(player.username);
+    private void HandleUpdatePlayerTransform(byte[] transformData)
+    {
+        Debug.Log(Encoding.UTF8.GetString(transformData));
+        var pattern = Encoding.UTF8.GetBytes("ENDPID");
+        int startIndex = FindPattern(transformData, pattern);
+        byte[] PID = new byte[startIndex];
+        Array.Copy(transformData, PID, startIndex);
 
-        serverPipeIn = new BlockingCollection<NetworkMessage>();
+        Debug.Log(Encoding.UTF8.GetString(PID));
+
+        var dataLen = transformData.Length - startIndex;
+        byte[] data = new byte[24];
+
+        Array.Copy(transformData, transformData.Length - 24, data, 0, 24);
+        if (ServerPlayer.gamePlayers.ContainsKey(Encoding.UTF8.GetString(PID)))
+            ServerPlayer.gamePlayers[Encoding.UTF8.GetString(PID)].UpdateTransform(data);
+        else
+            ServerPlayer.makeNewPlayer(Encoding.UTF8.GetString(PID));
+    }
+
+
+    public static int FindPattern(byte[] byteArray, byte[] pattern)
+    {
+        for (int i = 0; i <= byteArray.Length - pattern.Length; i++)
+        {
+            bool found = true;
+            for (int j = 0; j < pattern.Length; j++)
+            {
+                if (byteArray[i + j] != pattern[j])
+                {
+                    found = false;
+                    break;
+                }
+            }
+            if (found)
+            {
+                return i; // Return the start index of the pattern in the byte array
+            }
+        }
+        return -1; // Pattern not found
+    }
+
+
+    public void ServerTCP(handleIncomingMessage handleFunc)
+    {
         serverPipeOut = new BlockingCollection<NetworkMessage>();
 
         //Should probably start the UDP thread at some point here, right?
@@ -145,8 +202,15 @@ public class HexTileController : MonoBehaviour
                 }
 
                 //Receive incoming TCP messages
-                if(tileStream.Available > 0)
-                    serverPipeIn.Add(GetNetworkMessage(tileStream));
+                while (tileStream.Available > 0)
+                {
+                    string messageType = tileStream.GetStringFromStream();
+                    byte[] message = tileStream.GetBytesFromStream();
+
+                    NetworkMessage netMessage = new NetworkMessage(messageType, message);
+
+                    GridController.mainThreadContext.Post(_ => handleFunc(netMessage), null);
+                }
             }
 
         }
@@ -177,38 +241,6 @@ public class HexTileController : MonoBehaviour
         //serverTCPSocket.GetStream().Read(message, 0, messageLength);
 
         return new NetworkMessage(messageType, message);
-    }
-
-    IEnumerator HandleMessage()
-    {
-
-        while (true)
-        {
-            yield return null;
-
-            if (!(serverPipeIn == null))
-                break;
-        }
-
-        while (true)
-        {
-            if (serverPipeIn.TryTake(out NetworkMessage message))
-            {
-                Debug.Log($"Got message (Type): {message.messageType}\n (message):{Encoding.ASCII.GetString(message.message)}");
-                switch (message.messageType)
-                {
-                    case "tempType":
-                        Debug.Log(message.message.ToString());
-                        break;
-                    case "PlayerPos":
-                        Debug.Log(message.message.ToString());
-                        break;
-                    default: break;
-                }
-            }
-
-            yield return null;
-        }
     }
 
     public void ServerUDP()
@@ -245,9 +277,10 @@ public class HexTileController : MonoBehaviour
             yield break;
 
         serverData = tmpData;
+        Debug.Log($"Got server data {serverData.Name}");
         hasServer = true;
 
-        thread = new Thread(() => ContactServerAndRequestObjects());
+        thread = new Thread(() => InitializeWithTileServer());
         thread.Start();
 
         while (true)
@@ -284,6 +317,8 @@ public class HexTileController : MonoBehaviour
             prefab.Unload(false);
         }
     }
+
+
 
     public void ContactCore(BlockingCollection<ServerData> pipe)
     {
@@ -355,10 +390,8 @@ public class HexTileController : MonoBehaviour
         ClearGroundAndTileObjects();
     }
 
-    public void ContactServerAndRequestObjects()
+    public void InitializeWithTileServer()
     {
-        TileStream tileStream;
-
         try
         {
             tileStream = new TileStream(new TcpClient(serverData.Ip, serverData.Port));
@@ -375,33 +408,46 @@ public class HexTileController : MonoBehaviour
             return;
         }
 
-        ServerConnectAndGetGameObjects(tileStream);
+        var ack = VerifyMe();
+        verified = ack;
+        if (!ack)
+            throw new Exception("You were not verified by the tile server!");
+
+        GetServerAssets();
     }
 
-    public void ServerConnectAndGetGameObjects(TileStream server)
+    private bool VerifyMe()
     {
+        tileStream.SendStringToStream(player.playerID);
+        var challenge = tileStream.GetBytesFromStream();
+        var challengeResp = player.VerifyPlayer(challenge);
+        Debug.Log(Encoding.UTF8.GetString(challenge));
+        tileStream.SendBytesToStream(challengeResp);
 
-        server.SendStringToStream("getAssets");
+        return tileStream.GetStringFromStream() == "ACK";
+    }
 
+    public void GetServerAssets()
+    {
         switch (Application.platform)
         {
             case RuntimePlatform.WindowsPlayer:
             case RuntimePlatform.WindowsEditor:
-                server.SendStringToStream("w");
+                tileStream.SendStringToStream("w");
                 break;
             case RuntimePlatform.OSXPlayer:
             case RuntimePlatform.OSXEditor:
-                server.SendStringToStream("m");
+                tileStream.SendStringToStream("m");
                 break;
             case RuntimePlatform.LinuxPlayer:
             case RuntimePlatform.LinuxEditor:
-                server.SendStringToStream("l");
+                tileStream.SendStringToStream("l");
                 break;
             default:
                 throw new Exception("Unsupported OS");
         }
 
-        int numFiles = BitConverter.ToInt32(server.GetBytesFromStream());
+        int numFiles = BitConverter.ToInt32(tileStream.GetBytesFromStream());
 
         string assetBundleDirectoryPath = Application.dataPath + "/AssetBundles/" + x + "," + y + "/";
 
@@ -410,9 +456,9 @@ public class HexTileController : MonoBehaviour
 
         for(int i = 0; i < numFiles; i++)
         {
-            string fileName = server.GetStringFromStream();
+            string fileName = tileStream.GetStringFromStream();
 
-            byte[] fileBuffer = server.GetBytesFromStream();
+            byte[] fileBuffer = tileStream.GetBytesFromStream();
 
             System.IO.File.WriteAllBytes(assetBundleDirectoryPath + fileName, fileBuffer);
         }

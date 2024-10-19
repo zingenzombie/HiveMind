@@ -867,6 +867,7 @@ MonoBehaviour:
   walkSpeed: 30
   mainCamera: {fileID: 9210169823822129874}
   jumpPower: 10
+  timer: 2
 --- !u!33 &6880439479789486508
 MeshFilter:
   m_ObjectHideFlags: 0

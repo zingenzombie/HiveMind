@@ -1,36 +1,108 @@
 using System;
 using System.Collections;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Security.Cryptography;
+using System.Text;
 using System.Threading;
+using Unity.VisualScripting;
+using UnityEditor.Sprites;
 using UnityEngine;
 
 public class PlayerData : MonoBehaviour
 {
+    public delegate void handleMessage(NetworkMessage message);
+    public static List<PlayerData> ServerPlayers;
     public string playerID;
     public string username;
     public TileStream tileStream;
     public UdpClient udpClient;
     public IPEndPoint remoteEP;
+    public bool verified = false;
     ServerController serverController;
-
-    Coroutine messageHandler;
 
     Thread udpThread, tcpThread;
 
-    public BlockingCollection<NetworkMessage> serverPipeIn, serverPipeOut;
+    public BlockingCollection<NetworkMessage> serverPipeOut;
+
+    public static void SpawnNewPlayer(TileStream clientStream)
+    {
+        var newPlayer = Instantiate(Resources.Load("TemplatePlayerPref"), GameObject.FindGameObjectWithTag("PlayerContainer").transform);
+        newPlayer.GetComponent<PlayerData>().InitializePlayerData(clientStream);
+    }
 
     public void InitializePlayerData(TileStream client)
     {        
         serverController = GameObject.FindWithTag("ServerController").GetComponent<ServerController>();
 
         tileStream = client;
+        serverPipeOut = new BlockingCollection<NetworkMessage>();
 
-        //Get playerID and verify player
+        var verification = new Thread(() => HandleVerification());
+        verification.Start();
+
+        tcpThread = new Thread(() => TCPThread(HandleIncomingClientMessage));
+    }
+
+    private void HandleIncomingClientMessage(NetworkMessage packet)
+    {
+        var type = packet.messageType;
+
+        switch (type) {
+            case "GetAssets":
+                GetAssets(packet.message);
+                break;
+            case "KillMe":
+                HandleKillSwitch();
+                break;
+            case "UpdateTransform":
+                UpdatePlayerPosAndRot(packet.message);
+
+                var newPacket = new NetworkMessage(type, ConcatByteArrays(Encoding.UTF8.GetBytes($"{playerID}ENDPID"), packet.message));
+
+                HiveServerEvents.callGlobalPlayerMessage(this, newPacket);
+                break;
+            default:
+                break;
+        }
+    }
+
+    static byte[] ConcatByteArrays(params byte[][] arrays)
+    {
+        // Calculate the total length of all arrays
+        int totalLength = 0;
+        foreach (byte[] array in arrays)
+        {
+            totalLength += array.Length;
+        }
+
+        // Create a new byte array to hold all concatenated arrays
+        byte[] result = new byte[totalLength];
+
+        // Copy each array into the result array
+        int offset = 0;
+        foreach (byte[] array in arrays)
+        {
+            Buffer.BlockCopy(array, 0, result, offset, array.Length);
+            offset += array.Length;
+        }
+
+        return result;
+    }
+
+    private void HandleKillSwitch()
+    {
+        Debug.Log($"Killing connection with {playerID}");
+        Destroy(gameObject);
+    }
+
+    private void HandleVerification()
+    {
         playerID = tileStream.GetStringFromStream();
-        
+
         if (!VerifyPlayer())
         {
             //serverController.KillPlayer(tileStream);
@@ -38,68 +110,45 @@ public class PlayerData : MonoBehaviour
             return;
         }
 
-        Debug.Log("Client verified");
-
         tileStream.SendStringToStream("ACK");
 
         username = playerID;
 
-        serverPipeIn = new BlockingCollection<NetworkMessage>(); //Will need to be separated into udp and tcp pipes!
-        serverPipeOut = new BlockingCollection<NetworkMessage>();
+        var osType = tileStream.GetStringFromStream();
+        GetAssets(Encoding.UTF8.GetBytes(osType));
 
-        messageHandler = StartCoroutine(HandleMessages());
-
-        tcpThread = new Thread(() => TCPThread());
         tcpThread.Start();
-
-        //udpThread = new Thread(() => UDPThread());
-        //udpThread.Start();
     }
 
-    IEnumerator HandleMessages()
+    private void Start()
     {
-        while (true)
-        {
-            if (serverPipeIn.TryTake(out NetworkMessage message))
-            {
-                var exec = message.messageType;
-                Debug.Log(exec);
-                switch (exec)
-                {
-                    case "PlayerPos":
-                        UpdatePlayerPosAndRot(message);
-                        break;
-                    case "killMe":
-                        HandleKill();
-                        break;
-                    default: break;
-                }
-            }
-            yield return null;
-        }
+        HiveServerEvents.OnGlobalPlayerMessage += HandleGlobalMessage;
+    }
+
+    private void HandleGlobalMessage(PlayerData originator, NetworkMessage msg)
+    {
+        if(originator != this)
+            serverPipeOut.Add(msg);
     }
 
     private void OnDestroy()
     {
-
-        serverPipeIn.Dispose();
-        serverPipeOut.Dispose();
         tcpThread.Abort();
-        //udpThread.Abort();
-
-        StopCoroutine(messageHandler);
-
+        tileStream.Close();
+        serverPipeOut.Dispose();
+        HiveServerEvents.OnGlobalPlayerMessage -= HandleGlobalMessage;
     }
 
-    private void HandleKill()
+    private void OnDisable()
     {
-        serverController.KillPlayer(playerID);
+        tcpThread.Abort();
+        tileStream.Close();
+        serverPipeOut.Dispose();
+        HiveServerEvents.OnGlobalPlayerMessage -= HandleGlobalMessage;
     }
 
-    void UpdatePlayerPosAndRot(NetworkMessage message)
+    void UpdatePlayerPosAndRot(byte[] transformInfo)
     {
-        Debug.Log(message.messageType);
-        byte[] transformInfo = message.message;
         //***CHECK THAT MESSAGE TIME IS NEWER THAN CURRENT UPDATE***
 
         float posX = BitConverter.ToSingle(transformInfo, 0);
@@ -109,25 +158,16 @@ public class PlayerData : MonoBehaviour
         float rotX = BitConverter.ToSingle(transformInfo, 12);
         float rotY = BitConverter.ToSingle(transformInfo, 16);
         float rotZ = BitConverter.ToSingle(transformInfo, 20);
-        float rotW = BitConverter.ToSingle(transformInfo, 24);
 
-        transform.SetPositionAndRotation(new Vector3(posX,posY,posZ), new Quaternion(rotX, rotY, rotZ, rotW));
+        transform.position = new Vector3(posX, posY, posZ);
+        transform.rotation = Quaternion.Euler(rotX, rotY, rotZ);
     }
 
-    void TCPThread()
+    void TCPThread(handleMessage handleFunc)
     {
 
         while (true)
         {
-            if (!tileStream.Connected) 
-            {
-                tileStream.Close();
-                HandleMessage(new NetworkMessage("killMe", new byte[0]));
-
-                break;
-            }
-
-            //Send outgoing TCP messages
             while(serverPipeOut.TryTake(out NetworkMessage newObject))
             {
                 tileStream.SendStringToStream(newObject.messageType);
@@ -136,18 +176,16 @@ public class PlayerData : MonoBehaviour
 
             while(tileStream.Available > 0)
             {
-
                 string messageType = tileStream.GetStringFromStream();
+
                 byte[] message = tileStream.GetBytesFromStream();
 
                 NetworkMessage netMessage = new NetworkMessage(messageType, message);
-
-                //Debug.Log($"Recieved message from {playerID} saying: (Type: {Encoding.ASCII.GetString(message)})");
-               // Debug.Log($"(message: {messageType})");
-                HandleMessage(netMessage);
+                ServerController.mainThreadContext.Post(_ => handleFunc(netMessage), null);
             }
         }
     }
+
     public static bool IsConnected(TileStream _tcpClient)
     {
         try
@@ -206,11 +244,6 @@ public class PlayerData : MonoBehaviour
         }
     }*/
 
-    private void HandleMessage(NetworkMessage message)
-    {
-        serverPipeIn.Add(message);
-    }
-
     private bool VerifyPlayer()
     {
 
@@ -234,5 +267,50 @@ public class PlayerData : MonoBehaviour
                 return false;
 
         return true;
+    }
+
+    private void GetAssets(byte[] msg)
+    {
+        var typeOS = Encoding.UTF8.GetString(msg);
+        string assetBundleDirectoryPath = Application.dataPath + "/AssetBundles";
+
+        //string typeOS = CoreCommunication.GetStringFromStream(client);
+
+        if (!(typeOS.Equals("w") || typeOS.Equals("m") || typeOS.Equals("l")))
+        {
+            Debug.Log("Client sent invalid OS type.");
+            return;
+        }
+
+        string[] fileNames = Directory.GetFiles(assetBundleDirectoryPath + "/" + typeOS);
+
+        //client.Write(Encoding.ASCII.GetBytes(fileNames.Length.ToString() + (char) 0x00));
+
+        tileStream.SendBytesToStream(BitConverter.GetBytes(fileNames.Length));
+
+        foreach (string fileName in fileNames)
+        {
+
+            tileStream.SendStringToStream(new System.IO.FileInfo(fileName).Name);
+            //client.SendBytesToStream(BitConverter.GetBytes(new System.IO.FileInfo(fileName).Length));
+
+            //client.Write(Encoding.ASCII.GetBytes(new System.IO.FileInfo(fileName).Name + (char) 0x00));
+            //client.Write(Encoding.ASCII.GetBytes(((int) new System.IO.FileInfo(fileName).Length).ToString() + (char) 0x00));
+
+            //SendFile() had issues with files above ~16 KB in size on macOS, so this solution was implemented instead.
+            /*byte[] buffer = new byte[8192]; // 8 KB buffer size
+            int bytesRead;
+
+            using (FileStream fileStream = new FileStream(fileName, FileMode.Open, FileAccess.Read))
+                while ((bytesRead = fileStream.Read(buffer, 0, buffer.Length)) > 0)
+                    client.Write(buffer, 0, bytesRead);*/
+
+            byte[] buffer = new byte[new System.IO.FileInfo(fileName).Length];
+
+            using (FileStream fileStream = new FileStream(fileName, FileMode.Open, FileAccess.Read))
+                fileStream.Read(buffer);
+
+            tileStream.SendBytesToStream(buffer);
+        }
     }
 }

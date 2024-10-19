@@ -162,8 +162,7 @@ MonoBehaviour:
   y: 1
   serverName: testServer
   ownerID: Zin
-  playerPrefab: {fileID: 4302254615625725645, guid: 1f088450dacacb0429520eb56f7a2fe3, type: 3}
-  Players: {fileID: 2007970680}
+  PlayersContainer: {fileID: 0}
   DynamicObjects: {fileID: 628714864}
   hexTileTemplate: {fileID: 7693739768744577133, guid: 142239a109042df4ab372023a3b13902, type: 3}
   initialized: 0
@@ -413,7 +412,7 @@ GameObject:
   - component: {fileID: 2007970681}
   m_Layer: 0
   m_Name: Players
-  m_TagString: Untagged
+  m_TagString: PlayerContainer
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

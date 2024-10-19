@@ -366,6 +366,7 @@
 "Assets/Scripts/ExitUpAndDown.cs"
 "Assets/Scripts/GridController.cs"
 "Assets/Scripts/HexTileController.cs"
+"Assets/Scripts/HiveClientEvents.cs"
 "Assets/Scripts/MoveExit.cs"
 "Assets/Scripts/NetworkMessage.cs"
 "Assets/Scripts/PlayerController.cs"

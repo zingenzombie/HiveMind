@@ -9,11 +9,13 @@ using System.Net.Security;
 using System.Net.Sockets;
 using System.Numerics;
 using System.Text;
+using System.Threading;
 using Unity.VisualScripting;
 using UnityEngine;
 
 public class GridController : MonoBehaviour
 {
+    public static SynchronizationContext mainThreadContext;
     public int corePort;
     public string coreIPString;
     public IPAddress coreAddress;
@@ -61,7 +63,8 @@ public class GridController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-
+        ServerPlayer.gamePlayers = new Dictionary<string, ServerPlayer> { };
+        mainThreadContext = SynchronizationContext.Current;
         //Delete this later and fix
         if (!IPAddress.TryParse(coreIPString, out coreAddress))
             coreAddress = Dns.Resolve(coreIPString).AddressList[0];
@@ -73,11 +76,9 @@ public class GridController : MonoBehaviour
         if (Directory.Exists(assetBundleDirectoryPath))
             clearFolder(assetBundleDirectoryPath);
 
-
         tileSize = hexTileTemplate.GetComponent<Renderer>().bounds.size.z;
 
         SpawnTiles();
-
 
         exitTile = Instantiate(exitTilePrefab, ((GameObject)grid[new Key(0, 0)]).transform);
 
@@ -184,10 +185,9 @@ public class GridController : MonoBehaviour
         exitTileMove.y = newY;
 
         NetworkController.activeServer = ((GameObject)grid[new Key(newX, newY)]).GetComponent<HexTileController>();
+        HiveClientEvents.callTileChange(NetworkController.activeServer);
 
         SpawnTiles(newX, newY);
-
-        ((GameObject)grid[new Key(newX, newY)]).GetComponent<HexTileController>().ContactTileServer();
     }
 
     void SpawnTile(int x, int y/*, SslStream tcpClient*/)

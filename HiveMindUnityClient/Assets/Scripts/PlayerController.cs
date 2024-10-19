@@ -1,4 +1,6 @@
 using System;
+using System.ComponentModel;
+using System.Text;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -24,55 +26,62 @@ public class PlayerController : MonoBehaviour
 
     Vector3 oldPosition;
     Quaternion oldRotation;
+    public float timer = .01f;
 
     void Update()
     {
         Run();
         
         transform.GetPositionAndRotation(out Vector3 newPosition, out Quaternion newRotation);
+        timer -= Time.deltaTime;
         //Vector 3 is 12 bytes and Quaternion is 16 bytes.
-        if(oldPosition != newPosition || oldRotation != newRotation)
+        if((oldPosition != newPosition || oldRotation != newRotation) && timer < 0)
         {
+            timer = .01f;
 
             oldPosition = newPosition;
             oldRotation = newRotation;
+            var eulerRot = newRotation.eulerAngles;
 
-            byte[] posX = BitConverter.GetBytes(newPosition.x);
-            byte[] posY = BitConverter.GetBytes(newPosition.y);
-            byte[] posZ = BitConverter.GetBytes(newPosition.z);
+            var x = BitConverter.GetBytes(newPosition.x);
+            var y = BitConverter.GetBytes(newPosition.y);
+            var z = BitConverter.GetBytes(newPosition.z);
 
-            byte[] rotX = BitConverter.GetBytes(newRotation.x);
-            byte[] rotY = BitConverter.GetBytes(newRotation.y);
-            byte[] rotZ = BitConverter.GetBytes(newRotation.z);
-            byte[] rotW = BitConverter.GetBytes(newRotation.w);
+            var rotx = BitConverter.GetBytes(eulerRot.x);
+            var roty = BitConverter.GetBytes(eulerRot.y);
+            var rotz = BitConverter.GetBytes(eulerRot.z);
 
-            byte[] message = new byte[28];
+            var message = ConcatByteArrays(x, y, z, rotx, roty, rotz);
 
-            for(int i = 0; i < 28; i++)
-            {
-                if (i < 4)
-                    message[i] = posX[i];
-                else if (i < 8)
-                    message[i] = posY[i - 4];
-                else if (i < 12)
-                    message[i] = posZ[i - 8];
-                else if (i < 16)
-                    message[i] = rotX[i - 12];
-                else if (i < 20)
-                    message[i] = rotY[i - 16];
-                else if (i < 24)
-                    message[i] = rotZ[i - 20];
-                else
-                    message[i] = rotW[i - 24];
-            }
-
-            NetworkMessage netMessage = new NetworkMessage("PlayerPos", message);
+            NetworkMessage netMessage = new NetworkMessage("UpdateTransform", message);
 
             NetworkController.SendTCPMessage(netMessage);
-
         }
     }
-    
+
+    static byte[] ConcatByteArrays(params byte[][] arrays)
+    {
+        // Calculate the total length of all arrays
+        int totalLength = 0;
+        foreach (byte[] array in arrays)
+        {
+            totalLength += array.Length;
+        }
+
+        // Create a new byte array to hold all concatenated arrays
+        byte[] result = new byte[totalLength];
+
+        // Copy each array into the result array
+        int offset = 0;
+        foreach (byte[] array in arrays)
+        {
+            Buffer.BlockCopy(array, 0, result, offset, array.Length);
+            offset += array.Length;
+        }
+
+        return result;
+    }
+
     void Run()
     {
 

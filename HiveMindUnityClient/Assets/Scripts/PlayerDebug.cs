@@ -8,8 +8,13 @@ public class PlayerDebug : MonoBehaviour
     public TextMeshProUGUI debugText;
     public string username = null;
 
-    public void updateDebugInfo(GameObject currentTile)
+    private void Start()
     {
-        debugText.text = $"User: {username}\nOn Tile: {currentTile}";
+        HiveClientEvents.OnEnteredNewTile += updateDebugInfo;
+    }
+
+    public void updateDebugInfo(HexTileController hex)
+    {
+        debugText.text = $"User: {username}\nOn Tile: {hex.x},{hex.y}";
     }
 }
