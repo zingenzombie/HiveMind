@@ -421,7 +421,7 @@ public class HexTileController : MonoBehaviour
         tileStream.SendStringToStream(player.playerID);
         var challenge = tileStream.GetBytesFromStream();
         var challengeResp = player.VerifyPlayer(challenge);
-        Debug.Log(Encoding.UTF8.GetString(challenge));
+        //Debug.Log(Encoding.UTF8.GetString(challenge));
         tileStream.SendBytesToStream(challengeResp);
 
         return tileStream.GetStringFromStream() == "ACK";
