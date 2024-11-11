@@ -157,7 +157,7 @@ MonoBehaviour:
   serverIPString: 127.0.0.1
   coreIPString: hive.honeydragonproductions.com
   requestXY: 1
-  port: 3622
+  port: 3623
   x: 0
   y: 1
   serverName: testServer
