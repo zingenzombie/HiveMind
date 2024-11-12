@@ -60,6 +60,7 @@
   <ItemGroup>
     <Compile Include="Assets\scripts\NetworkMessage.cs" />
     <Compile Include="Assets\scripts\ServerController.cs" />
+    <Compile Include="Assets\scripts\ObjectDecomponser.cs" />
     <Compile Include="Assets\scripts\CoreCommunication.cs" />
     <Compile Include="Assets\scripts\ServerData.cs" />
     <Compile Include="Assets\scripts\PlayerData.cs" />

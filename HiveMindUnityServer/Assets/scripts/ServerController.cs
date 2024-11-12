@@ -56,6 +56,13 @@ public class ServerController : MonoBehaviour
     // Start is called before the first frame update
     private void Start()
     {
+
+        FileStream fs = File.Create("newFile");
+
+        ObjectDecomponser.BreadthFirstStaticDecompose(GameObject.FindWithTag("TESTTARGET"), fs);
+
+        fs.Close();
+
         localRSA = new RSACryptoServiceProvider();
 
         ipAddress = IPAddress.Parse(serverIPString);
