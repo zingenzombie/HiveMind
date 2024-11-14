@@ -57,11 +57,18 @@ public class ServerController : MonoBehaviour
     private void Start()
     {
 
+        if (File.Exists("newFile"))
+            File.Delete("newFile");
+
+        //This is just to temporarily break down and instantiate a test object
+
+        //FOR TESTING DECOMPOSER + COMPOSER
         FileStream fs = File.Create("newFile");
-
         ObjectDecomponser.BreadthFirstStaticDecompose(GameObject.FindWithTag("TESTTARGET"), fs);
-
         fs.Close();
+
+        fs = File.Open("newFile", FileMode.Open);
+        ObjectComposer.BreadthFirstStaticCompose(this.gameObject, fs);
 
         localRSA = new RSACryptoServiceProvider();
 

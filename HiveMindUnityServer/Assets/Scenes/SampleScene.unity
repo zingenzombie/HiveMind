@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 705507994}
-  m_IndirectSpecularColor: {r: 0.44657898, g: 0.4964133, b: 0.5748178, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657815, g: 0.49641192, b: 0.5748165, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -859,7 +859,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 5818841478622339675, guid: fce69f2ef6769284b918248fb242912c, type: 3}
+  - {fileID: 2100000, guid: 93026c718a3bf45bcb36f3d6b8b535e1, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1257,6 +1257,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6860578733548451946}
+  - component: {fileID: 6860578733548451947}
   m_Layer: 0
   m_Name: HiveDrone
   m_TagString: TESTTARGET
@@ -1306,9 +1307,9 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6088440836313408208}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.64, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 5180233823887890338}
@@ -1320,8 +1321,16 @@ Transform:
   - {fileID: 2094712505661361061}
   - {fileID: 1170598624809577830}
   - {fileID: 4159891802937746067}
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 8957353514390141139}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!33 &6860578733548451947
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6088440836313408208}
+  m_Mesh: {fileID: -69760931014144829, guid: fce69f2ef6769284b918248fb242912c, type: 3}
 --- !u!33 &6910646448179737128
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -1475,7 +1484,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 93026c718a3bf45bcb36f3d6b8b535e1, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1571,7 +1580,8 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 6860578733548451946}
   m_Father: {fileID: 2115727471202422422}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1660057539 &9223372036854775807
@@ -1581,4 +1591,3 @@ SceneRoots:
   - {fileID: 705507995}
   - {fileID: 534617745}
   - {fileID: 2115727471202422422}
-  - {fileID: 6860578733548451946}
