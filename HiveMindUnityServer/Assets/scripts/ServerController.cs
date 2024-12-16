@@ -57,26 +57,21 @@ public class ServerController : MonoBehaviour
     private void Start()
     {
 
-        if (File.Exists("newFile"))
-            File.Delete("newFile");
-
-        //This is just to temporarily break down and instantiate a test object
-
-        //FOR TESTING DECOMPOSER + COMPOSER
-        FileStream fs = File.Create("newFile");
-        ObjectDecomponser.BreadthFirstStaticDecompose(GameObject.FindWithTag("TESTTARGET"), fs);
-        fs.Close();
-
-        fs = File.Open("newFile", FileMode.Open);
-        ObjectComposer.BreadthFirstStaticCompose(this.gameObject, fs);
-
         localRSA = new RSACryptoServiceProvider();
 
         ipAddress = IPAddress.Parse(serverIPString);
 
-        //Delete this later and fix
-        if(!IPAddress.TryParse(coreIPString, out coreAddress))
-            coreAddress = Dns.Resolve(coreIPString).AddressList[0];
+        if (!IPAddress.TryParse(coreIPString, out coreAddress))
+        {
+            try
+            {
+                coreAddress = Dns.GetHostAddresses(coreIPString)[0];
+            }catch(Exception)
+            {
+                throw new Exception("No address was returned in the DNS lookup for the core server.");
+            }
+
+        }
 
         //groundHolder = hexTile.transform.GetChild(0).gameObject;
         groundHolder = hexTile.transform.GetChild(1).gameObject;
@@ -94,48 +89,8 @@ public class ServerController : MonoBehaviour
 
         StartCoroutine(InstantiateNewClients());
 
-        //Thread checkIn = new Thread(() => CheckIn());
-        //Thread checkWithCore = new Thread(() => CheckWithCore());
-
-        //StartCoroutine(ReadCoreMessages());
-
         ClientConnectListener();
     }
-    /*
-    void CheckWithCore()
-    {
-        while (true)
-        {
-            Thread.Sleep(5000);
-            string coreMes = CoreCommunication.GetStringFromStream(coreConnection);
-            CoreMessages.Add(coreMes);
-        }
-    }*/
-
-    /*
-    IEnumerator ReadCoreMessages()
-    {
-        while (true)
-        {
-            if (CoreMessages.TryTake(out string mes))
-                Debug.Log(mes);
-
-
-            yield return new WaitForSeconds(100);
-        }
-    }*/
-
-    //This CANNOT be done from any thread besides the one handling the client's TCP stream!!!
-    /*
-    void CheckIn()
-    {
-        foreach(GameObject player in players.Values)
-        {
-            PlayerData.IsConnected(player.GetComponent<PlayerData>().tileStream);
-        }
-
-        Thread.Sleep(5000);
-    }*/
 
     public void ShoutMessage(NetworkMessage message, bool sendToNeighbors = true)
     {

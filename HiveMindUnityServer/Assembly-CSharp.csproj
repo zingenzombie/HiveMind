@@ -59,6 +59,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets/Scripts/PlayerData.cs" />
+    <Compile Include="Assets/Scripts/GameObjectID.cs" />
     <Compile Include="Assets/Scripts/ObjectComposer.cs" />
     <Compile Include="Assets/Scripts/TileStream.cs" />
     <Compile Include="Assets/Scripts/ObjectDecomponser.cs" />

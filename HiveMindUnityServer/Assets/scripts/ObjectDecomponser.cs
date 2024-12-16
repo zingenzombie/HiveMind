@@ -1,31 +1,75 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Security.Cryptography;
 using System.Text;
 using UnityEngine;
 
-public static class ObjectDecomponser {
+public class ObjectDecomponser : MonoBehaviour
+{
+    static string objectDirectory = "objectDirectory/";
 
-    /* Welcome to the ObjectDecomposer class.
-     * 
-     * This class breaks down a GameObject, including its children and supported components,
-     * into a file, which can be composed by ObjectComposer into a perfect replica of the original object.
-     * 
-     * If you wish to add a new component, simply add its type to the Decompose components switch statement
-     * and define a decomposer for it. Don't forget to mirror your handler on the ObjectComposer.cs script!
-     */
+    static string tmpObjectPath = "tmpObjectFile";
+    static string tmpComponentPath = "tmpComponentFile";
+    static string tmpBytePath = "tmpByteFile";
 
+    int id;
 
+    List<GameObject> objectsByID;
 
-    /*File Format (ALL ENTRIES ARE PRECEEDED BY THE BYTE LENGTH OF THEIR VALUE AS INTS):
-     * Name
-     * Number of components
-     * Number of children
-     * Components (Need a defined function to handle every component type, including their dependencies)
-     * Children (Breadth First Decomposition)
-     */
-
-    public static void BreadthFirstStaticDecompose(GameObject decomposable, FileStream fs)
+    struct ObjectTree
     {
+        public string objectHash;
+        public List<ObjectTree> children;
+    }
+
+    public string Decompose(GameObject objectToDecompose)
+    {
+        //Reset in case of re-use of decomposer
+        id = 0;
+        objectsByID = new List<GameObject>();
+
+        //The actual decomposition process:
+
+        //Give each gameobject an ID and add them to the list
+        prepareGameObjects(objectToDecompose);
+
+        //Break down the gameobjects and components into their respective files by hashes
+        ObjectTree tree = breadthFirstDecompose(objectToDecompose);
+
+        //Write tree
+        string fileName = writeTree(tree);
+
+        //Clear IDs (this isn't strictly necessary, but it does prevent extra components from being awkwardly left behind when not needed)
+        foreach (var iter in objectsByID)
+            Destroy(iter.GetComponent<GameObjectID>());
+
+        return fileName;
+    }
+
+    void prepareGameObjects(GameObject decomposable)
+    {
+
+        objectsByID.Add(decomposable);
+
+        //This should always run, but it's here in case someone accidentally adds the GameObjectID script to an object.
+        if(decomposable.GetComponent<GameObjectID>() == null)
+            decomposable.AddComponent<GameObjectID>();
+
+        decomposable.GetComponent<GameObjectID>().id = id++;
+
+        int numChildren = decomposable.transform.childCount;
+
+        for (int i = 0; i < numChildren; i++)
+            prepareGameObjects(decomposable.transform.GetChild(i).gameObject);
+    }
+
+    ObjectTree breadthFirstDecompose(GameObject decomposable)
+    {
+
+        FileStream fs = startTmpFile(tmpObjectPath);
+
+        ObjectTree root = new ObjectTree();
 
         Write(decomposable.name, fs);
 
@@ -38,33 +82,91 @@ public static class ObjectDecomponser {
         //Decompose components
         foreach (Component component in components)
         {
+
             string componentType = component.GetType().FullName;
-            switch(componentType)
+
+            if (componentType == "GameObjectID")
+                continue;
+
+            FileStream fsComponent = startTmpFile(tmpComponentPath);
+
+            switch (componentType)
             {
                 case "UnityEngine.Transform":
-                    UnityEngine_Transform((Transform) component, fs);
+                    UnityEngine_Transform((Transform)component, fsComponent);
                     break;
 
                 case "UnityEngine.MeshFilter":
-                    UnityEngine_MeshFilter((MeshFilter) component, fs);
+                    UnityEngine_MeshFilter((MeshFilter)component, fsComponent);
                     break;
 
                 case "UnityEngine.MeshRenderer":
-                    UnityEngine_MeshRenderer((MeshRenderer) component, fs);
+                    UnityEngine_MeshRenderer((MeshRenderer)component, fsComponent);
                     break;
 
                 default:
-
-                    //TEMPORARY
-                    return;
-
+                    fs.Close();
+                    File.Delete(objectDirectory + tmpComponentPath);
                     throw new Exception("Cannot decompose component of type " + componentType);
             }
+
+            fileHashRename(fs, tmpObjectPath);
         }
 
+        fileHashRename(fs, tmpObjectPath);
+
         //Decompose children
-        for(int i = 0; i < numChildren; i++)
-            BreadthFirstStaticDecompose(decomposable.transform.GetChild(i).gameObject, fs);
+        for (int i = 0; i < numChildren; i++)
+            root.children.Add(breadthFirstDecompose(decomposable.transform.GetChild(i).gameObject));
+
+        return root;
+    }
+
+    string writeTree(ObjectTree tree)
+    {
+        FileStream fs = startTmpFile(tmpObjectPath);
+
+        writeRecursive(tree, fs);
+
+        return fileHashRename(fs, tmpObjectPath);
+    }
+
+    void writeRecursive(ObjectTree tree, FileStream fs)
+    {
+
+        Write(tree.objectHash, fs);
+
+        foreach (var iter in tree.children)
+            writeRecursive(iter, fs);
+    }
+
+    //Creates a temporary filestream to be closed by fileHashRename
+    FileStream startTmpFile(string path)
+    {
+
+        if (File.Exists(objectDirectory + path))
+            File.Delete(objectDirectory + path);
+
+        return File.Create(objectDirectory + path);
+    }
+
+    //Renames files 
+    string fileHashRename(FileStream fs, string path)
+    {
+
+        fs.Position = 0;
+
+        //Finish file construction
+        byte[] hash = SHA256.Create().ComputeHash(fs);
+        string hashStr = BitConverter.ToString(hash).Replace("-", "").ToLower();
+
+        fs.Close();
+
+        if (!File.Exists(objectDirectory + hashStr))
+            File.Move(objectDirectory + path, objectDirectory + hashStr);
+
+        return hashStr;
+
     }
 
 
@@ -95,7 +197,7 @@ public static class ObjectDecomponser {
      * 0 If no mesh 1 if mesh
      * Mesh(?)
      */
-    static void UnityEngine_MeshFilter(MeshFilter component, FileStream fs)
+    void UnityEngine_MeshFilter(MeshFilter component, FileStream fs)
     {
         Write("UnityEngine.MeshFilter", fs);
 
@@ -109,7 +211,7 @@ public static class ObjectDecomponser {
 
         Write(1, fs);
 
-        DecomposeMesh(mesh, fs);
+        DecomposeMesh(mesh);
 
     }
 
@@ -118,7 +220,7 @@ public static class ObjectDecomponser {
      * Number of materials
      * Materials
      */
-    static void UnityEngine_MeshRenderer(MeshRenderer component, FileStream fs)
+    void UnityEngine_MeshRenderer(MeshRenderer component, FileStream fs)
     {
         Write("UnityEngine.MeshRenderer", fs);
 
@@ -126,7 +228,7 @@ public static class ObjectDecomponser {
         Write(materials.Length, fs);
 
         foreach(Material material in materials)
-            DecomposeMaterial(material, fs);
+            DecomposeMaterial(material);
         
     }
 
@@ -177,8 +279,10 @@ public static class ObjectDecomponser {
      * Number of normals
      * Normals
      */
-    static void DecomposeMesh(Mesh mesh, FileStream fs)
+    void DecomposeMesh(Mesh mesh)
     {
+
+        FileStream fs = startTmpFile(tmpBytePath);
 
         Vector3[] vertices = mesh.vertices;
         Write(vertices.Length, fs);
@@ -198,14 +302,19 @@ public static class ObjectDecomponser {
         foreach (Vector3 normal in normals)
             Write(normal, fs);
 
+        fileHashRename(fs, tmpBytePath);
     }
 
-    static void DecomposeMaterial(Material material, FileStream fs)
+    void DecomposeMaterial(Material material)
     {
         //Need to create standardized trusted shaders.
 
+        FileStream fs = startTmpFile(tmpBytePath);
+
         Color color = material.color;
         DecomposeColor(color, fs);
+
+        fileHashRename(fs, tmpBytePath);
     }
 
     static void DecomposeColor(Color color, FileStream fs)
