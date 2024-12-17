@@ -38,24 +38,29 @@ public class ServerController : MonoBehaviour
 
     BlockingCollection<TileStream> playerPipe = new BlockingCollection<TileStream>();
 
-    Thread coreListener;
-    BlockingCollection<string> CoreMessages = new BlockingCollection<string>();
-
     public Dictionary<string, GameObject> players = new Dictionary<string, GameObject>();
-
-    SslStream coreConnection;
 
     private void OnApplicationQuit()
     {
         if(listen != null)
             listen.Abort();
-        if(coreListener != null)
-            coreListener.Abort();
     }
 
     // Start is called before the first frame update
     private void Start()
     {
+
+        GameObject testObject = GameObject.FindWithTag("TESTTARGET");
+
+        ObjectDecomposer decomposer = ScriptableObject.CreateInstance<ObjectDecomposer>();
+
+        string objectHash = decomposer.Decompose(testObject);
+
+        ObjectComposer composer = ScriptableObject.CreateInstance<ObjectComposer>();
+
+        composer.Compose(objectHash).transform.parent = this.transform;
+
+
 
         localRSA = new RSACryptoServiceProvider();
 
@@ -173,7 +178,6 @@ public class ServerController : MonoBehaviour
         using TcpClient client = new TcpClient(coreAddress.ToString(), corePort);
 
         SslStream sslStream = CoreCommunication.EstablishSslStreamFromTcpAsClient(client);
-        coreConnection = sslStream;
 
         //telling the core what kind of connection this is
         CoreCommunication.SendStringToStream(sslStream, "server");
@@ -196,6 +200,8 @@ public class ServerController : MonoBehaviour
 
         if(tileReqResult.Contains("GRANTED"))
             initialized = true;
+
+        sslStream.Close();
     }
 
     private void ListenForClientsTCP()

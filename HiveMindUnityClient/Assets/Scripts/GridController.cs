@@ -1,15 +1,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Data;
 using System.IO;
 using System.Net;
-using System.Net.Http;
-using System.Net.Security;
-using System.Net.Sockets;
-using System.Numerics;
-using System.Text;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class GridController : MonoBehaviour
@@ -47,9 +40,7 @@ public class GridController : MonoBehaviour
         DirectoryInfo dir = new DirectoryInfo(FolderName);
 
         foreach (FileInfo fi in dir.GetFiles())
-        {
             fi.Delete();
-        }
 
         foreach (DirectoryInfo di in dir.GetDirectories())
         {
@@ -62,9 +53,17 @@ public class GridController : MonoBehaviour
     void Start()
     {
 
-        //Delete this later and fix
         if (!IPAddress.TryParse(coreIPString, out coreAddress))
-            coreAddress = Dns.Resolve(coreIPString).AddressList[0];
+        {
+            try
+            {
+                coreAddress = Dns.GetHostAddresses(coreIPString)[0];
+            }
+            catch (Exception)
+            {
+                throw new Exception("No address was returned in the DNS lookup for the core server.");
+            }
+        }
 
         //This set of lines is a hack and needs to be fixed later
 
@@ -77,7 +76,6 @@ public class GridController : MonoBehaviour
         tileSize = hexTileTemplate.GetComponent<Renderer>().bounds.size.z;
 
         SpawnTiles();
-
 
         exitTile = Instantiate(exitTilePrefab, ((GameObject)grid[new Key(0, 0)]).transform);
 
@@ -100,24 +98,6 @@ public class GridController : MonoBehaviour
         foreach (DictionaryEntry entry in grid)
             tiles.Add((Key) entry.Key);
 
-        /*TcpClient tcpClient;
-
-        try
-        {
-            tcpClient = new TcpClient(coreAddress.ToString(), corePort);
-        }
-        catch (Exception)
-        {
-            //throw new Exception("Failed to connect to core.");
-            return;
-        }*/
-
-        //SslStream sslStream = CoreCommunication.EstablishSslStreamFromTcpAsClient(tcpClient);
-
-        //CoreCommunication.SendStringToStream(sslStream, "client");
-
-        //CoreCommunication.SendStringToStream(sslStream, "getServers");
-
         for (int x = -renderDistance + posX; x < renderDistance + posX; x++)
             for (int y = -renderDistance + posY; y < renderDistance + posY; y++)
             {
@@ -132,7 +112,6 @@ public class GridController : MonoBehaviour
         }
     }
 
-    //This function is public; I'm concerned that a malicious server could use this to force the client onto a different server.
     public void ChangeActiveTile(byte direction, int x, int y)
     {
         ((GameObject)grid[new Key(x, y)]).GetComponent<HexTileController>().Disconnect();
