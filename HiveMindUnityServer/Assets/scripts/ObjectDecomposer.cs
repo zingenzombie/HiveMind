@@ -82,27 +82,39 @@ public class ObjectDecomposer : ScriptableObject
 
             FileStream fsComponent = startTmpFile(tmpComponentPath);
 
-            Write(componentType, fsComponent);
-
             switch (componentType)
             {
                 case "UnityEngine.Transform":
+
+                    Write(componentType, fsComponent);
                     UnityEngine_Transform((Transform)component, fsComponent);
                     break;
 
                 case "UnityEngine.MeshFilter":
+
+                    Write(componentType, fsComponent);
                     UnityEngine_MeshFilter((MeshFilter)component, fsComponent);
                     break;
 
                 case "UnityEngine.MeshRenderer":
+
+                    Write(componentType, fsComponent);
                     UnityEngine_MeshRenderer((MeshRenderer)component, fsComponent);
                     break;
 
                 default:
+
+                    componentType = "UNSUPPORTED";
+                    Write(componentType, fsComponent);
+                    break;
+
+                    /*
                     fsObject.Close();
                     File.Delete(objectDirectory + tmpComponentPath);
-                    throw new Exception("Cannot decompose component of type " + componentType);
+                    throw new Exception("Cannot decompose component of type " + componentType);*/
             }
+
+            Write(componentType, fsComponent);
 
             Write(fileHashRename(fsComponent, tmpComponentPath), fsObject);
         }

@@ -1,10 +1,12 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography;
+using System.Threading;
 using UnityEngine;
 
-public class ObjectComposer : ScriptableObject
+public class ObjectComposer : MonoBehaviour
 {
     static string objectDirectory = "objectDirectory/";
 
@@ -13,29 +15,35 @@ public class ObjectComposer : ScriptableObject
     int id;
     TileStream tileStream;
 
-    public GameObject Compose(string objHash, TileStream tileStream = null)
+    public class CoroutineResult<T>
+    {
+        public T Value { get; set; }
+    }
+
+    public IEnumerator Compose(string objHash, Transform parentTransform, TileStream tileStream = null)
     {
         //Reset in case of re-use of decomposer
         id = 0;
         objectsByID = new List<GameObject>();
         GameObject returnObject = new GameObject();
+        returnObject.transform.parent = parentTransform;
         this.tileStream = tileStream;
 
-        FileStream fs = openByHash(objHash);
+        CoroutineResult<FileStream> resultFS = new CoroutineResult<FileStream>();
+        yield return StartCoroutine(openByHashSubCoroutine(objHash, resultFS));
+        FileStream fs = resultFS.Value;
 
         //Compose the object
-        BreadthFirstCompose(returnObject, fs);
+        yield return StartCoroutine(BreadthFirstCompose(returnObject, fs));
 
         //Replace placeholder references
         //TODO
 
         //Destroy objectsByID
         destryoObjectsByID();
-
-        return returnObject;
     }
 
-    void BreadthFirstCompose(GameObject parent, FileStream fsTree)
+    IEnumerator BreadthFirstCompose(GameObject parent, FileStream fsTree)
     {
         GameObject placeholder = new GameObject();
         placeholder.AddComponent<GameObjectID>();
@@ -46,7 +54,9 @@ public class ObjectComposer : ScriptableObject
         GameObject thisObject = new GameObject();
         thisObject.transform.parent = parent.transform;
 
-        FileStream fsObject = openByHash(ReadString(fsTree));
+        CoroutineResult<FileStream> resultFS = new CoroutineResult<FileStream>();
+        yield return StartCoroutine(openByHashSubCoroutine(ReadString(fsTree), resultFS));
+        FileStream fsObject = resultFS.Value;
 
         int numChildren = ReadInt(fsTree);
 
@@ -55,8 +65,8 @@ public class ObjectComposer : ScriptableObject
         string componentType;
         for (int i = 0; i < numComponents; i++)
         {
-
-            FileStream fsComponent = openByHash(ReadString(fsObject));
+            yield return StartCoroutine(openByHashSubCoroutine(ReadString(fsObject), resultFS));
+            FileStream fsComponent = resultFS.Value;
 
             componentType = ReadString(fsComponent);
 
@@ -67,14 +77,18 @@ public class ObjectComposer : ScriptableObject
                     break;
 
                 case "UnityEngine.MeshFilter":
-                    UnityEngine_MeshFilter(thisObject, fsComponent);
+                    yield return StartCoroutine(UnityEngine_MeshFilter(thisObject, fsComponent));
                     break;
 
                 case "UnityEngine.MeshRenderer":
-                    UnityEngine_MeshRenderer(thisObject, fsComponent);
+                    yield return StartCoroutine(UnityEngine_MeshRenderer(thisObject, fsComponent));
+                    break;
+
+                case "UNSUPPORTED":
                     break;
 
                 default:
+
                     fsComponent.Close();
                     fsObject.Close();
                     fsTree.Close();
@@ -87,16 +101,19 @@ public class ObjectComposer : ScriptableObject
         fsObject.Close();
 
         for (int i = 0; i < numChildren; i++)
-            BreadthFirstCompose(thisObject, fsTree);
+            yield return BreadthFirstCompose(thisObject, fsTree);
     }
 
-    static FileStream openByHash(string hash)
+    IEnumerator openByHashSubCoroutine(string hash, CoroutineResult<FileStream> result)
     {
+        //temporary
+        //yield return new WaitForSeconds(0.1f);
+
         try
         {
             if(!File.Exists(objectDirectory + hash))
             {
-                //request file
+                //request file. This will yield until the file is available
                 
                 
             }
@@ -117,62 +134,20 @@ public class ObjectComposer : ScriptableObject
 
             fs.Position = 0;
 
-            return fs;
+            result.Value = fs;
         }
         catch (Exception)
         {
             throw new Exception("A file with the hash " + hash + " could not be found.");
         }
+
+        yield return null;
     }
 
     void destryoObjectsByID()
     {
         for (int i = 0; i < objectsByID.Count; i++)
             Destroy(objectsByID[i]);
-    }
-
-    public static GameObject BreadthFirstStaticCompose(GameObject parent, FileStream fs)
-    {
-
-        GameObject thisObject = new GameObject();
-        thisObject.transform.SetParent(parent.transform);
-
-        thisObject.name = ReadString(fs);
-
-        int numComponents = ReadInt(fs);
-
-        int numChildren = ReadInt(fs);
-
-        String componentType;
-        for(int i = 0; i < numComponents; i++)
-        {
-            componentType = ReadString(fs);
-
-            switch (componentType)
-            {
-                case "UnityEngine.Transform":
-                    UnityEngine_Transform(thisObject, fs);
-                    break;
-
-                case "UnityEngine.MeshFilter":
-                    UnityEngine_MeshFilter(thisObject, fs);
-                    break;
-
-                case "UnityEngine.MeshRenderer":
-                    UnityEngine_MeshRenderer(thisObject, fs);
-                    break;
-
-                default:
-
-                    throw new Exception("Cannot compose component of type " + componentType);
-            }
-        }
-
-        for(int i = 0; i < numChildren; i++)
-            BreadthFirstStaticCompose(thisObject, fs);
-
-        return thisObject;
-
     }
 
 
@@ -198,14 +173,16 @@ public class ObjectComposer : ScriptableObject
      * 0 If no mesh 1 if mesh
      * Mesh(?)
      */
-    static void UnityEngine_MeshFilter(GameObject thisObject, FileStream fsComponent)
+    IEnumerator UnityEngine_MeshFilter(GameObject thisObject, FileStream fsComponent)
     {
         MeshFilter meshFilter = thisObject.AddComponent<MeshFilter>();
 
         if (ReadInt(fsComponent) == 0)
-            return;
+            yield return null;
 
-        FileStream fsData = openByHash(ReadString(fsComponent));
+        CoroutineResult<FileStream> resultFS = new CoroutineResult<FileStream>();
+        yield return StartCoroutine(openByHashSubCoroutine(ReadString(fsComponent), resultFS));
+        FileStream fsData = resultFS.Value;
 
         meshFilter.mesh = ComposeMesh(fsData);
 
@@ -216,7 +193,7 @@ public class ObjectComposer : ScriptableObject
      * Number of materials
      * Materials
      */
-    static void UnityEngine_MeshRenderer(GameObject thisObject, FileStream fs)
+    IEnumerator UnityEngine_MeshRenderer(GameObject thisObject, FileStream fs)
     {
         MeshRenderer meshRenderer = thisObject.AddComponent<MeshRenderer>();
 
@@ -225,8 +202,14 @@ public class ObjectComposer : ScriptableObject
 
         List<Material> newMaterials = new List<Material>();
 
+        CoroutineResult<FileStream> resultFS = new CoroutineResult<FileStream>();
+
         for (int i = 0; i < numMaterials; i++)
-            newMaterials.Add(ComposeMaterial(openByHash(ReadString(fs))));
+        {
+            yield return StartCoroutine(openByHashSubCoroutine(ReadString(fs), resultFS));
+            newMaterials.Add(ComposeMaterial(resultFS.Value));
+            //newMaterials.Add(ComposeMaterial(openByHash(ReadString(fs))));
+        }
 
         meshRenderer.SetMaterials(newMaterials);
     }

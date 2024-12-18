@@ -56,9 +56,11 @@ public class ServerController : MonoBehaviour
 
         string objectHash = decomposer.Decompose(testObject);
 
-        ObjectComposer composer = ScriptableObject.CreateInstance<ObjectComposer>();
+        //ObjectComposer composer = new ObjectComposer();
 
-        composer.Compose(objectHash).transform.parent = this.transform;
+        gameObject.AddComponent<ObjectComposer>();
+
+        StartCoroutine(this.GetComponent<ObjectComposer>().Compose(objectHash, DynamicObjects.transform));
 
 
 
