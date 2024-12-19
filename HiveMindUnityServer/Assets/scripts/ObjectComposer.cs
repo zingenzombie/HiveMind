@@ -15,11 +15,6 @@ public class ObjectComposer : MonoBehaviour
     int id;
     TileStream tileStream;
 
-    public class CoroutineResult<T>
-    {
-        public T Value { get; set; }
-    }
-
     public IEnumerator Compose(string objHash, Transform parentTransform, TileStream tileStream = null)
     {
         //Reset in case of re-use of decomposer
@@ -101,7 +96,7 @@ public class ObjectComposer : MonoBehaviour
         fsObject.Close();
 
         for (int i = 0; i < numChildren; i++)
-            yield return BreadthFirstCompose(thisObject, fsTree);
+            yield return StartCoroutine(BreadthFirstCompose(thisObject, fsTree));
     }
 
     IEnumerator openByHashSubCoroutine(string hash, CoroutineResult<FileStream> result)
@@ -136,8 +131,10 @@ public class ObjectComposer : MonoBehaviour
 
             result.Value = fs;
         }
-        catch (Exception)
+        catch (Exception e)
         {
+
+            Debug.Log(e);
             throw new Exception("A file with the hash " + hash + " could not be found.");
         }
 
@@ -206,12 +203,13 @@ public class ObjectComposer : MonoBehaviour
 
         for (int i = 0; i < numMaterials; i++)
         {
-            yield return StartCoroutine(openByHashSubCoroutine(ReadString(fs), resultFS));
+            StartCoroutine(openByHashSubCoroutine(ReadString(fs), resultFS));
             newMaterials.Add(ComposeMaterial(resultFS.Value));
             //newMaterials.Add(ComposeMaterial(openByHash(ReadString(fs))));
         }
 
         meshRenderer.SetMaterials(newMaterials);
+        yield return null;
     }
 
 

@@ -39,6 +39,8 @@ public class ObjectComposer : MonoBehaviour
         //Replace placeholder references
         //TODO
 
+        fs.Close();
+
         //Destroy objectsByID
         destryoObjectsByID();
     }
@@ -59,7 +61,6 @@ public class ObjectComposer : MonoBehaviour
         FileStream fsObject = resultFS.Value;
 
         int numChildren = ReadInt(fsTree);
-
         int numComponents = ReadInt(fsObject);
 
         string componentType;
@@ -107,18 +108,21 @@ public class ObjectComposer : MonoBehaviour
     IEnumerator openByHashSubCoroutine(string hash, CoroutineResult<FileStream> result)
     {
         //temporary
-        //yield return new WaitForSeconds(0.1f);
+        /*
+        if (!File.Exists(objectDirectory + hash))
+        {
+            //Thread thread = new Thread(() => FileManagement.DownloadFile(hash, tileStream));
+            //thread.Start();
+
+            FileManagement.DownloadFile(hash, tileStream);
+
+            //while (thread.IsAlive)
+              //yield return null;
+        }*/
 
         try
         {
-            if(!File.Exists(objectDirectory + hash))
-            {
-                //request file. This will yield until the file is available
-                
-                
-            }
-
-            FileStream fs = File.Open(objectDirectory + hash, FileMode.Open);
+            FileStream fs = File.Open(objectDirectory + hash, FileMode.Open, FileAccess.Read);
 
             fs.Position = 0;
 
@@ -128,6 +132,7 @@ public class ObjectComposer : MonoBehaviour
 
             if (hashStr != hash)
             {
+                fs.Close();
                 File.Delete(objectDirectory + hash);
                 throw new Exception();
             }
@@ -136,8 +141,10 @@ public class ObjectComposer : MonoBehaviour
 
             result.Value = fs;
         }
-        catch (Exception)
+        catch (Exception e)
         {
+            Debug.Log(e);
+
             throw new Exception("A file with the hash " + hash + " could not be found.");
         }
 
@@ -208,7 +215,7 @@ public class ObjectComposer : MonoBehaviour
         {
             yield return StartCoroutine(openByHashSubCoroutine(ReadString(fs), resultFS));
             newMaterials.Add(ComposeMaterial(resultFS.Value));
-            //newMaterials.Add(ComposeMaterial(openByHash(ReadString(fs))));
+            fs.Close();
         }
 
         meshRenderer.SetMaterials(newMaterials);

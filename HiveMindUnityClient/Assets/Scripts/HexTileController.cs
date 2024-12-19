@@ -233,8 +233,7 @@ public class HexTileController : MonoBehaviour
         serverData = tmpData;
         hasServer = true;
 
-        thread = new Thread(() => ContactServerAndRequestObjects());
-        thread.Start();
+        ContactServerAndRequestObjects();
 
         while (true)
         {
@@ -366,41 +365,19 @@ public class HexTileController : MonoBehaviour
 
     public void ServerConnectAndGetGameObjects(TileStream server)
     {
+        ObjectComposer composer = gameObject.AddComponent<ObjectComposer>();
 
-        server.SendStringToStream("getAssets");
+        server.SendStringToStream("getStaticAssets");
 
-        switch (Application.platform)
+        int numHashes = BitConverter.ToInt32(server.GetBytesFromStream());
+
+        for(int i = 0; i < numHashes; i++)
         {
-            case RuntimePlatform.WindowsPlayer:
-            case RuntimePlatform.WindowsEditor:
-                server.SendStringToStream("w");
-                break;
-            case RuntimePlatform.OSXPlayer:
-            case RuntimePlatform.OSXEditor:
-                server.SendStringToStream("m");
-                break;
-            case RuntimePlatform.LinuxPlayer:
-            case RuntimePlatform.LinuxEditor:
-                server.SendStringToStream("l");
-                break;
-            default:
-                throw new Exception("Unsupported OS");
-        }
+            string hash = server.GetStringFromStream();
+            StartCoroutine(composer.Compose(hash, tileObjects.transform, server));
 
-        int numFiles = BitConverter.ToInt32(server.GetBytesFromStream());
-
-        string assetBundleDirectoryPath = Application.dataPath + "/AssetBundles/" + x + "," + y + "/";
-
-        if (!Directory.Exists(assetBundleDirectoryPath))
-            Directory.CreateDirectory(assetBundleDirectoryPath);
-
-        for(int i = 0; i < numFiles; i++)
-        {
-            string fileName = server.GetStringFromStream();
-
-            byte[] fileBuffer = server.GetBytesFromStream();
-
-            System.IO.File.WriteAllBytes(assetBundleDirectoryPath + fileName, fileBuffer);
+            //Conclude this object
+            server.SendBytesToStream(new byte[1] { 0 });
         }
     }
 }

@@ -1,4 +1,3 @@
-using System.Collections;
 using UnityEngine;
 using System.Net;
 using System.Net.Sockets;
@@ -6,7 +5,6 @@ using System.Text;
 using System;
 using System.Threading;
 using System.IO;
-using System.Collections.Concurrent;
 using System.Net.Security;
 using System.Security.Cryptography;
 using System.Collections.Generic;
@@ -17,7 +15,6 @@ public class ServerController : MonoBehaviour
     private IPAddress coreAddress;
     public int corePort;
     public GameObject hexTile;
-    private GameObject groundHolder, tileObjects;
     public string serverIPString, coreIPString;
 
     public bool requestXY;
@@ -26,19 +23,17 @@ public class ServerController : MonoBehaviour
     public int x, y;
     public string serverName;
     public string ownerID;
-
-    [SerializeField] GameObject playerPrefab;
-    [SerializeField] GameObject Players;
-    [SerializeField] GameObject DynamicObjects;
     [SerializeField] GameObject hexTileTemplate;
     private float tileSize;
     public bool initialized = false;
 
+    [SerializeField] PlayerManager playerManager;
+
+    List<string> staticHashes;
+
     private RSACryptoServiceProvider localRSA;
 
-    BlockingCollection<TileStream> playerPipe = new BlockingCollection<TileStream>();
-
-    public Dictionary<string, GameObject> players = new Dictionary<string, GameObject>();
+    static string objectDirectory = "objectDirectory/";
 
     private void OnApplicationQuit()
     {
@@ -49,18 +44,24 @@ public class ServerController : MonoBehaviour
     // Start is called before the first frame update
     private void Start()
     {
+        staticHashes = new List<string>();
 
-        GameObject testObject = GameObject.FindWithTag("TESTTARGET");
-
+        //Initialize static objects
         ObjectDecomposer decomposer = ScriptableObject.CreateInstance<ObjectDecomposer>();
 
-        string objectHash = decomposer.Decompose(testObject);
+        Transform tileObjects = hexTile.transform.GetChild(1);
 
-        //ObjectComposer composer = new ObjectComposer();
+        int numChildren = tileObjects.transform.childCount;
 
-        gameObject.AddComponent<ObjectComposer>();
+        for(int i = 0; i < numChildren; i++)
+            staticHashes.Add(decomposer.Decompose(tileObjects.transform.GetChild(i).gameObject));
 
-        StartCoroutine(this.GetComponent<ObjectComposer>().Compose(objectHash, DynamicObjects.transform));
+
+
+        ObjectComposer objectComposer = gameObject.AddComponent<ObjectComposer>();
+
+        foreach(var iter in staticHashes)
+            StartCoroutine(objectComposer.Compose(iter, transform));
 
 
 
@@ -77,11 +78,7 @@ public class ServerController : MonoBehaviour
             {
                 throw new Exception("No address was returned in the DNS lookup for the core server.");
             }
-
         }
-
-        //groundHolder = hexTile.transform.GetChild(0).gameObject;
-        groundHolder = hexTile.transform.GetChild(1).gameObject;
 
         InitializeWithCore();
 
@@ -94,76 +91,8 @@ public class ServerController : MonoBehaviour
 
         hexTile.transform.SetLocalPositionAndRotation(new UnityEngine.Vector3(offsetX, 250 * Mathf.PerlinNoise(offsetX / 5000, offsetY / 5000), offsetY), transform.rotation);
 
-        StartCoroutine(InstantiateNewClients());
-
         ClientConnectListener();
     }
-
-    public void ShoutMessage(NetworkMessage message, bool sendToNeighbors = true)
-    {
-        Debug.Log($"Shouting: {message.messageType}");
-        foreach (GameObject playerData in players.Values)
-            playerData.GetComponent<PlayerData>().serverPipeOut.Add(message);
-
-        if (!sendToNeighbors)
-            return;
-
-        //Implement neighbor communication and replace below foreach with list of neighbors.
-
-        /*
-        foreach (GameObject playerData in players.Values)
-            playerData.GetComponent<PlayerData>().serverPipeOut.Add(message);*/
-    }
-
-    //I love the idea, but i think we should depreciate this and replace it with ShoutMessage(NetworkMessage message).
-    //This will allow us to send any sort of NetworkMessage, and it will make it easier to forward messages.
-    //We could also just leave both.
-    public void ShoutMessage(string type, string message)
-    {
-        Debug.Log($"Shouting: {message}");
-        foreach (GameObject playerData in players.Values)
-        {
-            var nwm = new NetworkMessage(type, Encoding.ASCII.GetBytes(message));
-            playerData.GetComponent<PlayerData>().serverPipeOut.Add(nwm);
-        }
-    }
-
-    public void KillPlayer(string playerID)
-    {
-        //This probably won't work for reasons
-
-        Destroy(players[playerID]);
-
-        players.Remove(playerID);
-
-        //Also announce player destruction to other players.
-    }
-
-    public void KillServer()
-    {
-
-    }
-
-    IEnumerator InstantiateNewClients()
-    {
-        while (true)
-        {
-            if(playerPipe.TryTake(out TileStream client))
-            {
-                GameObject newPlayer = Instantiate(playerPrefab, Players.transform);
-
-                var newComp = newPlayer.GetComponent<PlayerData>();
-                newComp.InitializePlayerData(client);
-
-                ShoutMessage("newPlayer", $"{newComp.playerID}");
-
-                players.Add(newComp.playerID, newPlayer);
-            }
-            yield return null;
-        }
-    }
-
-    //Needs to be replaced by one using PID instead!
 
     private void ClientConnectListener()
     {
@@ -181,9 +110,7 @@ public class ServerController : MonoBehaviour
 
         SslStream sslStream = CoreCommunication.EstablishSslStreamFromTcpAsClient(client);
 
-        //telling the core what kind of connection this is
         CoreCommunication.SendStringToStream(sslStream, "server");
-        
         CoreCommunication.SendStringToStream(sslStream, "newServer");
 
         byte[] bytesFinal = new byte[bytes.Length + 1];
@@ -215,94 +142,68 @@ public class ServerController : MonoBehaviour
 
         while (true)   //we wait for a connection
         {
-            TileStream client;
             if (server.Pending())
             {
-                client = new TileStream(server.AcceptTcpClient());
-                client.ActivateStream(localRSA);
-
-                Thread thread = new Thread(() => HandleNewClient(client));
+                Thread thread = new Thread(() => HandleNewClient(server.AcceptTcpClient()));
                 thread.Start();
             }
         }
     }
 
-    private void HandleNewClient(TileStream client)
+    private void HandleNewClient(TcpClient tcpStream)
     {
+        TileStream client = new TileStream(tcpStream);
+        client.ActivateStream(localRSA);
 
         switch (client.GetStringFromStream())
         {
+            case "getStaticAssets":
+                GetStaticAssets(client);
+                break;
             case "getAssets":
                 GetAssets(client);
                 break;
             case "joinServer":
-                JoinServer(client);
-                break;
-            case "updateAvatar":
-                UpdateAvatar(client);
+                playerManager.AddPlayer(client);
                 break;
 
             default: break;
         }
     }
 
-    private void GetAssets(TileStream client)
+    void GetStaticAssets(TileStream client)
     {
+        client.SendBytesToStream(BitConverter.GetBytes(staticHashes.Count));
 
-        string assetBundleDirectoryPath = Application.dataPath + "/AssetBundles";
-
-        string typeOS = client.GetStringFromStream();
-
-        if (!(typeOS.Equals("w") || typeOS.Equals("m") || typeOS.Equals("l")))
+        //Return hash(es) of static element(s)
+        foreach(string iter in staticHashes)
         {
-            Debug.Log("Client sent invalid OS type.");
-            return;
+            client.SendStringToStream(iter);
+            GetAssets(client);
         }
 
-        Debug.Log(typeOS);
+    }
 
-        string[] fileNames = Directory.GetFiles(assetBundleDirectoryPath + "/" + typeOS);
-
-        client.SendBytesToStream(BitConverter.GetBytes(fileNames.Length));
-
-        foreach (string fileName in fileNames)
+    void GetAssets(TileStream client)
+    {
+        while (true)
         {
+            //Read if asset wanted (end if 0)
+            if (client.GetBytesFromStream()[0] == 0)
+                return;
 
-            client.SendStringToStream(new System.IO.FileInfo(fileName).Name);
+            //Read hash of file desired
+            string hash = client.GetStringFromStream();
 
-            byte[] buffer = new byte[new System.IO.FileInfo(fileName).Length];
+            if (!File.Exists(objectDirectory + hash))
+            {
+                client.SendBytesToStream(new byte[1]{0});
+                continue;
+            }
 
-            using (FileStream fileStream = new FileStream(fileName, FileMode.Open, FileAccess.Read))
-                fileStream.Read(buffer);
-
-            client.SendBytesToStream(buffer);
+            //Write 1 and then write bytes
+            client.SendBytesToStream(new byte[1] {1});
+            client.SendBytesToStream(File.ReadAllBytes(objectDirectory + hash));
         }
-    }
-
-    private void JoinServer(TileStream client)
-    {
-        playerPipe.Add(client);
-    }
-
-    void UpdateAvatar(TileStream client)
-    {
-
-        /*Steps:
-
-        * Prove client is who they say they are and are a part of this server.
-
-        * Download avatar hash. This can be used to verify that a local copy of the avatar
-        doesn't exist (saving on storage + bandwidth).
-        
-
-        * Download avatar AssetBundle.
-
-        * Set client avatar to downloaded avatar.
-        */
-
-        /*Avatar File Format:
-        "ClientID" folder containing "lastOnline" (text document), "w", "m", and "l" folders (the actual
-        platform-specific AssetBundles).
-         */
     }
 }
