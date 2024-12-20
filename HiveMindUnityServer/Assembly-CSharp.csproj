@@ -59,10 +59,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets/Scripts/PlayerData.cs" />
+    <Compile Include="Assets/Scripts/GameObjectID.cs" />
+    <Compile Include="Assets/Scripts/PlayerManager.cs" />
     <Compile Include="Assets/Scripts/ObjectComposer.cs" />
     <Compile Include="Assets/Scripts/TileStream.cs" />
-    <Compile Include="Assets/Scripts/ObjectDecomponser.cs" />
+    <Compile Include="Assets/Scripts/FileManagement.cs" />
+    <Compile Include="Assets/Scripts/ObjectManager.cs" />
     <Compile Include="Assets/Scripts/ServerController.cs" />
+    <Compile Include="Assets/Scripts/ObjectDecomposer.cs" />
+    <Compile Include="Assets/Scripts/CoroutineResult.cs" />
     <Compile Include="Assets/Scripts/CoreCommunication.cs" />
     <Compile Include="Assets/Scripts/NetworkMessage.cs" />
     <Compile Include="Assets/Scripts/ServerData.cs" />

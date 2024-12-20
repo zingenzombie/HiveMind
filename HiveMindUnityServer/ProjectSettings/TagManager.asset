@@ -6,7 +6,7 @@ TagManager:
   tags:
   - tile
   - ServerController
-  - TESTTARGET
+  - PlayerManager
   layers:
   - Default
   - TransparentFX

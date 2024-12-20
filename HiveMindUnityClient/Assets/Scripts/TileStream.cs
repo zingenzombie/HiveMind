@@ -117,8 +117,8 @@ public class TileStream : TcpClient
             {
                 int bytesToRead = Math.Min(chunkSize, length - totalBytesRead);
                 int bytesRead = GetStream().Read(buffer, 0, bytesToRead);
-                if (bytesRead == 0)
-                    break; // Connection closed
+                //if (bytesRead == 0)
+                  //  break; // Connection closed
 
                 encryptedStream.Write(buffer, 0, bytesRead);
                 totalBytesRead += bytesRead;
@@ -141,8 +141,8 @@ public class TileStream : TcpClient
         while (offset < length)
         {
             int bytesRead = stream.Read(buffer, offset, length - offset);
-            if (bytesRead == 0)
-                throw new IOException("Unexpected end of stream");
+            //if (bytesRead == 0)
+              //  throw new IOException("Unexpected end of stream");
             offset += bytesRead;
         }
     }
