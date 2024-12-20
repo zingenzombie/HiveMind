@@ -16,7 +16,9 @@ public class GridController : MonoBehaviour
     [SerializeField] GameObject hexTile;
     [SerializeField] GameObject hexTileTemplate;
     [SerializeField] GameObject exitTilePrefab;
-    
+
+    static string objectDirectory = "objectDirectory/";
+
     GameObject exitTile;
 
     [SerializeField] int renderDistance;
@@ -52,6 +54,9 @@ public class GridController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+
+        if (!Directory.Exists(objectDirectory))
+            Directory.CreateDirectory(objectDirectory);
 
         if (!IPAddress.TryParse(coreIPString, out coreAddress))
         {

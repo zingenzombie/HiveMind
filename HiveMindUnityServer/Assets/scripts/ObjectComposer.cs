@@ -20,8 +20,8 @@ public class ObjectComposer : MonoBehaviour
         //Reset in case of re-use of decomposer
         id = 0;
         objectsByID = new List<GameObject>();
-        GameObject returnObject = new GameObject();
-        returnObject.transform.parent = parentTransform;
+        //GameObject returnObject = new GameObject();
+        //returnObject.transform.parent = parentTransform;
         this.tileStream = tileStream;
 
         CoroutineResult<FileStream> resultFS = new CoroutineResult<FileStream>();
@@ -29,7 +29,7 @@ public class ObjectComposer : MonoBehaviour
         FileStream fs = resultFS.Value;
 
         //Compose the object
-        yield return StartCoroutine(BreadthFirstCompose(returnObject, fs));
+        yield return StartCoroutine(BreadthFirstCompose(/*returnObject*/ parentTransform, fs));
 
         //Replace placeholder references
         //TODO
@@ -38,7 +38,7 @@ public class ObjectComposer : MonoBehaviour
         destryoObjectsByID();
     }
 
-    IEnumerator BreadthFirstCompose(GameObject parent, FileStream fsTree)
+    IEnumerator BreadthFirstCompose(/*GameObject*/ Transform parent, FileStream fsTree)
     {
         GameObject placeholder = new GameObject();
         placeholder.AddComponent<GameObjectID>();
@@ -46,8 +46,8 @@ public class ObjectComposer : MonoBehaviour
 
         objectsByID.Add(placeholder);
 
-        GameObject thisObject = new GameObject();
-        thisObject.transform.parent = parent.transform;
+        GameObject thisObject = Instantiate(new GameObject(), parent/*.transform*/);
+        //thisObject.transform.parent = parent.transform;
 
         CoroutineResult<FileStream> resultFS = new CoroutineResult<FileStream>();
         yield return StartCoroutine(openByHashSubCoroutine(ReadString(fsTree), resultFS));
@@ -84,36 +84,39 @@ public class ObjectComposer : MonoBehaviour
 
                 default:
 
-                    fsComponent.Close();
-                    fsObject.Close();
-                    fsTree.Close();
+                    fsComponent.Dispose();
+                    fsObject.Dispose();
+                    fsTree.Dispose();
                     throw new Exception("Cannot compose component of type " + componentType + ". Aborting object composition.");
             }
 
-            fsComponent.Close();
+            fsComponent.Dispose();
         }
 
-        fsObject.Close();
+        fsObject.Dispose();
 
         for (int i = 0; i < numChildren; i++)
-            yield return StartCoroutine(BreadthFirstCompose(thisObject, fsTree));
+            yield return StartCoroutine(BreadthFirstCompose(thisObject.transform, fsTree));
     }
 
     IEnumerator openByHashSubCoroutine(string hash, CoroutineResult<FileStream> result)
     {
-        //temporary
-        //yield return new WaitForSeconds(0.1f);
+        if (!File.Exists(objectDirectory + hash))
+        {
+            //request file. This will yield until the file is available
+
+            Thread thread = new Thread(() => FileManagement.DownloadFile(hash, tileStream));
+            thread.Start();
+
+            while (thread.IsAlive)
+                yield return null;
+
+        }
 
         try
         {
-            if(!File.Exists(objectDirectory + hash))
-            {
-                //request file. This will yield until the file is available
-                
-                
-            }
 
-            FileStream fs = File.Open(objectDirectory + hash, FileMode.Open);
+            FileStream fs = File.Open(objectDirectory + hash, FileMode.Open/*, FileAccess.Read, FileShare.Read*/);
 
             fs.Position = 0;
 
@@ -133,9 +136,9 @@ public class ObjectComposer : MonoBehaviour
         }
         catch (Exception e)
         {
-
+            //I know this is stupid
             Debug.Log(e);
-            throw new Exception("A file with the hash " + hash + " could not be found.");
+            throw e;
         }
 
         yield return null;
@@ -183,7 +186,7 @@ public class ObjectComposer : MonoBehaviour
 
         meshFilter.mesh = ComposeMesh(fsData);
 
-        fsData.Close();
+        fsData.Dispose();
     }
 
     /*MeshRenderer: 
@@ -203,9 +206,10 @@ public class ObjectComposer : MonoBehaviour
 
         for (int i = 0; i < numMaterials; i++)
         {
-            StartCoroutine(openByHashSubCoroutine(ReadString(fs), resultFS));
+            yield return StartCoroutine(openByHashSubCoroutine(ReadString(fs), resultFS));
             newMaterials.Add(ComposeMaterial(resultFS.Value));
-            //newMaterials.Add(ComposeMaterial(openByHash(ReadString(fs))));
+
+            resultFS.Value.Dispose();
         }
 
         meshRenderer.SetMaterials(newMaterials);
@@ -310,8 +314,6 @@ public class ObjectComposer : MonoBehaviour
         Material material = new Material(ComposeShader(fs));
 
         material.color = ComposeColor(fs);
-
-        fs.Close();
 
         return material;
     }

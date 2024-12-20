@@ -99,6 +99,7 @@
     <Compile Include="Assets/TextMesh Pro/Examples &amp; Extras/Scripts/WarpTextExample.cs" />
     <Compile Include="Assets/TextMesh Pro/Examples &amp; Extras/Scripts/TextMeshProFloatingText.cs" />
     <Compile Include="Assets/Scripts/ObjectDecomposer.cs" />
+    <Compile Include="Assets/Scripts/CoroutineResult.cs" />
     <Compile Include="Assets/TextMesh Pro/Examples &amp; Extras/Scripts/ShaderPropAnimator.cs" />
     <Compile Include="Assets/Scripts/HexTileController.cs" />
     <Compile Include="Assets/Scripts/PlayerLook.cs" />

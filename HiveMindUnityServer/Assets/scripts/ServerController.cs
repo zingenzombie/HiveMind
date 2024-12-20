@@ -44,6 +44,10 @@ public class ServerController : MonoBehaviour
     // Start is called before the first frame update
     private void Start()
     {
+
+        if (!Directory.Exists(objectDirectory))
+            Directory.CreateDirectory(objectDirectory);
+
         staticHashes = new List<string>();
 
         //Initialize static objects
@@ -57,11 +61,11 @@ public class ServerController : MonoBehaviour
             staticHashes.Add(decomposer.Decompose(tileObjects.transform.GetChild(i).gameObject));
 
 
-
+        /*
         ObjectComposer objectComposer = gameObject.AddComponent<ObjectComposer>();
 
         foreach(var iter in staticHashes)
-            StartCoroutine(objectComposer.Compose(iter, transform));
+            StartCoroutine(objectComposer.Compose(iter, transform));*/
 
 
 

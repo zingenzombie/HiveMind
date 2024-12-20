@@ -24,9 +24,6 @@ public class ObjectDecomposer : ScriptableObject
         id = 0;
         objectsByID = new List<GameObject>();
 
-        if (!Directory.Exists(objectDirectory))
-            Directory.CreateDirectory(objectDirectory);
-
         FileStream fs = startTmpFile(tmpTreePath);
 
         //The actual decomposition process:
@@ -107,14 +104,7 @@ public class ObjectDecomposer : ScriptableObject
                     componentType = "UNSUPPORTED";
                     Write(componentType, fsComponent);
                     break;
-
-                    /*
-                    fsObject.Close();
-                    File.Delete(objectDirectory + tmpComponentPath);
-                    throw new Exception("Cannot decompose component of type " + componentType);*/
             }
-
-            Write(componentType, fsComponent);
 
             Write(fileHashRename(fsComponent, tmpComponentPath), fsObject);
         }
@@ -149,7 +139,7 @@ public class ObjectDecomposer : ScriptableObject
         byte[] hash = SHA256.Create().ComputeHash(fs);
         string hashStr = BitConverter.ToString(hash).Replace("-", "").ToLower();
 
-        fs.Close();
+        fs.Dispose();
 
         //This appears to be leaving the old file in place and making a copy...
         if (!File.Exists(objectDirectory + hashStr))
@@ -158,8 +148,6 @@ public class ObjectDecomposer : ScriptableObject
         return hashStr;
 
     }
-
-
 
     //Component Decomposer (these decompose supported components of the GameObject):
 
