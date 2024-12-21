@@ -42,11 +42,19 @@ public class PlayerManager : MonoBehaviour
                 case "PlayerPos":
                     UpdatePlayerPos(networkMessage);
                     break;
-
+                case "Goodbye":
+                    DisconnectPlayer(networkMessage);
+                    break;
                 default:
                     break;
             }
         }
+    }
+
+    void DisconnectPlayer(NetworkMessage networkMessage)
+    {
+        Destroy(players[networkMessage.spawningClient]);
+        players.Remove(networkMessage.spawningClient);
     }
 
     void UpdatePlayerPos(NetworkMessage networkMessage)

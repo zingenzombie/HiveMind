@@ -9,6 +9,8 @@ public class PlayerController : MonoBehaviour
     [SerializeField] PlayerLook mainCamera;
     [SerializeField] float jumpPower = 10f;
 
+    NetworkController networkController;
+
     float walkSpeedActual;
     bool sprinting;
     bool jumping;
@@ -17,6 +19,7 @@ public class PlayerController : MonoBehaviour
 
     void Start()
     {
+        networkController = GameObject.FindWithTag("NetworkController").GetComponent<NetworkController>();
 
         walkSpeedActual = walkSpeed;
         myRigidbody = GetComponent<Rigidbody>();
@@ -68,7 +71,7 @@ public class PlayerController : MonoBehaviour
 
             NetworkMessage netMessage = new NetworkMessage("PlayerPos", message);
 
-            NetworkController.SendTCPMessage(netMessage);
+            networkController.SendTCPMessage(netMessage);
 
         }
     }

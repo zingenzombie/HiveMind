@@ -17,6 +17,8 @@ public class GridController : MonoBehaviour
     [SerializeField] GameObject hexTileTemplate;
     [SerializeField] GameObject exitTilePrefab;
 
+    NetworkController networkController;
+
     static string objectDirectory = "objectDirectory/";
 
     GameObject exitTile;
@@ -54,6 +56,7 @@ public class GridController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        networkController = GameObject.FindWithTag("NetworkController").GetComponent<NetworkController>();
 
         if (!Directory.Exists(objectDirectory))
             Directory.CreateDirectory(objectDirectory);
@@ -70,23 +73,13 @@ public class GridController : MonoBehaviour
             }
         }
 
-        //This set of lines is a hack and needs to be fixed later
-
-        string assetBundleDirectoryPath = Application.dataPath + "/AssetBundles";
-
-        if (Directory.Exists(assetBundleDirectoryPath))
-            clearFolder(assetBundleDirectoryPath);
-
-
         tileSize = hexTileTemplate.GetComponent<Renderer>().bounds.size.z;
-
         SpawnTiles();
 
         exitTile = Instantiate(exitTilePrefab, ((GameObject)grid[new Key(0, 0)]).transform);
-
         MoveExit exitTileMove = exitTile.GetComponent<MoveExit>();
 
-        NetworkController.activeServer = ((GameObject)grid[new Key(0, 0)]).GetComponent<HexTileController>();
+        StartCoroutine(networkController.ChangeActiveServer(((GameObject)grid[new Key(0, 0)]).GetComponent<HexTileController>()));
 
         exitTileMove.gridController = this;
         exitTileMove.x = 0;
@@ -119,8 +112,6 @@ public class GridController : MonoBehaviour
 
     public void ChangeActiveTile(byte direction, int x, int y)
     {
-        ((GameObject)grid[new Key(x, y)]).GetComponent<HexTileController>().Disconnect();
-
         int newX, newY;
         int offset = Math.Abs(x % 2);
 
@@ -154,24 +145,17 @@ public class GridController : MonoBehaviour
                 throw new Exception("Unsupported direction received!");
         }
 
-        float yCoord = exitTile.transform.position.y;
+        MoveExit moveExit = exitTile.GetComponent<MoveExit>();
 
-        Destroy(exitTile);
+        moveExit.x = newX;
+        moveExit.y = newY;
 
-        exitTile = Instantiate(exitTilePrefab, ((GameObject)grid[new Key(newX, newY)]).transform);
-        exitTile.transform.position = new UnityEngine.Vector3(exitTile.transform.position.x, yCoord, exitTile.transform.position.z);
+        exitTile.transform.parent = ((GameObject)grid[new Key(newX, newY)]).transform;
+        exitTile.transform.localPosition = new Vector3(0, exitTile.transform.localPosition.y, 0);
 
-        MoveExit exitTileMove = exitTile.GetComponent<MoveExit>();
-
-        exitTileMove.gridController = this;
-        exitTileMove.x = newX;
-        exitTileMove.y = newY;
-
-        NetworkController.activeServer = ((GameObject)grid[new Key(newX, newY)]).GetComponent<HexTileController>();
+        StartCoroutine(networkController.ChangeActiveServer(((GameObject)grid[new Key(newX, newY)]).GetComponent<HexTileController>()));
 
         SpawnTiles(newX, newY);
-
-        ((GameObject)grid[new Key(newX, newY)]).GetComponent<HexTileController>().ContactTileServer();
     }
 
     void SpawnTile(int x, int y/*, SslStream tcpClient*/)

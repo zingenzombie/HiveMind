@@ -27,9 +27,6 @@ public class HexTileController : MonoBehaviour
     public GameObject templateGroundHolder;
     public GameObject tileObjects;
 
-    private TileStream tileStream;
-
-    private Thread serverTCP = null, serverUDP = null;
     public BlockingCollection<NetworkMessage> serverPipeIn, serverPipeOut;
 
     public Hashtable players = new Hashtable();
@@ -59,12 +56,9 @@ public class HexTileController : MonoBehaviour
     {
         coreAddress = GameObject.FindWithTag("Grid").GetComponent<GridController>().coreAddress.ToString();
         corePort = GameObject.FindWithTag("Grid").GetComponent<GridController>().corePort;
-
-        StartCoroutine(HandleMessage());
-
-        //ClearServer();
     }
 
+    /*
     public void ContactTileServer()
     {
         if (!hasServer)
@@ -74,6 +68,7 @@ public class HexTileController : MonoBehaviour
         serverTCP.Start();
     }
 
+    
     public void Disconnect()
     {
         if(!hasServer) 
@@ -203,7 +198,7 @@ public class HexTileController : MonoBehaviour
 
         byte[] buffer = Encoding.ASCII.GetBytes("joinServer\n");
         server.Send(buffer, buffer.Length);
-    }
+    }*/
 
     public void ActivateTile()
     {
@@ -294,22 +289,6 @@ public class HexTileController : MonoBehaviour
         pipe.Add(serverData);
     }
 
-    //Kill coroutine communicating with server.
-    private void OnDestroy()
-    {
-        //serverTCP.Abort();
-        //serverUDP.Abort();
-    }
-
-    //Sets a tile back to its default state with the template ground.
-    void ClearServer()
-    {
-
-        StartCoroutine(ClearGroundAndTileObjects());
-        Instantiate(templateGroundHolder, groundHolder.transform);
-
-    }
-
     //Erases all ground and TileObject data
     public IEnumerator ClearGroundAndTileObjects()
     {
@@ -360,10 +339,10 @@ public class HexTileController : MonoBehaviour
             return;
         }
 
-        ServerConnectAndGetGameObjects(tileStream);
+        StartCoroutine(ServerConnectAndGetGameObjects(tileStream));
     }
 
-    public void ServerConnectAndGetGameObjects(TileStream server)
+    public IEnumerator ServerConnectAndGetGameObjects(TileStream server)
     {
         ObjectComposer composer = gameObject.AddComponent<ObjectComposer>();
 
@@ -374,7 +353,7 @@ public class HexTileController : MonoBehaviour
         for(int i = 0; i < numHashes; i++)
         {
             string hash = server.GetStringFromStream();
-            StartCoroutine(composer.Compose(hash, tileObjects.transform, server));
+            yield return StartCoroutine(composer.Compose(hash, tileObjects.transform, server));
 
             //Conclude this object
             server.SendBytesToStream(new byte[1] { 0 });

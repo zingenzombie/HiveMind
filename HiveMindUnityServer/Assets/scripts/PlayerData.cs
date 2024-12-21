@@ -16,6 +16,21 @@ public class PlayerData : MonoBehaviour
 
     bool initialized = false;
 
+    void OnDestroy()
+    {
+        tileStream.SendStringToStream("Goodbye");
+
+        if (tcpThreadIn != null && tcpThreadIn.IsAlive)
+            tcpThreadIn.Abort();
+
+        if (tcpThreadOut != null && tcpThreadOut.IsAlive)
+            tcpThreadOut.Abort();
+
+        tileStream.Dispose();
+
+        serverPipeOut.Dispose();
+    }
+
     public void InitializePlayerData(TileStream client, string playerID)
     {
         if (initialized)
@@ -25,6 +40,7 @@ public class PlayerData : MonoBehaviour
 
         tileStream = client;
         this.playerID = playerID;
+        username = playerID;
         playerManager = GameObject.FindWithTag("PlayerManager").GetComponent<PlayerManager>();
 
         serverPipeOut = new BlockingCollection<NetworkMessage>(); //Will need to be separated into udp and tcp pipes!
@@ -33,13 +49,6 @@ public class PlayerData : MonoBehaviour
         tcpThreadOut = new Thread(() => TCPThreadOut());
         tcpThreadIn.Start();
         tcpThreadOut.Start();
-    }
-
-    private void OnDestroy()
-    {
-        serverPipeOut.Dispose();
-        tcpThreadIn.Abort();
-        tcpThreadOut.Abort();
     }
 
     void TCPThreadIn()
@@ -68,7 +77,7 @@ public class PlayerData : MonoBehaviour
             if (!tileStream.Connected)
             {
                 tileStream.Close();
-                HandleMessage(new NetworkMessage(playerID, "killMe", new byte[0]));
+                HandleMessage(new NetworkMessage(playerID, "Goodbye", new byte[0]));
 
                 break;
             }
