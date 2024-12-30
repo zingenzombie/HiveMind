@@ -79,6 +79,10 @@ public class ObjectComposer : MonoBehaviour
                     yield return StartCoroutine(UnityEngine_MeshRenderer(thisObject, fsComponent));
                     break;
 
+                case "UnityEngine.Light":
+                    yield return StartCoroutine(UnityEngine_Light(thisObject, fsComponent));
+                    break;
+
                 case "UNSUPPORTED":
                     break;
 
@@ -213,6 +217,41 @@ public class ObjectComposer : MonoBehaviour
         }
 
         meshRenderer.SetMaterials(newMaterials);
+        yield return null;
+    }
+
+    /* Light:
+     * Type (string)
+     * Range (float)
+     * Spot angle (float)
+     * Color
+     * Intensity (float)
+     */
+    IEnumerator UnityEngine_Light(GameObject thisObject, FileStream fs){
+
+        Light light = thisObject.AddComponent<Light>();
+
+        string type = ReadString(fs);
+        switch(type){
+            case "Spot":
+                light.type = LightType.Spot;
+                break;
+            case "Directional":
+                light.type = LightType.Directional;
+                break;
+            case "Point":
+                light.type = LightType.Point;
+                break;
+
+            default:
+                break;
+        }
+
+        light.range = ReadFloat(fs);
+        light.spotAngle = ReadFloat(fs);
+        light.color = ComposeColor(fs);
+        light.intensity = ReadFloat(fs);
+
         yield return null;
     }
 

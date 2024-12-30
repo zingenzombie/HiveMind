@@ -99,6 +99,11 @@ public class ObjectDecomposer : ScriptableObject
                     UnityEngine_MeshRenderer((MeshRenderer)component, fsComponent);
                     break;
 
+                case "UnityEngine.Light":
+                    Write(componentType, fsComponent);
+                    UnityEngine_Light((Light)component, fsComponent);
+                    break;
+
                 default:
 
                     componentType = "UNSUPPORTED";
@@ -204,6 +209,26 @@ public class ObjectDecomposer : ScriptableObject
 
         foreach(Material material in materials)
             Write(DecomposeMaterial(material), fs);
+    }
+
+
+    /* Light:
+     * Type (string)
+     * Range (float)
+     * Spot angle (float)
+     * Color
+     * Intensity (float)
+     */
+    void UnityEngine_Light(Light component, FileStream fs){
+        LightType type = component.type;
+        Debug.Log(type);
+
+        Write(type.ToString(), fs);
+        Write(component.range, fs);
+        Write(component.spotAngle, fs);
+        DecomposeColor(component.color, fs);
+
+        Write(component.intensity, fs);
     }
 
 
