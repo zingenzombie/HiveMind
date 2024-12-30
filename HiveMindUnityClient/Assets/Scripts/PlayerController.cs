@@ -81,12 +81,12 @@ public class PlayerController : MonoBehaviour
 
         Vector3 playerVelocity;
 
-        if (myRigidbody.velocity.y < -50)
+        if (myRigidbody.linearVelocity.y < -50)
             playerVelocity = new Vector3(moveInput.x * walkSpeedActual, -50, moveInput.y * walkSpeedActual);
         else
-            playerVelocity = new Vector3(moveInput.x * walkSpeedActual, myRigidbody.velocity.y, moveInput.y * walkSpeedActual);
+            playerVelocity = new Vector3(moveInput.x * walkSpeedActual, myRigidbody.linearVelocity.y, moveInput.y * walkSpeedActual);
         
-        myRigidbody.velocity = transform.TransformDirection(playerVelocity);
+        myRigidbody.linearVelocity = transform.TransformDirection(playerVelocity);
 
 
     }
@@ -117,8 +117,8 @@ public class PlayerController : MonoBehaviour
 
         if (jumping)
         {
-            Vector3 playerVelocity = new Vector3(myRigidbody.velocity.x, myRigidbody.velocity.y + jumpPower, myRigidbody.velocity.z);
-            myRigidbody.velocity = transform.TransformDirection(playerVelocity);
+            Vector3 playerVelocity = new Vector3(myRigidbody.linearVelocity.x, myRigidbody.linearVelocity.y + jumpPower, myRigidbody.linearVelocity.z);
+            myRigidbody.linearVelocity = transform.TransformDirection(playerVelocity);
         }
     }
 
