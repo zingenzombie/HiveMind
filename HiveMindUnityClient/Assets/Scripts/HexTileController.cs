@@ -29,9 +29,6 @@ public class HexTileController : MonoBehaviour
 
     public BlockingCollection<NetworkMessage> serverPipeIn, serverPipeOut;
 
-    public Hashtable players = new Hashtable();
-
-
     /* *** Welcome to the HexTileControler ***
      * 
      * This function is repsonsible for all actions on the client side

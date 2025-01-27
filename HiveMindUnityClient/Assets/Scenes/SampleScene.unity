@@ -744,6 +744,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   player: {fileID: 46826626876120793}
+  otherPlayerPrefab: {fileID: 4687685011442031153, guid: dcfcefee32973a64288bf3cb4d155763, type: 3}
 --- !u!114 &46826626876120793
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -757,7 +758,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerID: <RSAKeyValue><Modulus>hZqBuNcl9sa2/Kl9fijKkQHQE7InbNo82JjVGDZZApYf5g12MusbLwzuJ4RRy+ceayf8EsddpEaImTNZkR8DQfzkS4yHq9nBq+crLG718Xdhp/Zt03jPFMTfMlZ+TtpGqUNE0d2nP3SXSJqGfvfuuMdHfzvo1H8XbozxAPNLqpU=</Modulus><Exponent>AQAB</Exponent><P>xLTvqdC1sFgBoubwLpcCxS3FI5zk6hWZbxqJTpVfquDxc+rCEN1x+Nc7PwX/P9Yki8pPWnH/nYMt9bAMhfwpTw==</P><Q>reAmUV1N0Mnpo47z379kwMgwpfIEVFyKHbSljEXDQ8+1cPxfF9pd4OWm2Hd/uOi2VQ5cfJNWK5g3/cDA8qls2w==</Q><DP>HZwCy3QQNVg5/tR2aPzwPNAT8bVnO9k+fFvpOTwA547uqX038yPySPvU/jqf3nMUkzpD0aCBUqtxWp9Cc1Suvw==</DP><DQ>mYQJcNcnaEuNfDov+gIbK9bUlP+ccPuPenDPpYzGvW17bjl0oDPNpU4+RGslmpXkvi5C3D6d2zm3XdS8xsNt9w==</DQ><InverseQ>FoSUxIWK/Vev1vQih2/5ekQNTirUepbTJJsbuBdE0cYA4maG4sCll/PdlJ1cwBDxn+d6s6xOloAmhTYqUgd7og==</InverseQ><D>EeOBMQWlsKgkwinTgrvle4r5mFmHS9zgvsOf7LECNAVz2fK9e83dAuzBSos+BIY6nXBqIP2OvTsweQrWGEdFwTODrZF7pr3PDhS2kS1WzzqDCAVYB5au8SFni3/Xdj8CA+kstEdVs+TRD17GKri5aQW8mxNsHoAxcdlTwBDRAfU=</D></RSAKeyValue>
-  privatePlayerID: 
   username: Zin
 --- !u!81 &115424869770342924
 AudioListener:
