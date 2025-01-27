@@ -120,7 +120,8 @@ public class ObjectComposer : MonoBehaviour
         try
         {
 
-            FileStream fs = File.Open(objectDirectory + hash, FileMode.Open/*, FileAccess.Read, FileShare.Read*/);
+            //FileStream fs = File.Open(objectDirectory + hash, FileMode.Open/*, FileAccess.Read, FileShare.Read*/);
+            FileStream fs = File.Open(objectDirectory + hash, FileMode.Open, FileAccess.Read, FileShare.Read);
 
             fs.Position = 0;
 
