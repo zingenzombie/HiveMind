@@ -49,7 +49,7 @@ MonoBehaviour:
   x: 0
   y: 0
   hasServer: 0
-  playerName: testName
+  player: {fileID: 0}
   groundHolder: {fileID: 6592415647992496422}
   templateGroundHolder: {fileID: 7693739768744577133, guid: 142239a109042df4ab372023a3b13902, type: 3}
   tileObjects: {fileID: 705462435388874766}
@@ -63,7 +63,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7280177548797364784}
   m_Layer: 0
-  m_Name: TileObjects
+  m_Name: Environment
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

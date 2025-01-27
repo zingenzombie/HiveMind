@@ -2,6 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Security.Cryptography;
+using System.Text;
 using UnityEngine;
 
 public class PlayerManager : MonoBehaviour
@@ -14,6 +15,9 @@ public class PlayerManager : MonoBehaviour
 
     BlockingCollection<PlayerInfo> newPlayerPipe = new BlockingCollection<PlayerInfo>();
     public BlockingCollection<NetworkMessage> messagePipe = new BlockingCollection<NetworkMessage>();
+
+    Dictionary<string, NetworkMessage> positionUpdates = new Dictionary<string, NetworkMessage>();
+    Queue<NetworkMessage> generalUpdates = new Queue<NetworkMessage>();
 
     struct PlayerInfo
     {
@@ -29,8 +33,9 @@ public class PlayerManager : MonoBehaviour
 
     private void Update()
     {
-        HandleNewMessages();
         InstantiateNewPlayers();
+        HandleNewMessages();
+        SendMessagesToAllExceptPID();
     }
 
     void HandleNewMessages()
@@ -43,6 +48,7 @@ public class PlayerManager : MonoBehaviour
                     UpdatePlayerPos(networkMessage);
                     break;
                 case "Goodbye":
+                    Debug.Log("Player " + networkMessage.spawningClient + " left the server.");
                     DisconnectPlayer(networkMessage);
                     break;
                 default:
@@ -53,8 +59,17 @@ public class PlayerManager : MonoBehaviour
 
     void DisconnectPlayer(NetworkMessage networkMessage)
     {
+        //Serverside deletion
         Destroy(players[networkMessage.spawningClient]);
         players.Remove(networkMessage.spawningClient);
+
+        //Send some message to clients that one client has left.
+        generalUpdates.Enqueue(networkMessage);
+
+        foreach(var iter in players)
+        {
+            Debug.Log("Existing player: " + iter.Key);
+        }
     }
 
     void UpdatePlayerPos(NetworkMessage networkMessage)
@@ -73,18 +88,40 @@ public class PlayerManager : MonoBehaviour
 
         players[networkMessage.spawningClient].transform.SetPositionAndRotation(new Vector3(posX, posY, posZ), new Quaternion(rotX, rotY, rotZ, rotW));
 
-        SendMessageToAllExceptPID(networkMessage);
+        //SendMessageToAllExceptPID(networkMessage);
+
+        //Replacing sender with dictionary so that each player can only have one position update.
+        //SendMessateToAllExceptPID moved to be called on every update.
+        positionUpdates[networkMessage.spawningClient] = networkMessage;
     }
 
-    //This should probably be changed to send multiple player updates at once
-    void SendMessageToAllExceptPID(NetworkMessage networkMessage)
+    //This is effectively broadcast
+    void SendMessagesToAllExceptPID()
     {
-        foreach(var player in players)
-        {
-            if (player.Key == networkMessage.spawningClient)
-                continue;
+        //Send each position update to each other client
+        foreach (var iter in positionUpdates)
+            foreach (var player in players)
+            {
+                if (player.Key == iter.Key)
+                    continue;
 
-            player.Value.GetComponent<PlayerData>().serverPipeOut.Add(networkMessage);
+                player.Value.GetComponent<PlayerData>().serverPipeOut.Add(iter.Value);
+            }
+
+        //Empty positionUpdates
+        positionUpdates.Clear();
+
+        //Send each additional update to each other client
+        while(generalUpdates.TryDequeue(out NetworkMessage iter))
+        {
+            Debug.Log(iter.messageType);
+            foreach (var player in players)
+            {
+                if (player.Key == iter.spawningClient)
+                    continue;
+
+                player.Value.GetComponent<PlayerData>().serverPipeOut.Add(iter);
+            }
         }
     }
 
@@ -97,8 +134,24 @@ public class PlayerManager : MonoBehaviour
         {
 
             GameObject newPlayer = Instantiate(playerPrefab, PlayersTransform);
+
+            //Send existing client info to new player
+            foreach (var player in players)
+                newPlayer.GetComponent<PlayerData>().serverPipeOut.Add(
+                    new NetworkMessage(player.Key, "newPlayer", new byte[1]));
+
             players.Add(playerInfo.playerID, newPlayer);
             newPlayer.GetComponent<PlayerData>().InitializePlayerData(playerInfo.tileStream, playerInfo.playerID);
+
+            Debug.Log("Player " + playerInfo.playerID + " joined the server.");
+            //Send new player info to other players.
+
+            /* Player info needed to send:
+             * PID (Required)
+             * Username?
+             */
+
+            generalUpdates.Enqueue(new NetworkMessage(playerInfo.playerID, "newPlayer", ASCIIEncoding.UTF8.GetBytes("USERNAMETMP")));
         }
     }
 

@@ -11,7 +11,7 @@ public class PlayerData : MonoBehaviour
     public string username;
 
     PlayerManager playerManager;
-    public BlockingCollection<NetworkMessage> serverPipeOut;
+    public BlockingCollection<NetworkMessage> serverPipeOut = new BlockingCollection<NetworkMessage>();
     Thread tcpThreadIn, tcpThreadOut;
 
     bool initialized = false;
@@ -43,7 +43,7 @@ public class PlayerData : MonoBehaviour
         username = playerID;
         playerManager = GameObject.FindWithTag("PlayerManager").GetComponent<PlayerManager>();
 
-        serverPipeOut = new BlockingCollection<NetworkMessage>(); //Will need to be separated into udp and tcp pipes!
+        //serverPipeOut = new BlockingCollection<NetworkMessage>(); //Will need to be separated into udp and tcp pipes!
 
         tcpThreadIn = new Thread(() => TCPThreadIn());
         tcpThreadOut = new Thread(() => TCPThreadOut());
@@ -53,6 +53,9 @@ public class PlayerData : MonoBehaviour
 
     void TCPThreadIn()
     {
+
+
+
         while (true)
         {
             while (tileStream.Available > 0)
@@ -85,6 +88,8 @@ public class PlayerData : MonoBehaviour
             //Send outgoing TCP messages
             while (serverPipeOut.TryTake(out NetworkMessage newObject))
             {
+                //This line is a new addition that will definitely break everything.
+                tileStream.SendStringToStream(newObject.spawningClient);
                 tileStream.SendStringToStream(newObject.messageType);
                 tileStream.SendBytesToStream(newObject.message);
             }

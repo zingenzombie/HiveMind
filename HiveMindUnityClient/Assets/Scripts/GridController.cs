@@ -37,7 +37,7 @@ public class GridController : MonoBehaviour
         }
     }
 
-    private Hashtable grid = new Hashtable();
+    private Dictionary<Key, GameObject> grid = new Dictionary<Key, GameObject>();
 
     private void clearFolder(string FolderName)
     {
@@ -76,16 +76,16 @@ public class GridController : MonoBehaviour
         tileSize = hexTileTemplate.GetComponent<Renderer>().bounds.size.z;
         SpawnTiles();
 
-        exitTile = Instantiate(exitTilePrefab, ((GameObject)grid[new Key(0, 0)]).transform);
+        exitTile = Instantiate(exitTilePrefab, (grid[new Key(0, 0)]).transform);
         MoveExit exitTileMove = exitTile.GetComponent<MoveExit>();
 
-        StartCoroutine(networkController.ChangeActiveServer(((GameObject)grid[new Key(0, 0)]).GetComponent<HexTileController>()));
+        StartCoroutine(networkController.ChangeActiveServer((grid[new Key(0, 0)]).GetComponent<HexTileController>()));
 
         exitTileMove.gridController = this;
         exitTileMove.x = 0;
         exitTileMove.y = 0;
 
-        player.transform.SetPositionAndRotation(((GameObject)grid[new Key(0, 0)]).transform.GetChild(1).transform.position, player.transform.rotation);
+        player.transform.SetPositionAndRotation((grid[new Key(0, 0)]).transform.GetChild(1).transform.position, player.transform.rotation);
     }
 
     void SpawnTiles(int posX = 0, int posY = 0)
@@ -93,8 +93,8 @@ public class GridController : MonoBehaviour
 
         HashSet<Key> tiles = new HashSet<Key>();
 
-        foreach (DictionaryEntry entry in grid)
-            tiles.Add((Key) entry.Key);
+        foreach (var entry in grid)
+            tiles.Add(entry.Key);
 
         for (int x = -renderDistance + posX; x < renderDistance + posX; x++)
             for (int y = -renderDistance + posY; y < renderDistance + posY; y++)
@@ -105,7 +105,7 @@ public class GridController : MonoBehaviour
 
         foreach(var key in tiles)
         {
-            Destroy((GameObject) grid[key]);
+            Destroy(grid[key]);
             grid.Remove(key);
         }
     }
@@ -150,10 +150,11 @@ public class GridController : MonoBehaviour
         moveExit.x = newX;
         moveExit.y = newY;
 
-        exitTile.transform.parent = ((GameObject)grid[new Key(newX, newY)]).transform;
+        exitTile.transform.parent = (grid[new Key(newX, newY)]).transform;
         exitTile.transform.localPosition = new Vector3(0, exitTile.transform.localPosition.y, 0);
 
-        StartCoroutine(networkController.ChangeActiveServer(((GameObject)grid[new Key(newX, newY)]).GetComponent<HexTileController>()));
+        HexTileController newTileController = (grid[new Key(newX, newY)]).GetComponent<HexTileController>();
+        StartCoroutine(networkController.ChangeActiveServer(newTileController));
 
         SpawnTiles(newX, newY);
     }
@@ -171,7 +172,7 @@ public class GridController : MonoBehaviour
 
         grid.Add(new Key(x, y), Instantiate(hexTile, new UnityEngine.Vector3(offsetX, 250 * Mathf.PerlinNoise(offsetX / 5000, offsetY / 5000), offsetY), transform.rotation, this.transform));
 
-        GameObject tile = ((GameObject)grid[new Key(x, y)]);
+        GameObject tile = (grid[new Key(x, y)]);
         HexTileController tileController = tile.GetComponent<HexTileController>();
 
         tile.name = x + ", " + y;

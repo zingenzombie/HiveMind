@@ -60,15 +60,6 @@ public class ServerController : MonoBehaviour
         for(int i = 0; i < numChildren; i++)
             staticHashes.Add(decomposer.Decompose(tileObjects.transform.GetChild(i).gameObject));
 
-
-        /*
-        ObjectComposer objectComposer = gameObject.AddComponent<ObjectComposer>();
-
-        foreach(var iter in staticHashes)
-            StartCoroutine(objectComposer.Compose(iter, transform));*/
-
-
-
         localRSA = new RSACryptoServiceProvider();
 
         ipAddress = IPAddress.Parse(serverIPString);

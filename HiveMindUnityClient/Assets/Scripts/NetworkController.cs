@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Threading;
 using UnityEngine;
@@ -9,16 +10,14 @@ public class NetworkController : MonoBehaviour
 {
     HexTileController activeServer;
     [SerializeField] PlayerInfo player;
+    [SerializeField] GameObject otherPlayerPrefab;
+    Transform playerHolder;
 
     Thread tileStreamSender, tileStreamReceiver;
-    BlockingCollection<NetworkMessage> messagePipeOut, messagePipeIn;
+    BlockingCollection<NetworkMessage> messagePipeOut = new BlockingCollection<NetworkMessage>();
+    BlockingCollection<NetworkMessage> messagePipeIn = new BlockingCollection<NetworkMessage>();
 
-    private void Start()
-    {
-        messagePipeOut = new BlockingCollection<NetworkMessage>();
-        messagePipeIn = new BlockingCollection<NetworkMessage>();
-    }
-
+    Dictionary<string, GameObject> players = new Dictionary<string, GameObject>();
     private void Update()
     {
         HandleNewMessages();
@@ -30,10 +29,55 @@ public class NetworkController : MonoBehaviour
         {
             switch (networkMessage.messageType)
             {
+                case "newPlayer":
+                    Debug.Log("Received new player " + networkMessage.spawningClient + "!");
+                    CreateNewPlayer(networkMessage);
+                    break;
+                case "Goodbye":
+                    Debug.Log("Player " + networkMessage.spawningClient + "left the server.");
+                    DeleteOtherPlayer(networkMessage);
+                    //Handle removal of player
+                    break;
+                case "PlayerPos":
+                    UpdatePlayerPosition(networkMessage);
+                    break;
                 default:
                     break;
             }
         }
+    }
+
+    void CreateNewPlayer(NetworkMessage networkMessage)
+    {
+        GameObject newPlayer = Instantiate(otherPlayerPrefab, playerHolder);
+        players[networkMessage.spawningClient] = newPlayer;
+    }
+
+    void DeleteOtherPlayer(NetworkMessage networkMessage)
+    {
+
+        Destroy(players[networkMessage.spawningClient]);
+        players.Remove(networkMessage.spawningClient);
+    }
+
+    void UpdatePlayerPosition(NetworkMessage networkMessage)
+    {
+
+        byte[] transformInfo = networkMessage.message;
+        //***CHECK THAT MESSAGE TIME IS NEWER THAN CURRENT UPDATE***
+
+        float posX = BitConverter.ToSingle(transformInfo, 0);
+        float posY = BitConverter.ToSingle(transformInfo, 4);
+        float posZ = BitConverter.ToSingle(transformInfo, 8);
+
+        float rotX = BitConverter.ToSingle(transformInfo, 12);
+        float rotY = BitConverter.ToSingle(transformInfo, 16);
+        float rotZ = BitConverter.ToSingle(transformInfo, 20);
+        float rotW = BitConverter.ToSingle(transformInfo, 24);
+        try
+        {
+            players[networkMessage.spawningClient].transform.SetPositionAndRotation(new Vector3(posX, posY, posZ), new Quaternion(rotX, rotY, rotZ, rotW));
+        }catch (Exception) { Debug.Log("Player " + networkMessage.spawningClient + " does not exist locally but received position update!"); }
     }
 
     /* When changing tiles, I want to stay connected to the prior tile until a new 
@@ -43,6 +87,13 @@ public class NetworkController : MonoBehaviour
     public IEnumerator ChangeActiveServer(HexTileController activeServer)
     {
         this.activeServer = activeServer;
+
+        playerHolder = activeServer.transform.GetChild(1);
+
+        foreach(var player in players)
+            Destroy(player.Value);
+
+        players.Clear();
 
         CoroutineResult<TileStream> streamReturn = new CoroutineResult<TileStream>();
         Thread connectThread = new Thread(() => connectToNewServer(streamReturn));
@@ -54,7 +105,10 @@ public class NetworkController : MonoBehaviour
         //How can I make sure this message gets sent before the thread handling it is aborted?
 
         if(tileStreamSender != null && tileStreamSender.IsAlive)
-            messagePipeOut.Add(new NetworkMessage("Goodbye", new byte[0]));
+        {
+            Debug.Log("Leaving");
+            messagePipeOut.Add(new NetworkMessage("Goodbye", new byte[1]));
+        }
 
         if (streamReturn.Value == null)
         {
@@ -64,6 +118,10 @@ public class NetworkController : MonoBehaviour
 
         tileStreamReceiver = new Thread(() => TCPThreadIn(streamReturn.Value));
         tileStreamReceiver.Start();
+
+        if(tileStreamSender != null)
+            while (tileStreamSender.ThreadState == ThreadState.Running)
+                yield return null;
 
         tileStreamSender = new Thread(() => TCPThreadOut(streamReturn.Value));
         tileStreamSender.Start();
@@ -77,22 +135,14 @@ public class NetworkController : MonoBehaviour
             {
                 while (tileStream.Available > 0)
                 {
-
+                    string spawningClient = tileStream.GetStringFromStream();
                     string messageType = tileStream.GetStringFromStream();
-
-                    if(messageType == "Goodbye")
-                    {
-                        tileStream.Close();
-                        return;
-                    }
-
                     byte[] message = tileStream.GetBytesFromStream();
 
-                    NetworkMessage netMessage = new NetworkMessage(player.playerID, messageType, message);
+                    NetworkMessage netMessage = new NetworkMessage(spawningClient, messageType, message);
 
                     messagePipeIn.Add(netMessage);
                 }
-
                 Thread.Yield();
             }
         }catch(Exception e)
