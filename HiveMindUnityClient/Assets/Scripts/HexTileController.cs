@@ -62,7 +62,7 @@ public class HexTileController : MonoBehaviour
 
     IEnumerator InitializeMe()
     {
-        BlockingCollection<ServerData> pipe = new BlockingCollection<ServerData>(1);
+        BlockingCollection<ServerData> pipe = new BlockingCollection<ServerData>();
 
         Thread thread = new Thread(() => ContactCore(pipe));
         thread.Start();
@@ -83,7 +83,7 @@ public class HexTileController : MonoBehaviour
         serverData = tmpData;
         hasServer = true;
 
-        ContactServerAndRequestObjects();
+        StartCoroutine(ContactServerAndRequestObjects());
 
         while (true)
         {
@@ -93,6 +93,7 @@ public class HexTileController : MonoBehaviour
                 break;
         }
 
+        /*
         string assetBundleDirectoryPath = Application.dataPath + "/AssetBundles/" + x + "," + y + "/";
 
         if(File.Exists(assetBundleDirectoryPath + "tileobjects"))
@@ -117,7 +118,7 @@ public class HexTileController : MonoBehaviour
                 Instantiate(tileObject, groundHolder.transform);
 
             prefab.Unload(false);
-        }
+        }*///
     }
 
     public void ContactCore(BlockingCollection<ServerData> pipe)
@@ -174,8 +175,8 @@ public class HexTileController : MonoBehaviour
         ClearGroundAndTileObjects();
     }
 
-    public void ContactServerAndRequestObjects()
-    {
+    void foundTileStream(BlockingCollection<TileStream> tileStreamCollection){
+
         TileStream tileStream;
 
         try
@@ -185,33 +186,84 @@ public class HexTileController : MonoBehaviour
         }
         catch(Exception)
         {
+            tileStreamCollection.Add(null);
             return;
         }
 
-        if (!tileStream.Connected)
+        tileStreamCollection.Add(tileStream);
+
+    }
+
+    public IEnumerator ContactServerAndRequestObjects()
+    {
+
+        BlockingCollection<TileStream> tileStreamCollection = new BlockingCollection<TileStream>();
+        Thread streamFinder = new Thread(() => foundTileStream(tileStreamCollection));
+        streamFinder.Start();
+
+        while(tileStreamCollection.Count == 0)
+            yield return null;        
+
+        TileStream server = tileStreamCollection.Take();
+
+        if (server == null)
         {
             Console.WriteLine("Failed to connect to server of tile " + transform.parent.name + ".");
-            return;
+            yield break;
         }
+        StartCoroutine(ServerConnectAndGetGameObjects(server));
+    }
 
-        StartCoroutine(ServerConnectAndGetGameObjects(tileStream));
+    void sendMessage(TileStream server, byte[] message){
+        server.SendBytesToStream(message);
+    }
+
+    void sendMessage(TileStream server, string message){
+        server.SendStringToStream(message);
+    }
+
+    void getMessage(TileStream server, BlockingCollection<byte[]> collection){
+        collection.Add(server.GetBytesFromStream());
+    }
+
+    void getMessage(TileStream server, BlockingCollection<string> collection){
+        collection.Add(server.GetStringFromStream());
     }
 
     public IEnumerator ServerConnectAndGetGameObjects(TileStream server)
     {
         ObjectComposer composer = gameObject.AddComponent<ObjectComposer>();
 
-        server.SendStringToStream("getStaticAssets");
+        Thread getAssets = new Thread(() => sendMessage(server, "getStaticAssets"));
+        getAssets.Start();
 
-        int numHashes = BitConverter.ToInt32(server.GetBytesFromStream());
+        BlockingCollection<byte[]> bytes = new BlockingCollection<byte[]>();
+
+        getAssets = new Thread(() => getMessage(server, bytes));
+        getAssets.Start();
+
+        while(bytes.Count == 0)
+            yield return null;
+
+        int numHashes = BitConverter.ToInt32(bytes.Take());
 
         for(int i = 0; i < numHashes; i++)
         {
-            string hash = server.GetStringFromStream();
+
+            BlockingCollection<string> hashCollection = new BlockingCollection<string>();
+
+            getAssets = new Thread(() => getMessage(server, hashCollection));
+            getAssets.Start();
+
+            while(hashCollection.Count == 0)
+                yield return null;
+
+            string hash = hashCollection.Take();
+            
             yield return StartCoroutine(composer.Compose(hash, tileObjects.transform, server));
 
-            //Conclude this object
-            server.SendBytesToStream(new byte[1] { 0 });
+            getAssets = new Thread(() => sendMessage(server, new byte[1] { 0 }));
+            getAssets.Start();
         }
     }
 }
