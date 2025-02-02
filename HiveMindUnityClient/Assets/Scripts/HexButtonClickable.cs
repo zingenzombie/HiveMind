@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
@@ -22,7 +23,6 @@ public class HexButtonClickable : MonoBehaviour
         {
             Vector2 mousePosition = Input.mousePosition;
 
-            // Check if the mouse is overlapping the polygon collider
             if (polygonCollider2D.OverlapPoint(mousePosition))
             {
                 onClick?.Invoke();

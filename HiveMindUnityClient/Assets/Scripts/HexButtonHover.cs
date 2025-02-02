@@ -9,6 +9,7 @@ public class HexButtonHover : MonoBehaviour
     [SerializeField] private float scaleAmount;
     [SerializeField] private Image image;
     [SerializeField] private float colorShiftAmount;
+    [SerializeField] private Image shine;
 
     private Vector3 initialScale;
     private Color currentColor;
@@ -53,6 +54,8 @@ public class HexButtonHover : MonoBehaviour
 
             newColor = new Color(newR, newG, newB);
         }
+
+        shine.gameObject.SetActive(hovered);
 
         transform.localScale = finalScale;
         transform.DOScale(finalScale, 0.15f);
