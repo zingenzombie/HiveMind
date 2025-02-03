@@ -60,11 +60,12 @@ public class HexTileController : MonoBehaviour
         StartCoroutine(InitializeMe());
     }
 
+    Thread thread;
     IEnumerator InitializeMe()
     {
         BlockingCollection<ServerData> pipe = new BlockingCollection<ServerData>();
 
-        Thread thread = new Thread(() => ContactCore(pipe));
+        thread = new Thread(() => ContactCore(pipe));
         thread.Start();
 
         while (true)
@@ -84,41 +85,6 @@ public class HexTileController : MonoBehaviour
         hasServer = true;
 
         StartCoroutine(ContactServerAndRequestObjects());
-
-        while (true)
-        {
-            yield return null;
-
-            if (!thread.IsAlive)
-                break;
-        }
-
-        /*
-        string assetBundleDirectoryPath = Application.dataPath + "/AssetBundles/" + x + "," + y + "/";
-
-        if(File.Exists(assetBundleDirectoryPath + "tileobjects"))
-        {
-            var prefab = AssetBundle.LoadFromFile(assetBundleDirectoryPath + "tileobjects");
-
-            UnityEngine.Object[] tileObjectsAll = prefab.LoadAllAssets();
-
-            foreach (var tileObject in tileObjectsAll)
-                Instantiate(tileObject, tileObjects.transform);
-
-            prefab.Unload(false);
-        }
-
-        if (File.Exists(assetBundleDirectoryPath + "ground"))
-        {
-            var prefab = AssetBundle.LoadFromFile(assetBundleDirectoryPath + "ground");
-
-            UnityEngine.Object[] tileObjectsAll = prefab.LoadAllAssets();
-
-            foreach (var tileObject in tileObjectsAll)
-                Instantiate(tileObject, groundHolder.transform);
-
-            prefab.Unload(false);
-        }*///
     }
 
     public void ContactCore(BlockingCollection<ServerData> pipe)
@@ -143,6 +109,19 @@ public class HexTileController : MonoBehaviour
 
         serverData = JsonUtility.FromJson<ServerData>(serverJSON);
         pipe.Add(serverData);
+    }
+
+    private void OnDestroy()
+    {
+
+        if (thread != null && thread.IsAlive)
+            thread.Abort();
+
+        if (getAssets != null && getAssets.IsAlive)
+            getAssets.Abort();
+
+        if (streamFinder != null && streamFinder.IsAlive)
+            streamFinder.Abort();
     }
 
     //Erases all ground and TileObject data
@@ -194,11 +173,13 @@ public class HexTileController : MonoBehaviour
 
     }
 
+    Thread streamFinder;
+
     public IEnumerator ContactServerAndRequestObjects()
     {
 
         BlockingCollection<TileStream> tileStreamCollection = new BlockingCollection<TileStream>();
-        Thread streamFinder = new Thread(() => foundTileStream(tileStreamCollection));
+        streamFinder = new Thread(() => foundTileStream(tileStreamCollection));
         streamFinder.Start();
 
         while(tileStreamCollection.Count == 0)
@@ -230,11 +211,13 @@ public class HexTileController : MonoBehaviour
         collection.Add(server.GetStringFromStream());
     }
 
+    Thread getAssets;
+
     public IEnumerator ServerConnectAndGetGameObjects(TileStream server)
     {
         ObjectComposer composer = gameObject.AddComponent<ObjectComposer>();
 
-        Thread getAssets = new Thread(() => sendMessage(server, "getStaticAssets"));
+        getAssets = new Thread(() => sendMessage(server, "getStaticAssets"));
         getAssets.Start();
 
         BlockingCollection<byte[]> bytes = new BlockingCollection<byte[]>();
