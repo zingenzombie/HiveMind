@@ -4,9 +4,9 @@ using UnityEngine.InputSystem;
 
 public class ChangeScene : MonoBehaviour
 {
-    [SerializeField] private PolygonCollider2D polygonCollider2D;
-    [SerializeField] private bool clickOnly;
-    [SerializeField] private string sceneName;
+    public PolygonCollider2D polygonCollider2D;
+    public bool clickOnly;
+    public string sceneName;
 
     private void Update()
     {

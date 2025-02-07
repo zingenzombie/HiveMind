@@ -983,9 +983,8 @@ GameObject:
   m_Component:
   - component: {fileID: 560575950}
   - component: {fileID: 560575953}
-  - component: {fileID: 560575952}
   - component: {fileID: 560575954}
-  - component: {fileID: 560575951}
+  - component: {fileID: 560575955}
   m_Layer: 5
   m_Name: Mid
   m_TagString: Untagged
@@ -1016,51 +1015,6 @@ RectTransform:
   m_AnchoredPosition: {x: 36.843002, y: 16}
   m_SizeDelta: {x: 446.8741, y: 446.8741}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &560575951
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 560575949}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ea103bff62b15cd48833af83eae5f8eb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  polygonCollider2D: {fileID: 560575953}
-  scaleAmount: 1.15
-  image: {fileID: 563214036}
-  colorShiftAmount: -0.15
-  shine: {fileID: 1767546468}
---- !u!114 &560575952
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 560575949}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cf8f1bfdeeab44a43b56b074b21f52c6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  polygonCollider2D: {fileID: 560575953}
-  onClick:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 532128878}
-        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
-        m_MethodName: 
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: test
-          m_BoolArgument: 0
-        m_CallState: 2
 --- !u!60 &560575953
 PolygonCollider2D:
   m_ObjectHideFlags: 0
@@ -1126,9 +1080,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e9107a9835d41ab48ad44edb82574da2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  polygonCollider2D: {fileID: 560575953}
+  polygonCollider2D: {fileID: 0}
   clickOnly: 1
   sceneName: SampleScene
+--- !u!114 &560575955
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 560575949}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea103bff62b15cd48833af83eae5f8eb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  polygonCollider2D: {fileID: 560575953}
+  scaleAmount: 1.15
+  image: {fileID: 563214036}
+  colorShiftAmount: -0.15
+  shine: {fileID: 1767546468}
 --- !u!1 &563214032
 GameObject:
   m_ObjectHideFlags: 0
@@ -1404,7 +1375,7 @@ SpriteRenderer:
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 19.2, y: 10.8}
+  m_Size: {x: 19.2, y: 12}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -2920,7 +2891,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1693350245
 RectTransform:
   m_ObjectHideFlags: 0
@@ -3206,7 +3177,7 @@ SpriteRenderer:
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 19.2, y: 10.8}
+  m_Size: {x: 19.2, y: 12}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
