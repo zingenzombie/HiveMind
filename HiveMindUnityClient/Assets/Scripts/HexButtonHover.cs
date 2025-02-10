@@ -5,10 +5,11 @@ using UnityEngine.InputSystem;
 
 public class HexButtonHover : MonoBehaviour
 {
-    [SerializeField] private PolygonCollider2D polygonCollider2D;
-    [SerializeField] private float scaleAmount;
-    [SerializeField] private Image image;
-    [SerializeField] private float colorShiftAmount;
+    public PolygonCollider2D polygonCollider2D;
+    public float scaleAmount;
+    public Image image;
+    public float colorShiftAmount;
+    public Image shine;
 
     private Vector3 initialScale;
     private Color currentColor;
@@ -53,6 +54,8 @@ public class HexButtonHover : MonoBehaviour
 
             newColor = new Color(newR, newG, newB);
         }
+
+        shine.gameObject.SetActive(hovered);
 
         transform.localScale = finalScale;
         transform.DOScale(finalScale, 0.15f);
