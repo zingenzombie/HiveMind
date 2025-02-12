@@ -41,8 +41,6 @@ public class PlayerInfo : MonoBehaviour
         //File.Create("PlayerInfo/PlayerInfo.txt");
         //File.WriteAllText("PlayerInfo/PlayerInfo.txt", rsa.ToXmlString(true));
 
-
-
         FileStream fs = File.Create("PlayerInfo/PlayerInfo.txt");
 
         fs.Write(Encoding.UTF8.GetBytes(rsa.ToXmlString(true)));

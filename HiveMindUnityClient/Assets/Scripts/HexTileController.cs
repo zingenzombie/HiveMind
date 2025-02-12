@@ -222,10 +222,13 @@ public class HexTileController : MonoBehaviour
 
         BlockingCollection<byte[]> bytes = new BlockingCollection<byte[]>();
 
+        while(getAssets.ThreadState == ThreadState.Running)
+            yield return null;
+
         getAssets = new Thread(() => getMessage(server, bytes));
         getAssets.Start();
 
-        while(bytes.Count == 0)
+        while (getAssets.ThreadState == ThreadState.Running)
             yield return null;
 
         int numHashes = BitConverter.ToInt32(bytes.Take());
@@ -238,7 +241,7 @@ public class HexTileController : MonoBehaviour
             getAssets = new Thread(() => getMessage(server, hashCollection));
             getAssets.Start();
 
-            while(hashCollection.Count == 0)
+            while (hashCollection.Count < 1)
                 yield return null;
 
             string hash = hashCollection.Take();
