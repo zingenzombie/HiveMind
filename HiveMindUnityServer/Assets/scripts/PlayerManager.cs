@@ -45,6 +45,9 @@ public class PlayerManager : MonoBehaviour
             switch (networkMessage.messageType)
             {
                 case "PlayerPos":
+                    //Testing:
+                    Debug.Log("Player moved!!");
+
                     UpdatePlayerPos(networkMessage);
                     break;
                 case "Goodbye":
