@@ -88,7 +88,7 @@ public class NetworkController : MonoBehaviour
         float rotW = BitConverter.ToSingle(transformInfo, 24);
         try
         {
-            players[networkMessage.spawningClient].transform.SetPositionAndRotation(new Vector3(posX, posY, posZ), new Quaternion(rotX, rotY, rotZ, rotW));
+            players[networkMessage.spawningClient].GetComponent<OtherClient>().ChangeTarget(new Vector3(posX, posY, posZ), new Quaternion(rotX, rotY, rotZ, rotW));
         }catch (Exception) { Debug.Log("Player " + networkMessage.spawningClient + " does not exist locally but received position update!"); }
     }
 
