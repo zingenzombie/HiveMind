@@ -3,6 +3,7 @@ using UnityEngine;
 public class UIOpenMenu : MonoBehaviour
 {
     public GameObject menu;
+    public InventoryObject inventory;
 
     void Start()
     {
@@ -16,6 +17,17 @@ public class UIOpenMenu : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.E) && menu != null)
         {
+            if (inventory != null)
+            {
+                if (menu.activeSelf)
+                {
+                    inventory.Load();
+                }
+                else
+                {
+                    inventory.Save();
+                }
+            }
             menu.SetActive(!menu.activeSelf);
         }
     }

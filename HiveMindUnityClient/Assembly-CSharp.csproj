@@ -61,6 +61,7 @@
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.0.32f1\Editor\Data\Tools\Unity.SourceGenerators\Unity.UIToolkit.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\Scripts\UI\UIOpenMenu.cs" />
     <Compile Include="Assets\Scripts\GameObjectID.cs" />
     <Compile Include="Assets\Scripts\TileStream.cs" />
     <Compile Include="Assets\Scripts\CoroutineResult.cs" />
@@ -68,24 +69,27 @@
     <Compile Include="Assets\Scripts\PlayerLook.cs" />
     <Compile Include="Assets\Scripts\PlayerController.cs" />
     <Compile Include="Assets\Scripts\ExitUpAndDown.cs" />
-    <Compile Include="Assets\Scripts\UIHotbarManager.cs" />
     <Compile Include="Assets\OtherClient.cs" />
+    <Compile Include="Assets\Scripts\UI\ItemsMenu.cs" />
     <Compile Include="Assets\Scripts\ExitMoveOnGrid.cs" />
+    <Compile Include="Assets\Scripts\UI\HexButtonClickable.cs" />
     <Compile Include="Assets\Scripts\PlayerInfo.cs" />
-    <Compile Include="Assets\Scripts\HexButtonClickable.cs" />
     <Compile Include="Assets\Scripts\FileManagement.cs" />
-    <Compile Include="Assets\Scripts\HexButtonHover.cs" />
     <Compile Include="Assets\Scripts\CoreCommunication.cs" />
     <Compile Include="Assets\Scripts\NetworkMessage.cs" />
     <Compile Include="Assets\Scripts\ServerData.cs" />
     <Compile Include="Assets\Scripts\ObjectComposer.cs" />
+    <Compile Include="Assets\Scripts\UI\HexButtonHover.cs" />
+    <Compile Include="Assets\Scripts\UI\ChangeScene.cs" />
     <Compile Include="Assets\Scripts\MoveExit.cs" />
     <Compile Include="Assets\Scripts\ObjectDecomposer.cs" />
+    <Compile Include="Assets\ScriptableObjects\Scripts\InventoryObject.cs" />
     <Compile Include="Assets\Scripts\GridController.cs" />
-    <Compile Include="Assets\Scripts\ChangeScene.cs" />
-    <Compile Include="Assets\Scripts\UIOpenMenu.cs" />
+    <Compile Include="Assets\ScriptableObjects\Scripts\ItemObject.cs" />
+    <Compile Include="Assets\ScriptableObjects\Scripts\ItemDatabaseObject.cs" />
     <Compile Include="Assets\Scripts\PlayerDebug.cs" />
     <Compile Include="Assets\Scripts\NetworkController.cs" />
+    <Compile Include="Assets\Scripts\UI\UIHotbarManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />
