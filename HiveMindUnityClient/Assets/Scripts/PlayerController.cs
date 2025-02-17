@@ -28,10 +28,34 @@ public class PlayerController : MonoBehaviour
     Vector3 oldPosition;
     Quaternion oldRotation;
 
-    void Update()
-    {
-        Run();
+    bool sendThisFixedUpdate = true;
+
+    void FixedUpdate(){
+
+        VelocityCap();
         
+        //Do position check every other fixed update.
+
+        if(sendThisFixedUpdate)
+            SendPositionMessage();
+
+        sendThisFixedUpdate = !sendThisFixedUpdate;
+    }
+    
+    void VelocityCap()
+    {
+
+        Vector3 playerVelocity;
+
+        if (myRigidbody.linearVelocity.y < -50)
+            playerVelocity = new Vector3(moveInput.x * walkSpeedActual, -50, moveInput.y * walkSpeedActual);
+        else
+            playerVelocity = new Vector3(moveInput.x * walkSpeedActual, myRigidbody.linearVelocity.y, moveInput.y * walkSpeedActual);
+        
+        myRigidbody.linearVelocity = transform.TransformDirection(playerVelocity);
+    }
+
+    void SendPositionMessage(){
         transform.GetPositionAndRotation(out Vector3 newPosition, out Quaternion newRotation);
         //Vector 3 is 12 bytes and Quaternion is 16 bytes.
         if(oldPosition != newPosition || oldRotation != newRotation)
@@ -74,21 +98,6 @@ public class PlayerController : MonoBehaviour
             networkController.SendTCPMessage(netMessage);
 
         }
-    }
-    
-    void Run()
-    {
-
-        Vector3 playerVelocity;
-
-        if (myRigidbody.linearVelocity.y < -50)
-            playerVelocity = new Vector3(moveInput.x * walkSpeedActual, -50, moveInput.y * walkSpeedActual);
-        else
-            playerVelocity = new Vector3(moveInput.x * walkSpeedActual, myRigidbody.linearVelocity.y, moveInput.y * walkSpeedActual);
-        
-        myRigidbody.linearVelocity = transform.TransformDirection(playerVelocity);
-
-
     }
 
     public void OnMove(InputValue value)
