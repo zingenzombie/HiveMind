@@ -263,7 +263,7 @@ MonoBehaviour:
   requestXY: 1
   port: 3622
   x: 0
-  y: 1
+  y: 2
   serverName: testServer
   ownerID: Zin
   hexTileTemplate: {fileID: 7693739768744577133, guid: 142239a109042df4ab372023a3b13902, type: 3}
@@ -532,7 +532,7 @@ Transform:
   m_GameObject: {fileID: 1155670021}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 37.1, y: 0, z: 46}
+  m_LocalPosition: {x: 37.1, y: 148.6, z: 46}
   m_LocalScale: {x: 18.7, y: 118.2, z: 18.7}
   m_ConstrainProportionsScale: 0
   m_Children: []

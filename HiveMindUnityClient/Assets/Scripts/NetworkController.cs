@@ -13,7 +13,7 @@ public class NetworkController : MonoBehaviour
     [SerializeField] GameObject otherPlayerPrefab;
     Transform playerHolder;
 
-    Thread tileStreamSender, tileStreamReceiver;
+    Thread tileStreamSender, tileStreamReceiver, connectThread;
     BlockingCollection<NetworkMessage> messagePipeOut = new BlockingCollection<NetworkMessage>();
     BlockingCollection<NetworkMessage> messagePipeIn = new BlockingCollection<NetworkMessage>();
 
@@ -21,6 +21,18 @@ public class NetworkController : MonoBehaviour
     private void Update()
     {
         HandleNewMessages();
+    }
+
+    private void OnDestroy()
+    {
+        if (tileStreamSender != null && tileStreamSender.IsAlive)
+            tileStreamSender.Abort();
+
+        if (tileStreamReceiver != null && tileStreamReceiver.IsAlive)
+            tileStreamReceiver.Abort();
+
+        if (connectThread != null && connectThread.IsAlive)
+            connectThread.Abort();
     }
 
     void HandleNewMessages()
@@ -76,7 +88,7 @@ public class NetworkController : MonoBehaviour
         float rotW = BitConverter.ToSingle(transformInfo, 24);
         try
         {
-            players[networkMessage.spawningClient].transform.SetPositionAndRotation(new Vector3(posX, posY, posZ), new Quaternion(rotX, rotY, rotZ, rotW));
+            players[networkMessage.spawningClient].GetComponent<OtherClient>().ChangeTarget(new Vector3(posX, posY, posZ), new Quaternion(rotX, rotY, rotZ, rotW));
         }catch (Exception) { Debug.Log("Player " + networkMessage.spawningClient + " does not exist locally but received position update!"); }
     }
 
@@ -84,6 +96,7 @@ public class NetworkController : MonoBehaviour
      * connection is established or fails to establish. This will (hopefully) 
      * prevent huccups in things like audio and player movement.
      */
+
     public IEnumerator ChangeActiveServer(HexTileController activeServer)
     {
         this.activeServer = activeServer;
@@ -96,24 +109,34 @@ public class NetworkController : MonoBehaviour
         players.Clear();
 
         CoroutineResult<TileStream> streamReturn = new CoroutineResult<TileStream>();
-        Thread connectThread = new Thread(() => connectToNewServer(streamReturn));
+        connectThread = new Thread(() => connectToNewServer(streamReturn));
         connectThread.Start();
 
-        while (connectThread.IsAlive)
+        while (connectThread.ThreadState == ThreadState.Running)
             yield return null;
 
         //How can I make sure this message gets sent before the thread handling it is aborted?
 
-        if(tileStreamSender != null && tileStreamSender.IsAlive)
+        if (tileStreamSender != null && tileStreamSender.ThreadState == ThreadState.Running)
         {
             Debug.Log("Leaving");
             messagePipeOut.Add(new NetworkMessage("Goodbye", new byte[1]));
+
+            while (connectThread.ThreadState == ThreadState.Running)
+                yield return null;
         }
 
         if (streamReturn.Value == null)
         {
             Debug.Log("An exception occurred while attempting to join a new tile.");
             yield break;
+        }
+
+        if (tileStreamReceiver != null && tileStreamReceiver.ThreadState == ThreadState.Running)
+        {
+            tileStreamReceiver.Abort();
+            while (tileStreamReceiver.ThreadState == ThreadState.Running)
+                yield return null;
         }
 
         tileStreamReceiver = new Thread(() => TCPThreadIn(streamReturn.Value));

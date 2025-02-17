@@ -8,7 +8,6 @@ public class PlayerLook : MonoBehaviour
 {
 
     private Vector2 moveInput;
-    private Rigidbody myRigidbody;
 
     [SerializeField] private float minViewDistance;
     [SerializeField] private float mouseSensitivity;
