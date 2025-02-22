@@ -55,6 +55,7 @@ public class PlayerManager : MonoBehaviour
                     DisconnectPlayer(networkMessage);
                     break;
                 default:
+                    Debug.Log("Unable to handle case " + networkMessage.messageType + ".");
                     break;
             }
         }

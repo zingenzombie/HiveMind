@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Concurrent;
+using System.Net;
 using System.Threading;
 using UnityEngine;
 
@@ -12,9 +13,38 @@ public class PlayerData : MonoBehaviour
 
     PlayerManager playerManager;
     public BlockingCollection<NetworkMessage> serverPipeOut = new BlockingCollection<NetworkMessage>();
+    public BlockingCollection<bool> messageUpdateTime = new BlockingCollection<bool>();
     Thread tcpThreadIn, tcpThreadOut;
 
     bool initialized = false;
+
+    float timeOfLastResponse;
+
+    private void Start()
+    {
+        timeOfLastResponse = Time.time;
+    }
+
+    bool armed = false;
+    private void FixedUpdate()
+    {
+        if (messageUpdateTime.TryTake(out _))
+            timeOfLastResponse = Time.fixedTime;
+
+        if (timeOfLastResponse + 3 < Time.fixedTime)
+        {
+            if (!armed)
+            {
+                armed = true;
+                serverPipeOut.Add(new NetworkMessage("", "ping", new byte[0]));
+            }
+
+        }else
+            armed = false;
+
+        if (timeOfLastResponse + 8 < Time.time)
+            playerManager.messagePipe.Add(new NetworkMessage(playerID, "Goodbye", new byte[0]));
+    }
 
     void OnDestroy()
     {
@@ -53,8 +83,6 @@ public class PlayerData : MonoBehaviour
 
     void TCPThreadIn()
     {
-
-
 
         while (true)
         {
@@ -98,9 +126,12 @@ public class PlayerData : MonoBehaviour
         }
     }
 
-    private void HandleMessage(NetworkMessage message)
+    void HandleMessage(NetworkMessage message)
     {
-        switch(message.messageType){
+
+        messageUpdateTime.Add(true);
+
+        switch (message.messageType){
 
             //First check for local request
             //case "PlayerPos":

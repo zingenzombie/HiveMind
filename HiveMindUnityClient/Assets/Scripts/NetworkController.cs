@@ -4,6 +4,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Threading;
+using UnityEditor.PackageManager;
 using UnityEngine;
 
 public class NetworkController : MonoBehaviour
@@ -52,6 +53,10 @@ public class NetworkController : MonoBehaviour
                     break;
                 case "PlayerPos":
                     UpdatePlayerPosition(networkMessage);
+                    break;
+                case "ping":
+                    Debug.Log("ping");
+                    messagePipeOut.Add(new NetworkMessage("", "pong", new byte[0]));
                     break;
                 default:
                     break;
