@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Pipes;
 using System.Net.Security;
 using System.Net.Sockets;
 using System.Runtime.InteropServices.ComTypes;
@@ -23,6 +24,46 @@ public class TileStream : TcpClient
         // Initialize the TileStream with the TcpClient's socket
         Client = tcpClient.Client;
     }
+    
+    public bool VerifyPeer(CoroutineResult<string> playerID)
+    {
+        //Generate challenge
+        RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider();
+
+        byte[] challengeKey = new byte[100];
+        rng.GetBytes(challengeKey);
+
+        //Encrypt challenge with playerKey and send
+        RSACryptoServiceProvider rsa = new RSACryptoServiceProvider();
+
+        playerID.Value = GetStringFromStream();
+        rsa.FromXmlString(playerID.Value);
+
+        SendBytesToStream(rsa.Encrypt(challengeKey, false));
+
+        byte[] response = GetBytesFromStream();
+
+        for (int i = 0; i < challengeKey.Length; i++)
+            if (challengeKey[i] != response[i])
+                return false;
+
+
+        SendStringToStream("ACK");
+        return true;
+    }
+
+    public bool VerifySelf(PlayerInfo player)
+    {
+        //Send playerID and verify player
+        SendStringToStream(player.GetPlayerPublicRSA());
+        SendBytesToStream(player.VerifyPlayer(GetBytesFromStream()));
+
+        if (!GetStringFromStream().Equals("ACK"))
+            return false;
+
+        return true;
+    }
+
 
     public int ActivateStream(string publicKey)
     {

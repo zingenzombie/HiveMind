@@ -13,18 +13,12 @@ public class PlayerInfo : MonoBehaviour
     string privatePlayerID;
     public string username = "Unnamed";
 
-    //Should not be public in the future most likely.
-    public string avatarHash;
-
     RSACryptoServiceProvider rsa;
 
     AssetBundle avatar;
 
-    ObjectManager objectController;
-
     private void Start()
     {
-        objectController = GameObject.FindWithTag("ObjectController").GetComponent<ObjectManager>();
 
         rsa = new RSACryptoServiceProvider();
 
@@ -40,9 +34,6 @@ public class PlayerInfo : MonoBehaviour
         Debug.Log(playerID);
 
         this.GetComponent<PlayerDebug>().name = username;
-
-        //TMP HASH AVATAR
-        avatarHash = objectController.DecomposeObject(transform.GetChild(1).GetChild(0).gameObject);
     }
 
     private void GeneratePlayerKeys()

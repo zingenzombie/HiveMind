@@ -1,5 +1,6 @@
 using System.Collections;
 using System.IO;
+using System.IO.Pipes;
 using UnityEngine;
 
 public class ObjectManager : MonoBehaviour
@@ -25,6 +26,11 @@ public class ObjectManager : MonoBehaviour
     public bool HashExists(string hash)
     {
         return File.Exists(objectDirectory + hash);
+    }
+
+    public IEnumerator Compose(string avatarHash, Transform transform, TileStream tileStream = null)
+    {
+        yield return StartCoroutine(composer.Compose(avatarHash, transform, tileStream));
     }
 
     public bool GetRequestedAssets(string hash, out byte[] objectBytes)

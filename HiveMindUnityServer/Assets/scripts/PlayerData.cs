@@ -1,13 +1,19 @@
 using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Net;
+using System.Text;
 using System.Threading;
+using UnityEditor;
+using UnityEditor.VersionControl;
 using UnityEngine;
 
 public class PlayerData : MonoBehaviour
 {
     string playerID;
     TileStream tileStream;
+
+    public string avatarHash;
 
     public string username;
 
@@ -18,15 +24,21 @@ public class PlayerData : MonoBehaviour
 
     bool initialized = false;
 
+    public BlockingCollection<NetworkMessage> messagePipe = new BlockingCollection<NetworkMessage>();
+    public BlockingCollection<TileStream> ObjectInTileStream = new BlockingCollection<TileStream>();
+
     float timeOfLastResponse;
+
+    ObjectManager objectManager;
 
     private void Start()
     {
+        objectManager = GameObject.FindWithTag("ObjectController").GetComponent<ObjectManager>();
         timeOfLastResponse = Time.time;
     }
 
     bool armed = false;
-    private void FixedUpdate()
+    void FixedUpdate()
     {
         if (messageUpdateTime.TryTake(out _))
             timeOfLastResponse = Time.fixedTime;
@@ -39,15 +51,25 @@ public class PlayerData : MonoBehaviour
                 serverPipeOut.Add(new NetworkMessage("", "ping", new byte[0]));
             }
 
-        }else
+        }
+        else
             armed = false;
 
         if (timeOfLastResponse + 8 < Time.time)
-            playerManager.messagePipe.Add(new NetworkMessage(playerID, "Goodbye", new byte[0]));
+        {
+            Debug.Log("LOCAL GOODBYE TRIGGERED");
+            messagePipe.Add(new NetworkMessage(playerID, "Goodbye", new byte[0]));
+        }
+    }
+
+    void Update()
+    {
+        HandleMessages();
     }
 
     void OnDestroy()
     {
+        Debug.Log("Destroy triggered!");
         tileStream.SendStringToStream("Goodbye");
 
         if (tcpThreadIn != null && tcpThreadIn.IsAlive)
@@ -92,9 +114,7 @@ public class PlayerData : MonoBehaviour
                 string messageType = tileStream.GetStringFromStream();
                 byte[] message = tileStream.GetBytesFromStream();
 
-                NetworkMessage netMessage = new NetworkMessage(playerID, messageType, message);
-
-                HandleMessage(netMessage);
+                messagePipe.Add(new NetworkMessage(playerID, messageType, message));
             }
 
             Thread.Yield();
@@ -108,7 +128,8 @@ public class PlayerData : MonoBehaviour
             if (!tileStream.Connected)
             {
                 tileStream.Close();
-                HandleMessage(new NetworkMessage(playerID, "Goodbye", new byte[0]));
+                Debug.Log("LOCAL GOODBYE 2 TRIGGERED");
+                messagePipe.Add(new NetworkMessage(playerID, "Goodbye", new byte[0]));
 
                 break;
             }
@@ -126,23 +147,74 @@ public class PlayerData : MonoBehaviour
         }
     }
 
-    void HandleMessage(NetworkMessage message)
+    void HandleMessages()
     {
 
-        messageUpdateTime.Add(true);
+        while (messagePipe.TryTake(out NetworkMessage networkMessage))
+        {
 
-        switch (message.messageType){
+            messageUpdateTime.Add(true);
 
-            //First check for local request
-            //case "PlayerPos":
-            //    UpdatePlayerPosAndRot(message);
-            //    break;
+            switch (networkMessage.messageType)
+            {
 
-            //If can't be handled locally, send to MessageManager
-            default:
-                playerManager.messagePipe.Add(message);
-                break;
+                case "ChangeAvatar":
+                    StartCoroutine(ChangeAvatarFromClient(networkMessage));
+                    break;
+
+                //First check for local request
+                //case "PlayerPos":
+                //    UpdatePlayerPosAndRot(message);
+                //    break;
+
+                //If can't be handled locally, send to MessageManager
+                default:
+                    playerManager.HandleNewMessages(networkMessage);
+                    break;
+            }
+
         }
 
+        IEnumerator ChangeAvatarFromClient(NetworkMessage networkMessage)
+        {
+
+            Debug.Log("Updating avatar...");
+
+            string hash = ASCIIEncoding.ASCII.GetString(networkMessage.message);
+            Debug.Log("Changing avatar to " + hash + "...");
+
+            //Destroy old avatar
+            Destroy(transform.GetChild(0).GetChild(0).gameObject);
+
+            if (objectManager.HashExists(hash))
+            {
+                Debug.Log("Local hash found!");
+                yield return StartCoroutine(objectManager.SpawnObjectAsServer(hash, transform.GetChild(0)));
+
+
+                avatarHash = hash;
+                playerManager.HandleNewMessages(networkMessage);
+
+                yield break;
+            }
+
+            Debug.Log("Local hash not found; prompting client for new stream...");
+            serverPipeOut.Add(new NetworkMessage("", "OpenConnection", new byte[0]));
+
+            TileStream tmpTileStream;
+
+            while(!ObjectInTileStream.TryTake(out tmpTileStream))
+                yield return null;
+
+            Debug.Log("Received stream for avatar data transfer.");
+
+            //Compose new one
+            yield return StartCoroutine(objectManager.SpawnObjectAsServer(hash, transform.GetChild(0), tmpTileStream));
+
+            //Change avatar hash locally and notify other members AFTER composition has finished to ensure that all files are available.
+            avatarHash = hash;
+            playerManager.HandleNewMessages(networkMessage);
+
+        }
     }
 }

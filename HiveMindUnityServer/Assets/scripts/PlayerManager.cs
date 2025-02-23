@@ -14,7 +14,6 @@ public class PlayerManager : MonoBehaviour
     Dictionary<string, GameObject> players = new Dictionary<string, GameObject>();
 
     BlockingCollection<PlayerInfo> newPlayerPipe = new BlockingCollection<PlayerInfo>();
-    public BlockingCollection<NetworkMessage> messagePipe = new BlockingCollection<NetworkMessage>();
 
     Dictionary<string, NetworkMessage> positionUpdates = new Dictionary<string, NetworkMessage>();
     Queue<NetworkMessage> generalUpdates = new Queue<NetworkMessage>();
@@ -34,30 +33,42 @@ public class PlayerManager : MonoBehaviour
     private void Update()
     {
         InstantiateNewPlayers();
-        HandleNewMessages();
         SendMessagesToAllExceptPID();
+        ReceiveAssetsFromPlayerInternal();
     }
 
-    void HandleNewMessages()
-    {
-        while (messagePipe.TryTake(out NetworkMessage networkMessage))
-        {
-            switch (networkMessage.messageType)
-            {
-                case "PlayerPos":
-                    //Testing:
-                    Debug.Log("Player moved!!");
+    BlockingCollection<TileStream> receiveStream = new BlockingCollection<TileStream>();
+    BlockingCollection<string> receivePlayerID = new BlockingCollection<string>();
 
-                    UpdatePlayerPos(networkMessage);
-                    break;
-                case "Goodbye":
-                    Debug.Log("Player " + networkMessage.spawningClient + " left the server.");
-                    DisconnectPlayer(networkMessage);
-                    break;
-                default:
-                    Debug.Log("Unable to handle case " + networkMessage.messageType + ".");
-                    break;
-            }
+    public void ReceiveAssetsFromPlayer(TileStream tileStream, string playerID)
+    {
+        receiveStream.Add(tileStream);
+        receivePlayerID.Add(playerID);
+    }
+
+    void ReceiveAssetsFromPlayerInternal()
+    {
+        while(receivePlayerID.TryTake(out string playerID))
+            players[playerID].GetComponent<PlayerData>().ObjectInTileStream.Add(receiveStream.Take());
+    }
+
+    public void HandleNewMessages(NetworkMessage networkMessage)
+    {
+        switch (networkMessage.messageType)
+        {
+            case "PlayerPos":
+                UpdatePlayerPos(networkMessage);
+                break;
+            case "Goodbye":
+                Debug.Log("Player " + networkMessage.spawningClient + " left the server.");
+                DisconnectPlayer(networkMessage);
+                break;
+            case "ChangeAvatar":
+                ChangeAvatar(networkMessage);
+                break;
+            default:
+                Debug.Log("Unable to handle case " + networkMessage.messageType + ".");
+                break;
         }
     }
 
@@ -74,6 +85,11 @@ public class PlayerManager : MonoBehaviour
         {
             Debug.Log("Existing player: " + iter.Key);
         }
+    }
+
+    void ChangeAvatar(NetworkMessage networkMessage)
+    {
+        generalUpdates.Enqueue(networkMessage);
     }
 
     void UpdatePlayerPos(NetworkMessage networkMessage)
@@ -141,8 +157,46 @@ public class PlayerManager : MonoBehaviour
 
             //Send existing client info to new player
             foreach (var player in players)
+            {
                 newPlayer.GetComponent<PlayerData>().serverPipeOut.Add(
-                    new NetworkMessage(player.Key, "newPlayer", new byte[1]));
+            new NetworkMessage(player.Key, "newPlayer", new byte[1]));
+
+                player.Value.transform.GetPositionAndRotation(out Vector3 newPosition, out Quaternion newRotation);
+
+                byte[] posX = BitConverter.GetBytes(newPosition.x);
+                byte[] posY = BitConverter.GetBytes(newPosition.y);
+                byte[] posZ = BitConverter.GetBytes(newPosition.z);
+
+                byte[] rotX = BitConverter.GetBytes(newRotation.x);
+                byte[] rotY = BitConverter.GetBytes(newRotation.y);
+                byte[] rotZ = BitConverter.GetBytes(newRotation.z);
+                byte[] rotW = BitConverter.GetBytes(newRotation.w);
+
+                byte[] message = new byte[28];
+
+                for (int i = 0; i < 28; i++)
+                {
+                    if (i < 4)
+                        message[i] = posX[i];
+                    else if (i < 8)
+                        message[i] = posY[i - 4];
+                    else if (i < 12)
+                        message[i] = posZ[i - 8];
+                    else if (i < 16)
+                        message[i] = rotX[i - 12];
+                    else if (i < 20)
+                        message[i] = rotY[i - 16];
+                    else if (i < 24)
+                        message[i] = rotZ[i - 20];
+                    else
+                        message[i] = rotW[i - 24];
+                }
+
+                newPlayer.GetComponent<PlayerData>().serverPipeOut.Add(new NetworkMessage(player.Key, "PlayerPos", message));
+
+                newPlayer.GetComponent<PlayerData>().serverPipeOut.Add(
+            new NetworkMessage(player.Key, "ChangeAvatar", ASCIIEncoding.ASCII.GetBytes(player.Value.GetComponent<PlayerData>().avatarHash)));
+            }
 
             players.Add(playerInfo.playerID, newPlayer);
             newPlayer.GetComponent<PlayerData>().InitializePlayerData(playerInfo.tileStream, playerInfo.playerID);
@@ -164,39 +218,13 @@ public class PlayerManager : MonoBehaviour
         CoroutineResult<string> playerID = new CoroutineResult<string>();
 
         //Authenticate client
-        if (!VerifyPlayer(playerID, tileStream))
+        if (!tileStream.VerifyPeer(playerID))
         {
             //Failed authentication
             return;
         }
 
         //Generate new player object and store to list
-        tileStream.SendStringToStream("ACK");
         newPlayerPipe.Add(new PlayerInfo(tileStream, playerID.Value));
-    }
-
-    bool VerifyPlayer(CoroutineResult<string> playerID, TileStream tileStream)
-    {
-        //Generate challenge
-        RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider();
-
-        byte[] challengeKey = new byte[100];
-        rng.GetBytes(challengeKey);
-
-        //Encrypt challenge with playerKey and send
-        RSACryptoServiceProvider rsa = new RSACryptoServiceProvider();
-
-        playerID.Value = tileStream.GetStringFromStream();
-        rsa.FromXmlString(playerID.Value);
-
-        tileStream.SendBytesToStream(rsa.Encrypt(challengeKey, false));
-
-        byte[] response = tileStream.GetBytesFromStream();
-
-        for (int i = 0; i < challengeKey.Length; i++)
-            if (challengeKey[i] != response[i])
-                return false;
-
-        return true;
     }
 }

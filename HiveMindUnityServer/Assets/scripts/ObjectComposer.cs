@@ -35,7 +35,7 @@ public class ObjectComposer : MonoBehaviour
         //TODO
 
         //Destroy objectsByID
-        destryoObjectsByID();
+        DestroyObjectsByID();
     }
 
     IEnumerator BreadthFirstCompose(/*GameObject*/ Transform parent, FileStream fsTree)
@@ -46,8 +46,8 @@ public class ObjectComposer : MonoBehaviour
 
         objectsByID.Add(placeholder);
 
-        GameObject thisObject = Instantiate(new GameObject(), parent/*.transform*/);
-        //thisObject.transform.parent = parent.transform;
+        GameObject thisObject = new GameObject();
+        thisObject.transform.parent = parent;
 
         CoroutineResult<FileStream> resultFS = new CoroutineResult<FileStream>();
         yield return StartCoroutine(openByHashSubCoroutine(ReadString(fsTree), resultFS));
@@ -109,6 +109,7 @@ public class ObjectComposer : MonoBehaviour
         {
             //request file. This will yield until the file is available
 
+            //Potential thread leak TODO
             Thread thread = new Thread(() => FileManagement.DownloadFile(hash, tileStream));
             thread.Start();
 
@@ -120,7 +121,8 @@ public class ObjectComposer : MonoBehaviour
         try
         {
 
-            FileStream fs = File.Open(objectDirectory + hash, FileMode.Open/*, FileAccess.Read, FileShare.Read*/);
+            //FileStream fs = File.Open(objectDirectory + hash, FileMode.Open/*, FileAccess.Read, FileShare.Read*/);
+            FileStream fs = File.Open(objectDirectory + hash, FileMode.Open, FileAccess.Read, FileShare.Read);
 
             fs.Position = 0;
 
@@ -148,11 +150,15 @@ public class ObjectComposer : MonoBehaviour
         yield return null;
     }
 
-    void destryoObjectsByID()
+    void DestroyObjectsByID()
     {
-        for (int i = 0; i < objectsByID.Count; i++)
+        for (int i = objectsByID.Count - 1; i >= 0; i--)
             Destroy(objectsByID[i]);
+
+        objectsByID.Clear();
     }
+
+
 
 
 
