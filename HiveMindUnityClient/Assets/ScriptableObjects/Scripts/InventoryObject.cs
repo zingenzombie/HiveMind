@@ -20,7 +20,7 @@ public class InventoryObject : ScriptableObject
 #endif        
     }
 
-    public void AddListItem(ItemObject _item, int _amount)
+    public void AddListItem(GameObject _item, int _amount, string _creator, string _date)
     {
         for (int i = 0; i < Container.Count; i++)
         {
@@ -30,7 +30,7 @@ public class InventoryObject : ScriptableObject
                 return;
             }
         }
-        Container.Add(new InventorySlot(database.GetId[_item], _item, _amount));
+        Container.Add(new InventorySlot(database.GetId[_item], _item, _amount, _creator, _date));
     }
 
     public void Save()
@@ -70,14 +70,18 @@ public class InventoryObject : ScriptableObject
 public class InventorySlot
 {
     public int ID;
-    public ItemObject item;
+    public GameObject item; // Can use ItemObjects in place of this if wanted.
     public int amount;
+    public string creator;
+    public string date;
 
-    public InventorySlot(int _ID, ItemObject _item, int _amount)
+    public InventorySlot(int _ID, GameObject _item, int _amount, string _creator, string _date)
     {
         ID = _ID;
         item = _item;
         amount = _amount;
+        creator = _creator;
+        date = _date;
     }
 
     public void AddAmount(int value)

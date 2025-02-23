@@ -1,6 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
-using System.Threading;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -25,12 +22,21 @@ public class PlayerLook : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        xRotation -= moveInput.y * mouseSensitivity;
-        xRotation = Mathf.Clamp(xRotation, -90f, minViewDistance);
+        if (!UIOpenMenu.menuIsOpen)
+        {
+            Cursor.lockState = CursorLockMode.Locked;
 
-        transform.localRotation = Quaternion.Euler(xRotation, 0, 0);
+            xRotation -= moveInput.y * mouseSensitivity;
+            xRotation = Mathf.Clamp(xRotation, -90f, minViewDistance);
 
-        playerBody.Rotate(Vector3.up * moveInput.x * mouseSensitivity);
+            transform.localRotation = Quaternion.Euler(xRotation, 0, 0);
+
+            playerBody.Rotate(Vector3.up * moveInput.x * mouseSensitivity);
+        }
+        else 
+        {
+            Cursor.lockState = CursorLockMode.None;
+        }
     }
 
     public void OnLook(InputValue value)
