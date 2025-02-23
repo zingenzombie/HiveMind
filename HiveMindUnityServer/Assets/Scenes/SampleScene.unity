@@ -269,6 +269,7 @@ MonoBehaviour:
   hexTileTemplate: {fileID: 7693739768744577133, guid: 142239a109042df4ab372023a3b13902, type: 3}
   initialized: 0
   playerManager: {fileID: 2067910049}
+  ObjectController: {fileID: 1455389448}
 --- !u!4 &534617745
 Transform:
   m_ObjectHideFlags: 0
@@ -627,9 +628,10 @@ GameObject:
   m_Component:
   - component: {fileID: 1455389447}
   - component: {fileID: 1455389448}
+  - component: {fileID: 1455389449}
   m_Layer: 0
-  m_Name: ObjectManager
-  m_TagString: Untagged
+  m_Name: ObjectController
+  m_TagString: ObjectController
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -659,6 +661,19 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5ecf6d241fd544320a290c2c4d75c2e3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  composer: {fileID: 1455389449}
+--- !u!114 &1455389449
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1455389446}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b2ebedcc73f4348b0904eeaf138bdd5c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &1523369499

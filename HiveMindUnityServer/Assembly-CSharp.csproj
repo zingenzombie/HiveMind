@@ -62,11 +62,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\scripts\NetworkMessage.cs" />
+    <Compile Include="Assets\scripts\PlayerDebug.cs" />
     <Compile Include="Assets\scripts\ServerData.cs" />
     <Compile Include="Assets\scripts\CoroutineResult.cs" />
     <Compile Include="Assets\scripts\ObjectDecomposer.cs" />
     <Compile Include="Assets\scripts\PlayerManager.cs" />
     <Compile Include="Assets\scripts\GameObjectID.cs" />
+    <Compile Include="Assets\scripts\PlayerInfo.cs" />
     <Compile Include="Assets\scripts\ObjectManager.cs" />
     <Compile Include="Assets\scripts\CoreCommunication.cs" />
     <Compile Include="Assets\scripts\TileStream.cs" />

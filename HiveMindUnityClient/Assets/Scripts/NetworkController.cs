@@ -3,8 +3,8 @@ using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Net.Sockets;
+using System.Text;
 using System.Threading;
-using UnityEditor.PackageManager;
 using UnityEngine;
 
 public class NetworkController : MonoBehaviour
@@ -19,7 +19,10 @@ public class NetworkController : MonoBehaviour
     BlockingCollection<NetworkMessage> messagePipeIn = new BlockingCollection<NetworkMessage>();
 
     Dictionary<string, GameObject> players = new Dictionary<string, GameObject>();
-    private void Update()
+
+    [SerializeField] ObjectManager objectController;
+
+    void Update()
     {
         HandleNewMessages();
     }
@@ -38,7 +41,7 @@ public class NetworkController : MonoBehaviour
 
     void HandleNewMessages()
     {
-        while (messagePipeIn.TryTake(out NetworkMessage networkMessage))
+        if (messagePipeIn.TryTake(out NetworkMessage networkMessage))
         {
             switch (networkMessage.messageType)
             {
@@ -54,14 +57,34 @@ public class NetworkController : MonoBehaviour
                 case "PlayerPos":
                     UpdatePlayerPosition(networkMessage);
                     break;
+                case "OpenConnection":
+                    Thread handleNewConnection = new Thread(() => OpenAChannel());
+                    handleNewConnection.Start();
+                    break;
+                case "ChangeAvatar":
+                    Debug.Log("Received new avatar for user " + networkMessage.spawningClient + ".");
+                    ChangeAvatar(networkMessage);
+                    break;
                 case "ping":
-                    Debug.Log("ping");
                     messagePipeOut.Add(new NetworkMessage("", "pong", new byte[0]));
                     break;
                 default:
                     break;
             }
         }
+    }
+
+    void ChangeAvatar(NetworkMessage networkMessage)
+    {
+        StartCoroutine(players[networkMessage.spawningClient].GetComponent<OtherClient>().UpdateAvatar(ASCIIEncoding.ASCII.GetString(networkMessage.message)));
+    }
+
+    void OpenAChannel()
+    {
+
+        TileStream tileStream = connectToNewServer("SendAssets");
+
+        objectController.SendRequestedObjects(tileStream);
     }
 
     void CreateNewPlayer(NetworkMessage networkMessage)
@@ -102,6 +125,16 @@ public class NetworkController : MonoBehaviour
      * prevent huccups in things like audio and player movement.
      */
 
+    public IEnumerator CreateFetchStream(CoroutineResult<TileStream> tileStream)
+    {
+        CoroutineResult<TileStream> streamReturn = new CoroutineResult<TileStream>();
+        connectThread = new Thread(() => connectToNewServer("getAssets", false, tileStream));
+        connectThread.Start();
+
+        while (connectThread.ThreadState == ThreadState.Running)
+            yield return null;
+    }
+
     public IEnumerator ChangeActiveServer(HexTileController activeServer)
     {
         this.activeServer = activeServer;
@@ -114,7 +147,7 @@ public class NetworkController : MonoBehaviour
         players.Clear();
 
         CoroutineResult<TileStream> streamReturn = new CoroutineResult<TileStream>();
-        connectThread = new Thread(() => connectToNewServer(streamReturn));
+        connectThread = new Thread(() => connectToNewServer("joinServer", true, streamReturn));
         connectThread.Start();
 
         while (connectThread.ThreadState == ThreadState.Running)
@@ -153,6 +186,8 @@ public class NetworkController : MonoBehaviour
 
         tileStreamSender = new Thread(() => TCPThreadOut(streamReturn.Value));
         tileStreamSender.Start();
+
+        messagePipeOut.Add(new NetworkMessage("", "ChangeAvatar", ASCIIEncoding.ASCII.GetBytes(player.avatarHash)));
     }
 
     void TCPThreadIn(TileStream tileStream)
@@ -213,7 +248,7 @@ public class NetworkController : MonoBehaviour
         }
     }
 
-    void connectToNewServer(CoroutineResult<TileStream> streamReturn)
+    TileStream connectToNewServer(string connectionType = "joinServer", bool verify = true, CoroutineResult<TileStream> streamReturn = null)
     {
 
         ServerData serverData = activeServer.serverData;
@@ -227,27 +262,24 @@ public class NetworkController : MonoBehaviour
         catch (Exception e)
         {
             Debug.Log(e);
-            streamReturn.Value = null;
-            return;
+            if(streamReturn != null)
+                streamReturn.Value = null;
+            return null;
         }
 
-        newTileStream.SendStringToStream("joinServer");
+        newTileStream.SendStringToStream(connectionType);
 
-        //Send playerID and verify player
-        newTileStream.SendStringToStream(player.GetPlayerPublicRSA());
-        newTileStream.SendBytesToStream(player.VerifyPlayer(newTileStream.GetBytesFromStream()));
+        if(verify)
+            if (!newTileStream.VerifySelf(player))
+            {
+                if (streamReturn != null)
+                    streamReturn.Value = null;
+                throw new Exception("Failed to verify self with server.");
+            }
 
-        string acknowledge = newTileStream.GetStringFromStream();
-        Debug.Log(acknowledge);
-
-        if (!acknowledge.Equals("ACK"))
-        {
-            Debug.Log("Failed to receive ACK from tile server!");
-            streamReturn.Value = null;
-            return;
-        }
-
-        streamReturn.Value = newTileStream;
+        if (streamReturn != null)
+            streamReturn.Value = newTileStream;
+        return newTileStream;
     }
 
     public void SendTCPMessage(NetworkMessage message)

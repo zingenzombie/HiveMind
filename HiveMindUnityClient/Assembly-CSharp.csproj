@@ -64,12 +64,12 @@
     <Compile Include="Assets\Scripts\UI\UIOpenMenu.cs" />
     <Compile Include="Assets\Scripts\GameObjectID.cs" />
     <Compile Include="Assets\Scripts\TileStream.cs" />
+    <Compile Include="Assets\Scripts\ObjectManager.cs" />
     <Compile Include="Assets\Scripts\CoroutineResult.cs" />
     <Compile Include="Assets\Scripts\HexTileController.cs" />
     <Compile Include="Assets\Scripts\PlayerLook.cs" />
     <Compile Include="Assets\Scripts\PlayerController.cs" />
     <Compile Include="Assets\Scripts\ExitUpAndDown.cs" />
-    <Compile Include="Assets\OtherClient.cs" />
     <Compile Include="Assets\Scripts\UI\ItemsMenu.cs" />
     <Compile Include="Assets\Scripts\ExitMoveOnGrid.cs" />
     <Compile Include="Assets\Scripts\UI\HexButtonClickable.cs" />
@@ -78,6 +78,7 @@
     <Compile Include="Assets\Scripts\CoreCommunication.cs" />
     <Compile Include="Assets\Scripts\NetworkMessage.cs" />
     <Compile Include="Assets\Scripts\ServerData.cs" />
+    <Compile Include="Assets\Scripts\OtherClient.cs" />
     <Compile Include="Assets\Scripts\ObjectComposer.cs" />
     <Compile Include="Assets\Scripts\UI\HexButtonHover.cs" />
     <Compile Include="Assets\Scripts\UI\ChangeScene.cs" />

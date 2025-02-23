@@ -11,8 +11,8 @@ using System.Collections.Generic;
 
 public class ServerController : MonoBehaviour
 {
-    private Thread listen;
-    private IPAddress coreAddress;
+    Thread listen;
+    IPAddress coreAddress;
     public int corePort;
     public GameObject hexTile;
     public string serverIPString, coreIPString;
@@ -24,41 +24,35 @@ public class ServerController : MonoBehaviour
     public string serverName;
     public string ownerID;
     [SerializeField] GameObject hexTileTemplate;
-    private float tileSize;
+    float tileSize;
     public bool initialized = false;
 
     [SerializeField] PlayerManager playerManager;
 
     List<string> staticHashes;
 
-    private RSACryptoServiceProvider localRSA;
+    RSACryptoServiceProvider localRSA;
 
-    static string objectDirectory = "objectDirectory/";
+    [SerializeField] ObjectManager ObjectController;
 
-    private void OnApplicationQuit()
+    void OnApplicationQuit()
     {
         if(listen != null)
             listen.Abort();
     }
 
     // Start is called before the first frame update
-    private void Start()
+    void Start()
     {
 
-        if (!Directory.Exists(objectDirectory))
-            Directory.CreateDirectory(objectDirectory);
-
         staticHashes = new List<string>();
-
-        //Initialize static objects
-        ObjectDecomposer decomposer = ScriptableObject.CreateInstance<ObjectDecomposer>();
 
         Transform tileObjects = hexTile.transform.GetChild(1);
 
         int numChildren = tileObjects.transform.childCount;
 
         for(int i = 0; i < numChildren; i++)
-            staticHashes.Add(decomposer.Decompose(tileObjects.transform.GetChild(i).gameObject));
+            staticHashes.Add(ObjectController.DecomposeObject(tileObjects.transform.GetChild(i).gameObject));
 
         localRSA = new RSACryptoServiceProvider();
 
@@ -156,7 +150,10 @@ public class ServerController : MonoBehaviour
                 GetStaticAssets(client);
                 break;
             case "getAssets":
-                GetAssets(client);
+                ObjectController.SendRequestedObjects(client);
+                break;
+            case "SendAssets":
+                SendAssets(client);
                 break;
             case "joinServer":
                 playerManager.AddPlayer(client);
@@ -173,32 +170,22 @@ public class ServerController : MonoBehaviour
         //Return hash(es) of static element(s)
         foreach(string iter in staticHashes)
         {
+            //Send object hash
             client.SendStringToStream(iter);
-            GetAssets(client);
+
+            //Send objects if client doesn't have
+            ObjectController.SendRequestedObjects(client);
         }
 
     }
 
-    void GetAssets(TileStream client)
+    void SendAssets(TileStream client)
     {
-        while (true)
-        {
-            //Read if asset wanted (end if 0)
-            if (client.GetBytesFromStream()[0] == 0)
-                return;
+        CoroutineResult<string> playerID = new CoroutineResult<string>();
 
-            //Read hash of file desired
-            string hash = client.GetStringFromStream();
+        if (!client.VerifyPeer(playerID))
+            return;
 
-            if (!File.Exists(objectDirectory + hash))
-            {
-                client.SendBytesToStream(new byte[1]{0});
-                continue;
-            }
-
-            //Write 1 and then write bytes
-            client.SendBytesToStream(new byte[1] {1});
-            client.SendBytesToStream(File.ReadAllBytes(objectDirectory + hash));
-        }
+        playerManager.ReceiveAssetsFromPlayer(client, playerID.Value);
     }
 }
