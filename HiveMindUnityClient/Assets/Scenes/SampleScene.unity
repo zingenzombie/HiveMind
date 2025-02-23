@@ -15,9 +15,9 @@ RenderSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 10
   m_Fog: 1
-  m_FogColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  m_FogColor: {r: 0.4117647, g: 0.38431373, b: 0.36078432, a: 1}
   m_FogMode: 3
-  m_FogDensity: 0.01
+  m_FogDensity: 0.001
   m_LinearFogStart: 0
   m_LinearFogEnd: 300
   m_AmbientSkyColor: {r: 0.212, g: 0.227, b: 0.259, a: 1}
@@ -172,6 +172,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8d7b565e65fa54844bef542796d1489a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  hotbar: {fileID: 0}
+  inventory: {fileID: 0}
+  spawnlist: {fileID: 0}
+  hotbarText: {fileID: 0}
+  inventoryText: {fileID: 0}
+  spawnlistText: {fileID: 0}
 --- !u!114 &119501406
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -392,6 +398,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ad66369f1ea182242aae76d5a2f5219a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  hotbarParent: {fileID: 0}
+  inventoryAsset: 0
+  centerSlots: 0
+  slotPrefab: {fileID: 0}
+  xOffset: 0
+  yOffset: 0
+  playerHotbar: {fileID: 0}
 --- !u!1 &229713985
 GameObject:
   m_ObjectHideFlags: 0
@@ -973,6 +986,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ad66369f1ea182242aae76d5a2f5219a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  hotbarParent: {fileID: 0}
+  inventoryAsset: 0
+  centerSlots: 0
+  slotPrefab: {fileID: 0}
+  xOffset: 0
+  yOffset: 0
+  playerHotbar: {fileID: 0}
 --- !u!1 &376047203
 GameObject:
   m_ObjectHideFlags: 0
@@ -1748,6 +1768,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0769329c01d570146a70665f6afb8e9c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  menu: {fileID: 0}
+  inventory: {fileID: 0}
 --- !u!114 &689657942
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1760,6 +1782,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ad66369f1ea182242aae76d5a2f5219a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  hotbarParent: {fileID: 0}
+  inventoryAsset: 0
+  centerSlots: 0
+  slotPrefab: {fileID: 0}
+  xOffset: 0
+  yOffset: 0
+  playerHotbar: {fileID: 0}
 --- !u!1 &747903708
 GameObject:
   m_ObjectHideFlags: 0
@@ -2413,6 +2442,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0769329c01d570146a70665f6afb8e9c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  menu: {fileID: 0}
+  inventory: {fileID: 0}
 --- !u!1 &1240700532
 GameObject:
   m_ObjectHideFlags: 0
