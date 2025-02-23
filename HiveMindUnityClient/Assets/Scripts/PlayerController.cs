@@ -31,6 +31,12 @@ public class PlayerController : MonoBehaviour
     bool sendThisFixedUpdate = true;
 
     void FixedUpdate(){
+        if (UIOpenMenu.menuIsOpen)
+        {
+            moveInput = Vector2.zero;
+            myRigidbody.linearVelocity = new Vector3(0, myRigidbody.linearVelocity.y, moveInput.y * walkSpeedActual);
+            return;
+        }
 
         VelocityCap();
         
@@ -44,7 +50,6 @@ public class PlayerController : MonoBehaviour
     
     void VelocityCap()
     {
-
         Vector3 playerVelocity;
 
         if (myRigidbody.linearVelocity.y < -50)
@@ -102,17 +107,20 @@ public class PlayerController : MonoBehaviour
 
     public void OnMove(InputValue value)
     {
-        moveInput = value.Get<Vector2>();
+        if (!UIOpenMenu.menuIsOpen)
+            moveInput = value.Get<Vector2>();
 
     }
     public void OnLook(InputValue value)
     {
-        mainCamera.OnLook(value);
+        if (!UIOpenMenu.menuIsOpen)
+            mainCamera.OnLook(value);
     }
 
     public void OnSprint(InputValue value)
     {
-        sprinting = value.isPressed;
+        if (!UIOpenMenu.menuIsOpen)
+            sprinting = value.isPressed;
 
         if (sprinting)
             walkSpeedActual = walkSpeed * 2;
@@ -122,7 +130,8 @@ public class PlayerController : MonoBehaviour
 
     public void OnJump(InputValue value)
     {
-        jumping = value.isPressed;
+        if (!UIOpenMenu.menuIsOpen)
+            jumping = value.isPressed;
 
         if (jumping)
         {

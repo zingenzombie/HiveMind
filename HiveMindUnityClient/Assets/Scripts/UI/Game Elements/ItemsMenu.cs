@@ -1,37 +1,36 @@
 using TMPro;
 using UnityEngine;
-using UnityEngine.Animations;
 
 public class ItemsMenu : MonoBehaviour
 {
-    // Get scripts for hotbar and inventory
+    // Get scripts for hotbar, inventory, and spawnlist
     public UIHotbarManager hotbar;
     public UIHotbarManager inventory;
+    public SpawnlistManager spawnlist;
 
-    // Get text for hotbar and inventory
+    // Get text for hotbar, inventory, and spawnlist
     public TextMeshProUGUI hotbarText;
     public TextMeshProUGUI inventoryText;
+    public TextMeshProUGUI spawnlistText;
     
     void Start()
     {
-        Canvas canvas = GetComponent<Canvas>();
-
+        // Position hotbar elements
         RectTransform rectTransformHotbar = hotbarText.GetComponent<RectTransform>();
         rectTransformHotbar.anchoredPosition = new Vector2(0, 0);
 
         float inventoryY = hotbar.PrintItems(rectTransformHotbar.sizeDelta.y) - 20;
 
+        // Position inventory elements
         RectTransform rectTransformInventory = inventoryText.GetComponent<RectTransform>();
         rectTransformInventory.anchoredPosition = new Vector2(0, inventoryY);
 
         float spawnsY = inventory.PrintItems(-inventoryY + rectTransformInventory.sizeDelta.y) - 20;
 
-        Debug.Log(rectTransformHotbar.sizeDelta.y + " " + -inventoryY);
-    }
+        // Position spawnlist elements
+        RectTransform rectTransformSpawnlist = spawnlistText.GetComponent<RectTransform>();
+        rectTransformSpawnlist.anchoredPosition = new Vector2(0, spawnsY);
 
-    // Update is called once per frame
-    void Update()
-    {
-        
+        spawnlist.PrintItems(-spawnsY + rectTransformSpawnlist.sizeDelta.y);
     }
 }
