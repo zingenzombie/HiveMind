@@ -1,26 +1,35 @@
 using UnityEngine;
 using System.Collections.Generic;
 using TMPro;
-using UnityEngine.Rendering;
+using Unity.VisualScripting;
 
 public class UIHotbarManager : MonoBehaviour
 {
     // Set parent
-    public RectTransform hotbarParent;
+    public GameObject hotbarParent;
+    private RectTransform hotbarRectTransform;
 
-    // Number of items to be used in hotbar
-    public int numberOfSlots;
+    // Setting this to true confirms the hotbar display is being used for the inventory, not the actual hotbar
+    public bool inventoryAsset;
 
-    // Aspects of hotbar graphic - used image, color, distance
+    // Aspects of hotbar graphic - whether the slots are centered on the screen, the used image, color, distance
     public bool centerSlots;
-    private List<GameObject> slotObjects = new List<GameObject>();
     public GameObject slotPrefab;
     public float xOffset;
     public float yOffset;
 
+    // Objects refering to the inventory - the playerHotbar is used to set the numberOfSlots and slotObjects fields
+    public InventoryObject playerHotbar;
+    private int numberOfSlots;
+
+    private List<GameObject> slotObjects = new List<GameObject>();
+
     void Awake()
     {
-        slotPrefab.SetActive(true);
+        hotbarParent.SetActive(true);
+        hotbarRectTransform = hotbarParent.GetComponent<RectTransform>();
+
+        numberOfSlots = playerHotbar.Container.Count;
 
         if (slotObjects != null) 
         {
@@ -30,7 +39,16 @@ public class UIHotbarManager : MonoBehaviour
             }
         }
     }
-    
+
+    void Start()
+    {
+        if (!inventoryAsset)
+        {
+            PrintItems(0);
+        }
+    }
+
+
     public float PrintItems(float verticalOffset)
     {
         float currWidth = 0;
@@ -41,13 +59,13 @@ public class UIHotbarManager : MonoBehaviour
 
         for (int i = 0; i < numberOfSlots; i++)
         {
-            GameObject slotObj = Instantiate(slotPrefab, hotbarParent);
+            GameObject slotObj = Instantiate(slotPrefab, hotbarRectTransform);
             slotObj.name = "Inventory Slot " + (i + 1).ToString();
 
             RectTransform rectTransform = slotObj.GetComponent<RectTransform>();
             rectHeight = rectTransform.sizeDelta.y;
 
-            if (currWidth + rectTransform.sizeDelta.x > hotbarParent.rect.width && currentRowSlots.Count > 0)
+            if (currWidth + rectTransform.sizeDelta.x > hotbarRectTransform.rect.width && currentRowSlots.Count > 0)
             {
                 OffsetRow(currentRowSlots, currWidth);
                 currentRowSlots.Clear();
@@ -87,7 +105,7 @@ public class UIHotbarManager : MonoBehaviour
         float offset = 0;
         if (centerSlots) 
         {
-            offset = (hotbarParent.rect.width - rowWidth) / 2;
+            offset = (hotbarRectTransform.rect.width - rowWidth) / 2;
         }
 
         for (int i = 0; i < rowSlots.Count; i++)
