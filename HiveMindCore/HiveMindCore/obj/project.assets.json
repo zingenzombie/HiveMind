@@ -2756,11 +2756,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/root/HiveMindCore/HiveMindCore/HiveMindCore.csproj",
+      "projectUniqueName": "/HiveMind/HiveMindCore/HiveMindCore/HiveMindCore.csproj",
       "projectName": "HiveMindCore",
-      "projectPath": "/root/HiveMindCore/HiveMindCore/HiveMindCore.csproj",
+      "projectPath": "/HiveMind/HiveMindCore/HiveMindCore/HiveMindCore.csproj",
       "packagesPath": "/root/.nuget/packages/",
-      "outputPath": "/root/HiveMindCore/HiveMindCore/obj/",
+      "outputPath": "/HiveMind/HiveMindCore/HiveMindCore/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "/root/.nuget/NuGet/NuGet.Config"

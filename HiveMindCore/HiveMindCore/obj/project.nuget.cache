@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "CKCW1QRg2eQTWylMwi/GQdd4NCiqm1Iu5Kl5hrWJKJtwxuTbCFnMOJciC/idPE0wuaFLH+X+qc6NJixA9hoOUQ==",
+  "dgSpecHash": "qmhZ7vY6ecI=",
   "success": true,
-  "projectFilePath": "/root/HiveMindCore/HiveMindCore/HiveMindCore.csproj",
+  "projectFilePath": "/HiveMind/HiveMindCore/HiveMindCore/HiveMindCore.csproj",
   "expectedPackageFiles": [
     "/root/.nuget/packages/microsoft.csharp/4.0.1/microsoft.csharp.4.0.1.nupkg.sha512",
     "/root/.nuget/packages/microsoft.netcore.platforms/1.0.1/microsoft.netcore.platforms.1.0.1.nupkg.sha512",
