@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Concurrent;
 using System.Net;
+using System.Net.Security;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
@@ -47,19 +48,6 @@ public class ServerDataHolder
         [JsonInclude]
         public string LastContact;
 
-        /*
-        public ServerData(int x, int y, string name, string ip, int port, string ownerID)
-        {
-            this.X = x;
-            this.Y = y;
-            this.Name = name;
-            this.Ip = ip;
-            this.Port = port;
-            this.OwnerID = ownerID;
-            
-            LastContact = DateTime.Now.ToString();
-        }*/
-
         public string GetServerJsonData()
         {
             return JsonConvert.SerializeObject(this);
@@ -67,7 +55,7 @@ public class ServerDataHolder
     }
     
     //Returns 1 if successfully creates a new server and 0 if not.
-    public bool CreateServer(string JSONObject)
+    public bool CreateServer(string JSONObject, SslStream client)
     {
         ServerData newServerData;
         try
@@ -82,30 +70,65 @@ public class ServerDataHolder
 
         if (newServerData == null)
             return false;
-
-        if (servers.ContainsKey(new Key(newServerData.X, newServerData.Y)))
-        {
-            //**REMOVE THIS LINE AFTER TESTING!!!**
-            //return true;
-            
-            
-            Console.WriteLine("ERROR: Server already exists at " + newServerData.X + ", " + newServerData.Y + ".");
-            return false;
-        }
-
-        if (servers.TryAdd(new Key(newServerData.X, newServerData.Y), newServerData))
-        {
-            Console.WriteLine("Server successfully created at " + newServerData.X + ", " + newServerData.Y + ".");
-            return true;
-        }
         
-        Console.WriteLine("Server failed to be created at " + newServerData.X + ", " + newServerData.Y + ". This should never occur.");
+        //CoreCommunication.SendStringToStream(client, "Parsing data was a success");
+        //CoreCommunication.SendStringToStream(client, "Setting tile up...");
+        
+        Console.Write($"New Server: {newServerData.Name} \n");
+        if (newServerData.requestTile)
+        {
+            //CoreCommunication.SendStringToStream(client, $"You are requesting a tile @ {newServerData.X},{newServerData.Y}...");
+            Console.Write($"        is requesting a tile at ({newServerData.X},{newServerData.Y})...");
+            AssignTile(newServerData.X, newServerData.Y, newServerData, client);
+        }
+        else
+        {
+            //CoreCommunication.SendStringToStream(client, "You are asking for a random tile location... ");
+            Console.Write($"        Server is requesting any available tile...");
+        }
+
+        return true;
+    }
+
+    public bool AssignTile(int X, int Y, ServerData newServerData, SslStream client)
+    {
+        
+        //These four lines are a debug patch and should be removed. See below comment.
+            servers[new Key(X, Y)] = newServerData;
+            Console.WriteLine("GRANTED");
+            CoreCommunication.SendStringToStream(client, $"   GRANTED @ ({X},{Y})");
+            return true;
+        
+        //This is the original function that should be used in prod to prevent new servers from overriding existing ones. It's temporarily replaced for testing.
+        /*
+        if (servers.TryAdd(new Key(X, Y), newServerData))
+        {
+            Console.WriteLine("GRANTED");
+            CoreCommunication.SendStringToStream(client, $"   GRANTED @ ({X},{Y})");
+            return true;
+        }*/
+        
+        
+        Console.Write("FAILED");
+        CoreCommunication.SendStringToStream(client, $"   FAILED @ ({X},{Y})");
         return false;
+    }
+
+    public void FindAvailableTile(ServerData newServerData)
+    {
+        
     }
 
     public void DeleteServer(int x, int y)
     {
-        servers.TryRemove(new KeyValuePair<Key, ServerData>(new Key(x, y), servers[new Key(x, y)]));
+        Console.Write($"Removing Server at Tile ({x},{y})...");
+        if (servers.TryRemove(new KeyValuePair<Key, ServerData>(new Key(x, y), servers[new Key(x, y)])))
+        {
+            Console.WriteLine(" SUCCESS");
+            return;
+        }
+
+        Console.WriteLine("FAILED, server does not exist at that tile location");
     }
 
     public string GetServerJsonData(int x, int y)
@@ -129,6 +152,17 @@ public class ServerDataHolder
                 return JsonConvert.SerializeObject((ServerData)enumerator.Current);
         
         throw new Exception("No server of name " + name + " exists.");
+    }
+
+    public void PrintServers()
+    {
+        if(servers.IsEmpty)
+            Console.WriteLine("The server is empty :(");
+        foreach (var VARIABLE in servers)
+        {
+            var val = VARIABLE.Value;
+            Console.WriteLine($"Server: {val.OwnerID} ({val.Name}) is at {val.X}:{val.Y}");
+        }
     }
     
     
