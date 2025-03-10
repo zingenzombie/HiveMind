@@ -1,8 +1,4 @@
-﻿// See https://aka.ms/new-console-template for more information
-
-using System.Collections;
-using System.ComponentModel;
-using System.Net;
+﻿using System.Net;
 using System.Net.Security;
 using System.Net.Sockets;
 using System.Security.Authentication;
@@ -37,9 +33,9 @@ void LiveControls()
 {
     while (true)
     {
-        string[] args = Console.ReadLine().Split(' ');
+        string[]? args = Console.ReadLine()?.Split(' ');
 
-        switch (args[0])
+        switch (args?[0])
         {
             //remove a server at a location
             case "rmserv":
@@ -71,20 +67,11 @@ void LiveControls()
 
 void Main(string[] args)
 {
-
     HandleArgs(args);
-    
-    static async Task<IPAddress?> GetExternalIpAddress()
-    {
-        var externalIpString = (await new HttpClient().GetStringAsync("http://icanhazip.com"))
-            .Replace("\\r\\n", "").Replace("\\n", "").Trim();
-        if(!IPAddress.TryParse(externalIpString, out var ipAddress)) return null;
-        return ipAddress;
-    }
 
     Console.WriteLine("Good morning.");
 
-    IPAddress address = GetExternalIpAddress().Result;
+    IPAddress address = IPAddress.Parse("5.161.235.144");
     int port = 3621;
 
     //Gather certificate
@@ -96,11 +83,11 @@ void Main(string[] args)
 
     if (maintain)
     {
-        Thread maintainer = new Thread(() => MaintainList());
+        Thread maintainer = new Thread(MaintainList);
         maintainer.Start();
     }
 
-    Thread liveControls = new Thread(() => LiveControls());
+    Thread liveControls = new Thread(LiveControls);
     liveControls.Start();
 
     TcpListener server = new TcpListener(IPAddress.Any, port);
@@ -109,37 +96,38 @@ void Main(string[] args)
 
     while (true)   //we wait for a connection
     {
-        TcpClient client;
-        if (server.Pending())
-        {
-            client = server.AcceptTcpClient();  //if a connection exists, the server will accept it
+        
+        //if a connection exists, the server will accept it
+        if (!server.Pending()) 
+            continue;
+        
+        TcpClient client = server.AcceptTcpClient();
 
-            if (client.Connected)  //while the client is connected, we look for incoming messages
-            {
-                Console.Write("Incoming connection request... (Verifying)... ");
-                new Thread(() => PromoteToSsl(client)).Start();
-            }
-        }
+        if (!client.Connected) 
+            continue; 
+            
+        //while the client is connected, we look for incoming messages
+        Console.Write("Incoming connection request... (Verifying)... ");
+        new Thread(() => PromoteToSsl(client)).Start();
     } 
+    
 }
 
 static X509Certificate2 GatherCertificate()
 {
 
-    String CERT_ADDR = "/honeydragonproductions.com-ssl-bundle/certificate.pfx";
-    String PWD_ADDR = "/honeydragonproductions.com-ssl-bundle/pwd";
+    String certAddr = "/honeydragonproductions.com-ssl-bundle/certificate.pfx";
+    String pwdAddr = "/honeydragonproductions.com-ssl-bundle/pwd";
 
-    string pwd = File.ReadAllText(PWD_ADDR);
+    string pwd = File.ReadAllText(pwdAddr);
 
     pwd = pwd.Substring(0, pwd.Length - 1);
 
-    return new X509Certificate2(CERT_ADDR, pwd);
+    return new X509Certificate2(certAddr, pwd);
 }
 
 void IncomingConnectionHandler(SslStream sslStream)
 {
-    //CoreCommunication.SendStringToStream(sslStream, "This connection has been verified by the core...");
-    //CoreCommunication.SendStringToStream(sslStream, "Core is requesting your connection type...");
     // Read a message from the client.
     Console.Write("Requesting Connection Info... ");
     string connectionType = CoreCommunication.GetStringFromStream(sslStream);
@@ -148,11 +136,9 @@ void IncomingConnectionHandler(SslStream sslStream)
     switch (connectionType)
     {
         case "server":
-            //CoreCommunication.SendStringToStream(sslStream, $"(TYPE SUCCESS) you are recognized as a {connectionType.ToUpper()}");
             ServerRequestHandler tmpS = new ServerRequestHandler(sslStream, holder);
             break;
         case "client":
-            //CoreCommunication.SendStringToStream(sslStream, $"(TYPE SUCCESS) you are recognized as a {connectionType.ToUpper()}");
             ClientRequestHandler tmpC = new ClientRequestHandler(sslStream, holder);
             break;
         default:
@@ -202,6 +188,8 @@ void PromoteToSsl(TcpClient client)
 
 void MaintainList()
 {
+    Console.WriteLine("NOT IMPLEMENTED.");
+    /*
     while (true)
     {
         Thread.Sleep(5000); //Run every 5 seconds.
@@ -237,5 +225,5 @@ void MaintainList()
             tcpClient.SendStringToStream("check");
         }
         ((IDisposable)enumerator).Dispose();
-    }
+    }*/
 }

@@ -1,9 +1,4 @@
-﻿using System.Collections;
-using System.Linq.Expressions;
-using System.Net;
-using System.Net.Security;
-using System.Net.Sockets;
-using System.Text;
+﻿using System.Net.Security;
 
 namespace HiveMindCore;
 
@@ -44,8 +39,11 @@ public class ClientRequestHandler : RequestHandler
     
     private void GetAllServers()
     {
+        Console.WriteLine("GetAllServers not implemented!");
+        /*
         IEnumerator enumerator = holder.servers.GetEnumerator();
 
+        //Should be changed to issue single query to database instead of n!!!
         while (enumerator.MoveNext())
         {
             var serverData = (KeyValuePair<ServerDataHolder.Key, ServerDataHolder.ServerData>) enumerator.Current;
@@ -55,7 +53,7 @@ public class ClientRequestHandler : RequestHandler
             client.Write(serverBytes, 0, serverBytes.Length);
         }
 
-        ((IDisposable)enumerator).Dispose();
+        ((IDisposable)enumerator).Dispose();*/
     }
 
     private void GetServer()
@@ -75,16 +73,6 @@ public class ClientRequestHandler : RequestHandler
             return;
         }
         
-        ServerDataHolder.ServerData serverData;
-
-        if (!holder.servers.TryGetValue(new ServerDataHolder.Key(x, y), out serverData))
-        {
-            CoreCommunication.SendStringToStream(client, "DoesNotExist");
-            return;
-        }
-
-        //byte[] serverDataBytes = Encoding.ASCII.GetBytes(serverData.GetServerJsonData() + (char)0x00);        
-        //client.Write(serverDataBytes);
-        CoreCommunication.SendStringToStream(client, serverData.GetServerJsonData());
+        CoreCommunication.SendStringToStream(client, holder.GetServerJsonData(x, y));
     }
 }
