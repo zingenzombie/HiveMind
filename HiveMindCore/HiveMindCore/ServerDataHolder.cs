@@ -8,11 +8,42 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using Newtonsoft.Json;
+using MySql.Data;
+using MySql.Data.MySqlClient;
 
 namespace HiveMindCore;
 
 public class ServerDataHolder
 {
+    private MySqlConnection mySqlConnection;
+    public ServerDataHolder()
+    {
+        string connStr = "server=localhost;user=core;database=Hive;port=3306;password=1234";
+        
+        mySqlConnection = new MySqlConnection(connStr);
+        
+        try
+        {
+            Console.WriteLine("Connecting to MySQL...");
+            mySqlConnection.Open();
+
+            string sql = "SELECT ip FROM servers";
+            MySqlCommand cmd = new MySqlCommand(sql, mySqlConnection);
+            MySqlDataReader rdr = cmd.ExecuteReader();
+
+            while (rdr.Read())
+            {
+                Console.WriteLine(rdr[0]);
+            }
+            rdr.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            throw new Exception("Failed to establish connection with database!");
+        }
+    }
+    
     public struct Key
     {
         public readonly int Dimension1;
@@ -79,7 +110,7 @@ public class ServerDataHolder
         {
             //CoreCommunication.SendStringToStream(client, $"You are requesting a tile @ {newServerData.X},{newServerData.Y}...");
             Console.Write($"        is requesting a tile at ({newServerData.X},{newServerData.Y})...");
-            AssignTile(newServerData.X, newServerData.Y, newServerData, client);
+            AssignTile(newServerData, client);
         }
         else
         {
@@ -90,27 +121,34 @@ public class ServerDataHolder
         return true;
     }
 
-    public bool AssignTile(int X, int Y, ServerData newServerData, SslStream client)
+    public bool AssignTile(ServerData newServerData, SslStream client)
     {
         
-        //These four lines are a debug patch and should be removed. See below comment.
-            servers[new Key(X, Y)] = newServerData;
-            Console.WriteLine("GRANTED");
-            CoreCommunication.SendStringToStream(client, $"   GRANTED @ ({X},{Y})");
-            return true;
-        
-        //This is the original function that should be used in prod to prevent new servers from overriding existing ones. It's temporarily replaced for testing.
-        /*
-        if (servers.TryAdd(new Key(X, Y), newServerData))
+        string query = "INSERT INTO servers (x,y,name,ip,port,ownerID,publicKey) VALUES (@x,@y,@name,@ip, @port,@ownerID,@publicKey)";
+
+        try
         {
-            Console.WriteLine("GRANTED");
-            CoreCommunication.SendStringToStream(client, $"   GRANTED @ ({X},{Y})");
-            return true;
-        }*/
-        
-        
-        Console.Write("FAILED");
-        CoreCommunication.SendStringToStream(client, $"   FAILED @ ({X},{Y})");
+            using (MySqlCommand cmd = new MySqlCommand(query, mySqlConnection))
+            {
+                cmd.Parameters.AddWithValue("@x", newServerData.X);
+                cmd.Parameters.AddWithValue("@y", newServerData.Y);
+                cmd.Parameters.AddWithValue("@name", newServerData.Name);
+                cmd.Parameters.AddWithValue("@ip", newServerData.Ip);
+                cmd.Parameters.AddWithValue("@port", newServerData.Port);
+                cmd.Parameters.AddWithValue("@ownerID", newServerData.OwnerID);
+                cmd.Parameters.AddWithValue("@publicKey", newServerData.PublicKey);
+
+                //Add exception/check for failed case!!!
+                
+                CoreCommunication.SendStringToStream(client, $"   GRANTED @ ({newServerData.X},{newServerData.Y})");
+                return true;
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
+        CoreCommunication.SendStringToStream(client, $"   FAILED @ ({newServerData.X},{newServerData.Y})");
         return false;
     }
 
