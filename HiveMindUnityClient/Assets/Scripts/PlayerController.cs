@@ -6,22 +6,40 @@ public class PlayerController : MonoBehaviour
 {
 
     [SerializeField] float walkSpeed = 10f;
-    [SerializeField] PlayerLook mainCamera;
+    [SerializeField] float horizontalAcceleration = 1f;
+    [SerializeField] float maxRunSpeed = 20f;
     [SerializeField] float jumpPower = 10f;
+    [SerializeField] float gravity = Physics.gravity.y;
+    [SerializeField] PlayerLook mainCamera;
 
     NetworkController networkController;
 
     float walkSpeedActual;
+    float fallSpeedActual;
     bool sprinting;
-    bool jumping;
     Vector2 moveInput;
     Rigidbody myRigidbody;
+
+    bool flying = false;
+    float delayBetweenPresses = 0.25f;
+    bool pressedFirstTime = false;
+    float lastPressedTime;
+    bool justStoppedFlying = false;
+    bool jumpHeld = false;
+    private LayerMask groundLayer = LayerMask.NameToLayer("Default");
 
     void Start()
     {
         networkController = GameObject.FindWithTag("NetworkController").GetComponent<NetworkController>();
 
         walkSpeedActual = walkSpeed;
+
+        Physics.gravity = new Vector3(Physics.gravity.x, gravity, Physics.gravity.z);
+        fallSpeedActual = jumpPower;
+
+        if (maxRunSpeed < walkSpeed)
+            maxRunSpeed = walkSpeed;
+
         myRigidbody = GetComponent<Rigidbody>();
     }
 
@@ -30,13 +48,16 @@ public class PlayerController : MonoBehaviour
 
     bool sendThisFixedUpdate = true;
 
-    void FixedUpdate(){
+    void Update()
+    {
+        UpdateSprintSpeed();
+
         if (UIOpenMenu.menuIsOpen)
         {
             moveInput = Vector2.zero;
-            myRigidbody.linearVelocity = new Vector3(0, myRigidbody.linearVelocity.y, moveInput.y * walkSpeedActual);
+            myRigidbody.linearVelocity = new Vector3(0, myRigidbody.linearVelocity.y, moveInput.y * fallSpeedActual);
             return;
-        }
+        }      
 
         VelocityCap();
         
@@ -52,15 +73,34 @@ public class PlayerController : MonoBehaviour
     {
         Vector3 playerVelocity;
 
-        if (myRigidbody.linearVelocity.y < -50)
-            playerVelocity = new Vector3(moveInput.x * walkSpeedActual, -50, moveInput.y * walkSpeedActual);
-        else
+        if (onGround()) {
+            playerVelocity = new Vector3(moveInput.x * walkSpeedActual, 0, moveInput.y * walkSpeedActual);
+        }
+        else if (!flying)
+        {
             playerVelocity = new Vector3(moveInput.x * walkSpeedActual, myRigidbody.linearVelocity.y, moveInput.y * walkSpeedActual);
-        
+        }
+        else
+        {
+            playerVelocity = new Vector3(moveInput.x * walkSpeedActual, 0, moveInput.y * walkSpeedActual);
+
+            if (UIOpenMenu.menuIsOpen) 
+            {
+                playerVelocity.y = 0;
+            }
+            else if (jumpHeld)
+            {
+                playerVelocity.y = jumpPower / 2;
+            }
+            else if (Input.GetKey(KeyCode.LeftControl)) // TODO: Cond is placeholder
+                playerVelocity.y = -jumpPower / 2;
+        }
+            
         myRigidbody.linearVelocity = transform.TransformDirection(playerVelocity);
     }
 
-    void SendPositionMessage(){
+    void SendPositionMessage()
+    {
         transform.GetPositionAndRotation(out Vector3 newPosition, out Quaternion newRotation);
         //Vector 3 is 12 bytes and Quaternion is 16 bytes.
         if(oldPosition != newPosition || oldRotation != newRotation)
@@ -117,27 +157,80 @@ public class PlayerController : MonoBehaviour
             mainCamera.OnLook(value);
     }
 
+    void UpdateSprintSpeed()
+    {
+        if (sprinting)
+        {
+            walkSpeedActual += horizontalAcceleration; 
+            walkSpeedActual = Mathf.Min(walkSpeedActual, maxRunSpeed); 
+        }
+        else
+        {
+            walkSpeedActual -= horizontalAcceleration;
+            walkSpeedActual = Mathf.Max(walkSpeedActual, walkSpeed); 
+        }
+    }
+
     public void OnSprint(InputValue value)
     {
         if (!UIOpenMenu.menuIsOpen)
             sprinting = value.isPressed;
-
-        if (sprinting)
-            walkSpeedActual = walkSpeed * 2;
-        else
-            walkSpeedActual = walkSpeed;
     }
 
     public void OnJump(InputValue value)
     {
-        if (!UIOpenMenu.menuIsOpen)
-            jumping = value.isPressed;
-
-        if (jumping)
+        if (value.isPressed)
         {
-            Vector3 playerVelocity = new Vector3(myRigidbody.linearVelocity.x, myRigidbody.linearVelocity.y + jumpPower, myRigidbody.linearVelocity.z);
-            myRigidbody.linearVelocity = transform.TransformDirection(playerVelocity);
+            if (pressedFirstTime)
+            {
+                bool isDoublePress = Time.time - lastPressedTime <= delayBetweenPresses;
+  
+                if (isDoublePress)
+                {
+                    pressedFirstTime = false;
+                    flying = !flying;
+                    myRigidbody.useGravity = !flying;
+                    justStoppedFlying = !flying;
+                }
+            }
+            else
+            {
+                pressedFirstTime = true;
+            }
+
+            if (!UIOpenMenu.menuIsOpen)
+            {
+                if (!flying)
+                {
+                    if (!justStoppedFlying && myRigidbody.linearVelocity.y == 0)
+                    {
+                        Vector3 jumpVelocity = myRigidbody.linearVelocity;
+                        jumpVelocity.y = jumpPower;
+                        myRigidbody.linearVelocity = jumpVelocity;
+                    }
+                }
+                else 
+                {
+                    jumpHeld = true;
+                }
+            }
         }
+        else
+        {
+            jumpHeld = false;
+        }
+
+        lastPressedTime = Time.time;
+        if (pressedFirstTime && Time.time - lastPressedTime > delayBetweenPresses) 
+        {
+            pressedFirstTime = false;
+        }
+
+        justStoppedFlying = false;
     }
 
+    private bool onGround()
+    {
+        return Physics.Raycast(transform.position, Vector3.down, 0.1f, groundLayer);
+    }
 }

@@ -1,53 +1,39 @@
+using Microsoft.Unity.VisualStudio.Editor;
 using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
 public class MenuNavigation : MonoBehaviour
 {
-    //public int option;
     public GameObject InventoryArea;
     public GameObject AvatarsArea;
     public GameObject SettingsArea;
     public GameObject QuitArea;
 
-    void Start()
+    public void Activate(int option) 
     {
-        InventoryArea.SetActive(true);
+        InventoryArea.SetActive(false);
         AvatarsArea.SetActive(false);
         SettingsArea.SetActive(false);
         QuitArea.SetActive(false);
-    }
 
-    public void Activate(int option) 
-    {
-        if (option == 0) 
+        switch (option)
         {
-            InventoryArea.SetActive(true);
-            AvatarsArea.SetActive(false);
-            SettingsArea.SetActive(false);
-            QuitArea.SetActive(false);
-        }
-        else if (option == 1)
-        {
-            InventoryArea.SetActive(false);
-            AvatarsArea.SetActive(true);
-            SettingsArea.SetActive(false);
-            QuitArea.SetActive(false);
-        }
-        else if (option == 2)
-        {
-            InventoryArea.SetActive(false);
-            AvatarsArea.SetActive(false);
-            SettingsArea.SetActive(true);
-            QuitArea.SetActive(false);
-        }
-        else if (option == 3)
-        {
-            InventoryArea.SetActive(false);
-            AvatarsArea.SetActive(false);
-            SettingsArea.SetActive(false);
-            QuitArea.SetActive(true);
-        }
-        else {
-            Debug.Log("MenuNavigation.activate: Incorrect index inputted.");
+            case 0:
+                InventoryArea.SetActive(true);
+                break;
+            case 1:
+                AvatarsArea.SetActive(true);
+                break;
+            case 2:
+                SettingsArea.SetActive(true);
+                break;
+            case 3:
+                QuitArea.SetActive(true);
+                break;
+            default:
+                Debug.Log("MenuNavigation.activate: Incorrect index inputted.");
+                break;
         }
     }
 }
