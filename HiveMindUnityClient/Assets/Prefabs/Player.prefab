@@ -154,7 +154,7 @@ CapsuleCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4302254615625725645}
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 13400000, guid: 63b33baacf6e45e44b38d2aa69e41f37, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -183,8 +183,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   walkSpeed: 10
-  mainCamera: {fileID: 8890202714503333112}
+  horizontalAcceleration: 1
+  maxHorizontalSpeed: 20
   jumpPower: 10
+  gravity: -9.81
+  mainCamera: {fileID: 8890202714503333112}
 --- !u!54 &7932195916917869700
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -240,47 +243,47 @@ MonoBehaviour:
   - m_PersistentCalls:
       m_Calls: []
     m_ActionId: c61c74dc-8a00-4ed9-8d7d-4528da9e5230
-    m_ActionName: Player/Move[/Keyboard/w,/Keyboard/upArrow,/Keyboard/s,/Keyboard/downArrow,/Keyboard/a,/Keyboard/leftArrow,/Keyboard/d,/Keyboard/rightArrow]
+    m_ActionName: 'Player/Move[/Keyboard/w,/Keyboard/upArrow,/Keyboard/s,/Keyboard/downArrow,/Keyboard/a,/Keyboard/leftArrow,/Keyboard/d,/Keyboard/rightArrow]'
   - m_PersistentCalls:
       m_Calls: []
     m_ActionId: 9cf4c488-31a0-499a-a75a-edb6dad4795a
-    m_ActionName: Player/Look[/Mouse/delta,/Pen/delta]
+    m_ActionName: 'Player/Look[/Mouse/delta,/Pen/delta]'
   - m_PersistentCalls:
       m_Calls: []
     m_ActionId: b1a8963d-2a1c-46ae-a6f6-837374fa7be4
-    m_ActionName: Player/Fire[/Mouse/leftButton]
+    m_ActionName: 'Player/Fire[/Mouse/leftButton]'
   - m_PersistentCalls:
       m_Calls: []
     m_ActionId: de163954-0bc7-4f83-90e1-a5e9d3770d09
-    m_ActionName: UI/Navigate[/Keyboard/w,/Keyboard/upArrow,/Keyboard/s,/Keyboard/downArrow,/Keyboard/a,/Keyboard/leftArrow,/Keyboard/d,/Keyboard/rightArrow]
+    m_ActionName: 'UI/Navigate[/Keyboard/w,/Keyboard/upArrow,/Keyboard/s,/Keyboard/downArrow,/Keyboard/a,/Keyboard/leftArrow,/Keyboard/d,/Keyboard/rightArrow]'
   - m_PersistentCalls:
       m_Calls: []
     m_ActionId: 01e665b5-e2b4-466f-a6db-25e1f176c1e1
-    m_ActionName: UI/Submit[/Keyboard/enter]
+    m_ActionName: 'UI/Submit[/Keyboard/enter]'
   - m_PersistentCalls:
       m_Calls: []
     m_ActionId: 67afc3e5-79ea-465d-b6f4-45679eb4b22c
-    m_ActionName: UI/Cancel[/Keyboard/escape]
+    m_ActionName: 'UI/Cancel[/Keyboard/escape]'
   - m_PersistentCalls:
       m_Calls: []
     m_ActionId: 2d9eb506-e949-4302-b990-37ea7680523e
-    m_ActionName: UI/Point[/Mouse/position,/Pen/position]
+    m_ActionName: 'UI/Point[/Mouse/position,/Pen/position]'
   - m_PersistentCalls:
       m_Calls: []
     m_ActionId: 389b6a21-4455-41a4-877c-4e4064b6541f
-    m_ActionName: UI/Click[/Mouse/leftButton,/Pen/tip]
+    m_ActionName: 'UI/Click[/Mouse/leftButton,/Pen/tip]'
   - m_PersistentCalls:
       m_Calls: []
     m_ActionId: a14820bb-0f97-4b7f-adac-8f18cea844ff
-    m_ActionName: UI/ScrollWheel[/Mouse/scroll]
+    m_ActionName: 'UI/ScrollWheel[/Mouse/scroll]'
   - m_PersistentCalls:
       m_Calls: []
     m_ActionId: f52025c0-7723-4b78-ab8d-5a9b1d1d579d
-    m_ActionName: UI/MiddleClick[/Mouse/middleButton]
+    m_ActionName: 'UI/MiddleClick[/Mouse/middleButton]'
   - m_PersistentCalls:
       m_Calls: []
     m_ActionId: 25b3eff2-d7fa-4b0b-9184-0ac8b3b1d96a
-    m_ActionName: UI/RightClick[/Mouse/rightButton]
+    m_ActionName: 'UI/RightClick[/Mouse/rightButton]'
   - m_PersistentCalls:
       m_Calls: []
     m_ActionId: c2959ccf-781a-4f93-9e60-9043ccbee3e0
@@ -307,8 +310,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerID: <RSAKeyValue><Modulus>wBVPKgV5tuk8cV9HJ4MKZhq+0Et4nsty5xFt683+9/luvbCrW83AgC3kfRwz9d9V1neQJultO+wbQtUoa753yOTnPkF7YVoXdZHv61Z3GYVoPHYI+1o9fEp+aZOaUYnOTbLJ3goA5KES0PrFYqru1IdpLFXYDlsllUfPF7k16S0=</Modulus><Exponent>AQAB</Exponent><P>wJdkPiCxkZkHClWPcWCWeAVVpjYF7ovf6uQ6BeRtTSoi6YUJQY5RdM/1bM4MujFNsOVhcX/nOOJuRKRvUL8FzQ==</P><Q>/1MW5so5qfrOMMyMVJtrMdeA7t1MBrnfiS/8hJlpWINZCw/tUfwelAUh/3WnZ3dSEhPw2HJCXl7o/HkwT8kQ4Q==</Q><DP>vnX5oKdcdAzONZ4f2ZQXumIsLc/HVf3mV7mU2DbrESDWnfH/EWHZlJgEsrGjTI9tsb9m+oPu+waS3jdwDn6bEQ==</DP><DQ>WpZMRc3x75EAnuez0kDiI2jmYdk6JBjGapIP8avMaI8RhI8+EBx3bOT1TwGbR2ZaQ/e3N9QyH/FkkE8fCO+5gQ==</DQ><InverseQ>H3eMdWTktYQtJq3gzBJA3D6pWigrCgsnO3eaovZoGjiY6EJaZ2TML9SWbKcTRKHW6k5VvazOnTvudXAvuMgWLw==</InverseQ><D>Kw7bzxypGyKPhQ6JocbTNu455fF1GYubt0aF8H0d8bJ9a5JF529o/pLLDGydDTnCQTBOJRrgfLVBqyqjQ/vPV9nnu0kU7RWMBg5PVn8ZyNBTIERcbVuP2UnrRoN9WeL3pGzR6Sz6Asr50zWpxllJXpzGQge2wiBTcsAHWleV54E=</D></RSAKeyValue>
-  privatePlayerID: 
   username: Zin
+  avatarHash: 
 --- !u!1 &5614926293446158799
 GameObject:
   m_ObjectHideFlags: 0
