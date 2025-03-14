@@ -58,6 +58,7 @@ public class ClientRequestHandler : RequestHandler
 
     private void GetServer()
     {
+        
         int x;
         int y;
         

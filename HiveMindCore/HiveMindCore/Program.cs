@@ -188,42 +188,12 @@ void PromoteToSsl(TcpClient client)
 
 void MaintainList()
 {
-    Console.WriteLine("NOT IMPLEMENTED.");
-    /*
+    //Console.WriteLine("NOT IMPLEMENTED.");
+    
     while (true)
     {
         Thread.Sleep(5000); //Run every 5 seconds.
-        IEnumerator enumerator = holder.servers.GetEnumerator();
-        Console.WriteLine("HeartBeat");
-
-        while (enumerator.MoveNext())
-        {
-
-            var serverData = (KeyValuePair<ServerDataHolder.Key, ServerDataHolder.ServerData>) enumerator.Current;
-
-            TileStream tcpClient;
-
-            try
-            {
-                Console.WriteLine($"Trying connection with Tile Server {"10.20.0.59"},{serverData.Value.Port}");
-                tcpClient = new TileStream(new TcpClient("10.20.0.59", serverData.Value.Port));
-            }
-            catch(Exception e)
-            {
-                Console.WriteLine(e);
-                Console.WriteLine("Goodbye " + serverData.Value.X + ", " + serverData.Value.Y + ".");
-                holder.DeleteServer(serverData.Value.X, serverData.Value.Y);
-                continue;
-            }
-            
-            if (!tcpClient.Connected)
-            {
-                Console.WriteLine("Goodbye " + serverData.Value.X + ", " + serverData.Value.Y + ".");
-                holder.DeleteServer(serverData.Value.X, serverData.Value.Y);
-            }
-            
-            tcpClient.SendStringToStream("check");
-        }
-        ((IDisposable)enumerator).Dispose();
-    }*/
+        
+        holder.PruneServers();
+    }
 }

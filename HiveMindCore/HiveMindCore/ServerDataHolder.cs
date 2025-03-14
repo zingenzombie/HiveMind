@@ -1,5 +1,7 @@
 ﻿using System.Net.Security;
+using System.Net.Sockets;
 using System.Text.Json.Serialization;
+using System.Xml.Linq;
 using Newtonsoft.Json;
 using MySql.Data.MySqlClient;
 
@@ -135,17 +137,6 @@ public class ServerDataHolder
         
     }
 
-    public void DeleteServer(int x, int y)
-    {
-        Console.WriteLine("NOT IMPLEMENTED!!!!!");
-        
-        //Console.Write($"Removing Server at Tile ({x},{y})...");
-        
-        //...
-        
-        //Console.WriteLine("FAILED, server does not exist at that tile location");
-    }
-
     public string GetServerJsonData(int x, int y)
     {
         //Use of the ServerData object is based on old solution and should be removed.
@@ -205,6 +196,97 @@ public class ServerDataHolder
     {
         throw new Exception("PrintServers not implemented!");
     }
-    
+
+    public void PruneServers()
+    {
+        using MySqlConnection mySqlConnection = new MySqlConnection(ConnStr);
+        string query = "SELECT x, y, ip, port, publicKey FROM servers";
+
+        try
+        {
+            mySqlConnection.Open();
+
+            using MySqlCommand cmd = new MySqlCommand(query, mySqlConnection);
+            using MySqlDataReader rdr = cmd.ExecuteReader();  // Automatically closes the reader
+
+            while (rdr.Read())
+            {
+                ServerData data = new ServerData();
+                int i = 0;
+
+                // Populate server data from the database
+                data.X = (int)rdr[i++];
+                data.Y = (int)rdr[i++];
+                data.Ip = (string)rdr[i++];
+                data.Port = (int)rdr[i++];
+                data.PublicKey = (string)rdr[i];
+
+                try
+                {
+                    // Create and activate the TCP connection
+                    using (TcpClient tcpClient = new TcpClient(data.Ip, data.Port))
+                    {
+                        using (TileStream tileStream = new TileStream(tcpClient))
+                        {
+                            tileStream.ActivateStream(data.PublicKey);
+                            tileStream.SendStringToStream("Ping");
+
+                            if (tileStream.GetStringFromStream() != "Pong")
+                                throw new Exception("Did not receive pong from server " + data.X + ", " + data.Y + ".");
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    // Log the error and proceed with deleting the server from the database
+                    Console.WriteLine($"Error connecting to server {data.X}, {data.Y}: {e.Message}");
+                    Console.WriteLine($"Goodbye server at {data.X}, {data.Y}.");
+
+                    try
+                    {
+                        // Try deleting the server if the connection failed
+                        DeleteServer(data.X, data.Y);
+                    }
+                    catch (Exception deleteException)
+                    {
+                        // Log if the deletion failed
+                        Console.WriteLine($"Error deleting server {data.X}, {data.Y}: {deleteException.Message}");
+                    }
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            // Log any errors that occur during the database connection or command execution
+            Console.WriteLine($"An error occurred while accessing the database: {e.Message}");
+        }
+    }
+
+
+
+    //Returns true if command sent; false otherwise.
+    public bool DeleteServer(int x, int y)
+    {
+        using MySqlConnection connection = new MySqlConnection(ConnStr);
+        
+        try
+        {
+            connection.Open();
+            string query = "DELETE FROM servers WHERE x = @x AND y = @y";
+
+            MySqlCommand command = new MySqlCommand(query, connection);
+
+            command.Parameters.AddWithValue("@x", x);
+            command.Parameters.AddWithValue("@y", y);
+
+            command.ExecuteNonQuery();
+        }
+        catch(Exception e)
+        {
+            Console.WriteLine(e);
+            return false;
+        }
+        return true;
+    }
     
 }
