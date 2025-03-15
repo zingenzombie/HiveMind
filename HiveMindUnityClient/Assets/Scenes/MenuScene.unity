@@ -1953,7 +1953,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ea103bff62b15cd48833af83eae5f8eb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  polygonCollider2D: {fileID: 0}
+  polygonCollider2D: {fileID: 712208411}
   scaleAmount: 1.15
   image: {fileID: 803444337}
   colorShiftAmount: -0.15
