@@ -1,36 +1,44 @@
-﻿using System.Collections;
-using System.Collections.Concurrent;
-using System.Net;
-using System.Net.Security;
-using System.Numerics;
-using System.Runtime.CompilerServices;
-using System.Text.Json;
-using System.Text.Json.Nodes;
+﻿using System.Net.Security;
+using System.Net.Sockets;
 using System.Text.Json.Serialization;
+using System.Xml.Linq;
 using Newtonsoft.Json;
+using MySql.Data.MySqlClient;
 
 namespace HiveMindCore;
 
 public class ServerDataHolder
 {
-    public struct Key
+    const string ConnStr = "server=localhost;user=core;database=Hive;port=3306;password=1234";
+    public ServerDataHolder()
     {
-        public readonly int Dimension1;
-        public readonly int Dimension2;
-        public Key(int x, int y)
+        using MySqlConnection mySqlConnection = new MySqlConnection(ConnStr);
+        
+        try
         {
-            Dimension1 = x;
-            Dimension2 = y;
-        }
-        // Equals and GetHashCode ommitted
-    }
+            Console.WriteLine("Connecting to MySQL...");
+            mySqlConnection.Open();
 
-    public ConcurrentDictionary<Key, ServerData> servers = new ConcurrentDictionary<Key, ServerData>();
-    
+            string sql = "SELECT ip FROM servers";
+            using MySqlCommand cmd = new MySqlCommand(sql, mySqlConnection);
+            MySqlDataReader rdr = cmd.ExecuteReader();
+
+            while (rdr.Read())
+            {
+                Console.WriteLine(rdr[0]);
+            }
+            rdr.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            throw new Exception("Failed to establish connection with database!");
+        }
+    }
     public class ServerData
     {
         [JsonInclude] 
-        public bool requestTile;
+        public bool RequestTile;
         [JsonInclude]
         public int X;
         [JsonInclude]
@@ -42,7 +50,7 @@ public class ServerDataHolder
         [JsonInclude]
         public int Port;
         [JsonInclude]
-        public string OwnerID;
+        public string OwnerId;
         [JsonInclude]
         public string PublicKey;
         [JsonInclude]
@@ -55,12 +63,12 @@ public class ServerDataHolder
     }
     
     //Returns 1 if successfully creates a new server and 0 if not.
-    public bool CreateServer(string JSONObject, SslStream client)
+    public bool CreateServer(string jsonObject, SslStream client)
     {
         ServerData newServerData;
         try
         {
-            newServerData = JsonConvert.DeserializeObject<ServerData>(JSONObject);
+            newServerData = JsonConvert.DeserializeObject<ServerData>(jsonObject);
         }
         catch (Exception)
         {
@@ -75,11 +83,11 @@ public class ServerDataHolder
         //CoreCommunication.SendStringToStream(client, "Setting tile up...");
         
         Console.Write($"New Server: {newServerData.Name} \n");
-        if (newServerData.requestTile)
+        if (newServerData.RequestTile)
         {
             //CoreCommunication.SendStringToStream(client, $"You are requesting a tile @ {newServerData.X},{newServerData.Y}...");
             Console.Write($"        is requesting a tile at ({newServerData.X},{newServerData.Y})...");
-            AssignTile(newServerData.X, newServerData.Y, newServerData, client);
+            AssignTile(newServerData, client);
         }
         else
         {
@@ -90,27 +98,37 @@ public class ServerDataHolder
         return true;
     }
 
-    public bool AssignTile(int X, int Y, ServerData newServerData, SslStream client)
+    bool AssignTile(ServerData newServerData, SslStream client)
     {
+        using MySqlConnection mySqlConnection = new MySqlConnection(ConnStr);
         
-        //These four lines are a debug patch and should be removed. See below comment.
-            servers[new Key(X, Y)] = newServerData;
-            Console.WriteLine("GRANTED");
-            CoreCommunication.SendStringToStream(client, $"   GRANTED @ ({X},{Y})");
-            return true;
-        
-        //This is the original function that should be used in prod to prevent new servers from overriding existing ones. It's temporarily replaced for testing.
-        /*
-        if (servers.TryAdd(new Key(X, Y), newServerData))
+        string query = "INSERT INTO servers (x,y,name,ip,port,ownerID,publicKey) VALUES (@x,@y,@name,@ip, @port,@ownerID,@publicKey)";
+
+        try
         {
-            Console.WriteLine("GRANTED");
-            CoreCommunication.SendStringToStream(client, $"   GRANTED @ ({X},{Y})");
+            mySqlConnection.Open();
+
+            using MySqlCommand cmd = new MySqlCommand(query, mySqlConnection);
+            cmd.Parameters.AddWithValue("@x", newServerData.X);
+            cmd.Parameters.AddWithValue("@y", newServerData.Y);
+            cmd.Parameters.AddWithValue("@name", newServerData.Name);
+            cmd.Parameters.AddWithValue("@ip", newServerData.Ip);
+            cmd.Parameters.AddWithValue("@port", newServerData.Port);
+            cmd.Parameters.AddWithValue("@ownerID", newServerData.OwnerId);
+            cmd.Parameters.AddWithValue("@publicKey", newServerData.PublicKey);
+                
+            cmd.ExecuteNonQuery();
+                
+            Console.WriteLine("Success!");
+                
+            CoreCommunication.SendStringToStream(client, $"   GRANTED @ ({newServerData.X},{newServerData.Y})");
             return true;
-        }*/
-        
-        
-        Console.Write("FAILED");
-        CoreCommunication.SendStringToStream(client, $"   FAILED @ ({X},{Y})");
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
+        CoreCommunication.SendStringToStream(client, $"   FAILED @ ({newServerData.X},{newServerData.Y})");
         return false;
     }
 
@@ -119,51 +137,156 @@ public class ServerDataHolder
         
     }
 
-    public void DeleteServer(int x, int y)
-    {
-        Console.Write($"Removing Server at Tile ({x},{y})...");
-        if (servers.TryRemove(new KeyValuePair<Key, ServerData>(new Key(x, y), servers[new Key(x, y)])))
-        {
-            Console.WriteLine(" SUCCESS");
-            return;
-        }
-
-        Console.WriteLine("FAILED, server does not exist at that tile location");
-    }
-
     public string GetServerJsonData(int x, int y)
     {
-        ServerData data;
+        //Use of the ServerData object is based on old solution and should be removed.
+        //ServerData middle-man is no-longer necessary.
         
-        if(servers.TryGetValue(new Key(x, y), out data))
-            throw new Exception("No server exists at " + x + ", " + y + ".");
+        using MySqlConnection mySqlConnection = new MySqlConnection(ConnStr);
+        
+        string query = "SELECT * FROM servers WHERE x = @x AND y = @y";
 
-        return JsonConvert.SerializeObject(data);
+        try
+        {
+            mySqlConnection.Open();
+
+            using MySqlCommand cmd = new MySqlCommand(query, mySqlConnection);
+            cmd.Parameters.AddWithValue("@x", x);
+            cmd.Parameters.AddWithValue("@y", y);
+                
+            MySqlDataReader rdr = cmd.ExecuteReader();
+                
+            Console.WriteLine("Success!");
+                
+            rdr.Read();
+                
+            //Read result into ServerData object;
+            if (!rdr.HasRows)
+                return "DoesNotExist";
+                    
+            ServerData data = new ServerData();
+                
+            int i = 0;
+
+            data.X = (int) rdr[i++];
+            data.Y = (int) rdr[i++];
+            data.Name = (string) rdr[i++];
+            data.Ip = (string) rdr[i++];
+            data.Port = (int) rdr[i++];
+            data.OwnerId = (string) rdr[i++];
+            data.PublicKey = (string) rdr[i++];
+
+            return JsonConvert.SerializeObject(data);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
+        
+        return "DoesNotExist";
     }
 
     //This function would only be use in user queries for servers by name.
     public string GetServerJsonData(string name)
     {
-
-        IEnumerator enumerator = servers.GetEnumerator();
-
-        while (enumerator.MoveNext())
-            if (((ServerData)enumerator.Current).Name == name)
-                return JsonConvert.SerializeObject((ServerData)enumerator.Current);
-        
-        throw new Exception("No server of name " + name + " exists.");
+        throw new Exception("GetServerJsonData not implemented!");
     }
 
     public void PrintServers()
     {
-        if(servers.IsEmpty)
-            Console.WriteLine("The server is empty :(");
-        foreach (var VARIABLE in servers)
+        throw new Exception("PrintServers not implemented!");
+    }
+
+    public void PruneServers()
+    {
+        using MySqlConnection mySqlConnection = new MySqlConnection(ConnStr);
+        string query = "SELECT x, y, ip, port, publicKey FROM servers";
+
+        try
         {
-            var val = VARIABLE.Value;
-            Console.WriteLine($"Server: {val.OwnerID} ({val.Name}) is at {val.X}:{val.Y}");
+            mySqlConnection.Open();
+
+            using MySqlCommand cmd = new MySqlCommand(query, mySqlConnection);
+            using MySqlDataReader rdr = cmd.ExecuteReader();  // Automatically closes the reader
+
+            while (rdr.Read())
+            {
+                ServerData data = new ServerData();
+                int i = 0;
+
+                // Populate server data from the database
+                data.X = (int)rdr[i++];
+                data.Y = (int)rdr[i++];
+                data.Ip = (string)rdr[i++];
+                data.Port = (int)rdr[i++];
+                data.PublicKey = (string)rdr[i];
+
+                try
+                {
+                    // Create and activate the TCP connection
+                    using (TcpClient tcpClient = new TcpClient(data.Ip, data.Port))
+                    {
+                        using (TileStream tileStream = new TileStream(tcpClient))
+                        {
+                            tileStream.ActivateStream(data.PublicKey);
+                            tileStream.SendStringToStream("Ping");
+
+                            if (tileStream.GetStringFromStream() != "Pong")
+                                throw new Exception("Did not receive pong from server " + data.X + ", " + data.Y + ".");
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    // Log the error and proceed with deleting the server from the database
+                    Console.WriteLine($"Error connecting to server {data.X}, {data.Y}: {e.Message}");
+                    Console.WriteLine($"Goodbye server at {data.X}, {data.Y}.");
+
+                    try
+                    {
+                        // Try deleting the server if the connection failed
+                        DeleteServer(data.X, data.Y);
+                    }
+                    catch (Exception deleteException)
+                    {
+                        // Log if the deletion failed
+                        Console.WriteLine($"Error deleting server {data.X}, {data.Y}: {deleteException.Message}");
+                    }
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            // Log any errors that occur during the database connection or command execution
+            Console.WriteLine($"An error occurred while accessing the database: {e.Message}");
         }
     }
-    
+
+
+
+    //Returns true if command sent; false otherwise.
+    public bool DeleteServer(int x, int y)
+    {
+        using MySqlConnection connection = new MySqlConnection(ConnStr);
+        
+        try
+        {
+            connection.Open();
+            string query = "DELETE FROM servers WHERE x = @x AND y = @y";
+
+            MySqlCommand command = new MySqlCommand(query, connection);
+
+            command.Parameters.AddWithValue("@x", x);
+            command.Parameters.AddWithValue("@y", y);
+
+            command.ExecuteNonQuery();
+        }
+        catch(Exception e)
+        {
+            Console.WriteLine(e);
+            return false;
+        }
+        return true;
+    }
     
 }
