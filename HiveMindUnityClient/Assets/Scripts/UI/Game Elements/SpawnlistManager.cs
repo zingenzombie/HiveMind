@@ -35,9 +35,9 @@ public class SpawnlistManager : MonoBehaviour
         headingObj.name = "Heading Object";
 
         RectTransform headingTransform = headingObj.GetComponent<RectTransform>();
-        float currHeight = headingTransform.sizeDelta.y + 10;
+        float currHeight = headingTransform.sizeDelta.y;
 
-        headingTransform.anchoredPosition = new Vector2(headingTransform.sizeDelta.x / 2, -(headingTransform.sizeDelta.y / 2) - verticalOffset - 10);
+        headingTransform.anchoredPosition = new Vector2(headingTransform.sizeDelta.x / 2, -headingTransform.sizeDelta.y - verticalOffset); // TODO: Could be fixed up
 
         int entryIndex = 0;
         for (int i = 0; i < numberOfSlots; i++) 
@@ -46,7 +46,7 @@ public class SpawnlistManager : MonoBehaviour
             rowObj.name = "Spawnlist Row " + (i + 1).ToString();
 
             RectTransform rowTransform = rowObj.GetComponent<RectTransform>();
-            rowTransform.anchoredPosition = new Vector2(rowTransform.sizeDelta.x / 2, -(rowTransform.sizeDelta.y / 2) - verticalOffset - currHeight);
+            rowTransform.anchoredPosition = new Vector2(rowTransform.sizeDelta.x / 2, -rowTransform.sizeDelta.y - verticalOffset - currHeight);
             currHeight += rowTransform.sizeDelta.y;
 
             TMP_Text[] textComponents = rowObj.GetComponentsInChildren<TMP_Text>();
