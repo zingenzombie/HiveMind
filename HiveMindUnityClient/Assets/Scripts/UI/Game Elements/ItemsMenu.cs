@@ -19,13 +19,13 @@ public class ItemsMenu : MonoBehaviour
         RectTransform rectTransformHotbar = hotbarText.GetComponent<RectTransform>();
         rectTransformHotbar.anchoredPosition = new Vector2(0, 0);
 
-        float inventoryY = hotbar.PrintItems(rectTransformHotbar.sizeDelta.y) - 20;
+        float inventoryY = -hotbar.PrintItems(rectTransformHotbar.sizeDelta.y);
 
         // Position inventory elements
         RectTransform rectTransformInventory = inventoryText.GetComponent<RectTransform>();
         rectTransformInventory.anchoredPosition = new Vector2(0, inventoryY);
 
-        float spawnsY = inventory.PrintItems(-inventoryY + rectTransformInventory.sizeDelta.y) - 20;
+        float spawnsY = -inventory.PrintItems(-inventoryY + rectTransformInventory.sizeDelta.y); // todo
 
         // Position spawnlist elements
         RectTransform rectTransformSpawnlist = spawnlistText.GetComponent<RectTransform>();
