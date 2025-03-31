@@ -13,6 +13,9 @@ public class ItemsMenu : MonoBehaviour
     public TextMeshProUGUI inventoryText;
     public TextMeshProUGUI spawnlistText;
     
+    // Grab RectTransform for bounds so its size can be changed dynamically
+    public RectTransform uiSpace;
+    
     void Start()
     {
         // Position hotbar elements
@@ -31,6 +34,11 @@ public class ItemsMenu : MonoBehaviour
         RectTransform rectTransformSpawnlist = spawnlistText.GetComponent<RectTransform>();
         rectTransformSpawnlist.anchoredPosition = new Vector2(0, spawnsY);
 
-        spawnlist.PrintItems(-spawnsY + rectTransformSpawnlist.sizeDelta.y);
+        float spawnlistY = -spawnlist.PrintItems(-spawnsY + rectTransformSpawnlist.sizeDelta.y);
+
+        Debug.Log(inventoryY + " " + spawnsY + " " + spawnlistY);
+
+        uiSpace.sizeDelta = new Vector2(uiSpace.sizeDelta.x, -inventoryY - spawnsY - spawnlistY);
+        uiSpace.anchoredPosition = new Vector2(uiSpace.anchoredPosition.x, uiSpace.anchoredPosition.y + inventoryY + spawnsY + spawnlistY);
     }
 }
