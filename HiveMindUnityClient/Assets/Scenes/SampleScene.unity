@@ -404,7 +404,7 @@ MonoBehaviour:
   slotPrefab: {fileID: 358579548226134629, guid: 07c4bb0a2dd87944cbdb502e7d89fb79, type: 3}
   xOffset: 15
   yOffset: 0
-  playerHotbar: {fileID: 11400000, guid: bafae7ea2e4bf8c44807223d52401d1b, type: 2}
+  playerHotbar: {fileID: 11400000, guid: 1476d046e9d93bb419b269b54a227be7, type: 2}
 --- !u!1 &229713985
 GameObject:
   m_ObjectHideFlags: 0
@@ -992,7 +992,7 @@ MonoBehaviour:
   slotPrefab: {fileID: 358579548226134629, guid: 07c4bb0a2dd87944cbdb502e7d89fb79, type: 3}
   xOffset: 15
   yOffset: 0
-  playerHotbar: {fileID: 11400000, guid: d5ce198ef0b6b53458d22a6d9e7ec59c, type: 2}
+  playerHotbar: {fileID: 11400000, guid: 1da3b22a0cb30614bbf8278580b34600, type: 2}
 --- !u!1 &376047203
 GameObject:
   m_ObjectHideFlags: 0
@@ -1293,7 +1293,7 @@ MonoBehaviour:
   entryPrefabs:
   - {fileID: 7016405062497254227, guid: d1bdba50be861d34f91b791e007fbabb, type: 3}
   - {fileID: 6505692031559039214, guid: 1021102e76d404541b8f73a3fa6b4d3f, type: 3}
-  playerSpawnlist: {fileID: 11400000, guid: 85634363a3fc77f45bdafbfbeee3ea32, type: 2}
+  playerSpawnlist: {fileID: 11400000, guid: 8229ef93525c70a4db98071bd1996a71, type: 2}
 --- !u!1 &560953885
 GameObject:
   m_ObjectHideFlags: 0
@@ -1770,7 +1770,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   menu: {fileID: 1049561573}
-  inventory: {fileID: 11400000, guid: d5ce198ef0b6b53458d22a6d9e7ec59c, type: 2}
+  inventory: {fileID: 11400000, guid: 1da3b22a0cb30614bbf8278580b34600, type: 2}
   InventoryArea: {fileID: 119501403}
   AvatarsArea: {fileID: 376047203}
   SettingsArea: {fileID: 832285864}
@@ -1793,7 +1793,7 @@ MonoBehaviour:
   slotPrefab: {fileID: 3143170080540028004, guid: 1686223841908d64681cd46d32295500, type: 3}
   xOffset: 15
   yOffset: 0
-  playerHotbar: {fileID: 11400000, guid: bafae7ea2e4bf8c44807223d52401d1b, type: 2}
+  playerHotbar: {fileID: 11400000, guid: 1476d046e9d93bb419b269b54a227be7, type: 2}
 --- !u!1 &747903708
 GameObject:
   m_ObjectHideFlags: 0
@@ -2658,7 +2658,7 @@ MonoBehaviour:
   hexTile: {fileID: 227366594333924227, guid: 1695bfc5e2fc432488d2b6fe01289783, type: 3}
   hexTileTemplate: {fileID: 7693739768744577133, guid: 142239a109042df4ab372023a3b13902, type: 3}
   exitTilePrefab: {fileID: 5966602332483114496, guid: 896fd603b63cc0847b1818deddef74b7, type: 3}
-  renderDistance: 12
+  renderDistance: 4
 --- !u!1 &1312724175
 GameObject:
   m_ObjectHideFlags: 0
@@ -4443,6 +4443,7 @@ MonoBehaviour:
   jumpPower: 18
   gravity: -20
   mainCamera: {fileID: 9210169823822129874}
+  objectToSend: {fileID: 3099095686292695660, guid: 4079511c98e62464fbfc796dd2336dd7, type: 3}
 --- !u!4 &7573471563246649973
 Transform:
   m_ObjectHideFlags: 0

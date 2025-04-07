@@ -66,10 +66,18 @@ public class PlayerManager : MonoBehaviour
             case "ChangeAvatar":
                 ChangeAvatar(networkMessage);
                 break;
+            case "SpawnObject":
+                SpawnObject(networkMessage);
+                break;
             default:
                 Debug.Log("Unable to handle case " + networkMessage.messageType + ".");
                 break;
         }
+    }
+
+    void SpawnObject(NetworkMessage networkMessage)
+    {
+        generalUpdates.Enqueue(networkMessage);
     }
 
     void DisconnectPlayer(NetworkMessage networkMessage)
