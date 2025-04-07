@@ -28,14 +28,6 @@ public class UIOpenMenu : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.E) && menu != null)
         {
-            if (inventory != null)
-            {
-                if (menu.activeSelf)
-                    inventory.Load();
-                else
-                    inventory.Save();
-            }
-
             InventoryArea.SetActive(true);
             AvatarsArea.SetActive(false);
             SettingsArea.SetActive(false);
