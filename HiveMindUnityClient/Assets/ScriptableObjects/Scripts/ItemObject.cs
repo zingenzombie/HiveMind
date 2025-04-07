@@ -1,6 +1,3 @@
-using JetBrains.Annotations;
-using Unity.VisualScripting;
-using UnityEditor;
 using UnityEngine;
 
 public enum ItemType { // can use whatever types

@@ -3,13 +3,16 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine.EventSystems;
 using UnityEngine.Events;
-using System;
+using UnityEngine.UI;
+using Unity.VisualScripting;
 
 public class UIHotbarManager : MonoBehaviour
 {
     // Set parent
     public GameObject hotbarParent;
     private RectTransform hotbarRectTransform;
+
+    public GameObject emptyObject;
 
     // Sizes
     private float xSize;
@@ -131,16 +134,16 @@ public class UIHotbarManager : MonoBehaviour
                 GameObject slotObj = Instantiate(slotPrefab, hotbarRectTransform);
                 slotObj.name = "(" + (i + 1) + ", " + (j + 1) + ")";
 
-                RectTransform rectTransform = slotObj.GetComponent<RectTransform>();
-                rectTransform.anchoredPosition = new Vector2(xCurrOffset, yCurrOffset);
+                RectTransform slotTransform = slotObj.GetComponent<RectTransform>();
+                slotTransform.anchoredPosition = new Vector2(xCurrOffset, yCurrOffset);
 
-                xCurrOffset += rectTransform.sizeDelta.x + xOffset;
+                xCurrOffset += slotTransform.sizeDelta.x + xOffset;
 
                 TextMeshProUGUI slotLabel = slotObj.GetComponentInChildren<TextMeshProUGUI>();
                 if (slotLabel != null)
                     slotLabel.text = (currNumItems + 1).ToString();
 
-                InstantiateIcon(i, rectTransform, slotObj);
+                InstantiateIcon(j, slotTransform, slotObj);
 
                 currRowItems++;
                 currNumItems++;
@@ -153,6 +156,20 @@ public class UIHotbarManager : MonoBehaviour
 
     void InstantiateIcon(int index, RectTransform rectTransform, GameObject slotObj)
     {
+        if (playerHotbar.Container.Items[index].item.Prefab == null)
+        {
+            GameObject emptyObj = Instantiate(slotObj);
+            emptyObj.GetComponent<RectTransform>().localPosition = new Vector3(rectTransform.sizeDelta.x, rectTransform.sizeDelta.y, 0);
+
+            Image imageComponent = emptyObj.GetComponent<Image>();
+            if (imageComponent != null)
+            {
+                Destroy(imageComponent);
+            }
+
+            playerHotbar.Container.Items[index].item.Prefab = emptyObj;
+        }
+
         GameObject iconObj = Instantiate(playerHotbar.Container.Items[index].item.Prefab, rectTransform);
         iconObj.name = playerHotbar.Container.Items[index].item.Prefab.name;
 
