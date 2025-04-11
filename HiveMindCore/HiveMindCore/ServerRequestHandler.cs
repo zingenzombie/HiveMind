@@ -26,15 +26,11 @@ public class ServerRequestHandler : RequestHandler
 
     private void NewServer()
     {
+        //CoreCommunication.SendStringToStream(client, "Core is requesting your server info... ");
         string serverRequest = CoreCommunication.GetStringFromStream(client);
-        Console.WriteLine(serverRequest);
+        //CoreCommunication.SendStringToStream(client, "(CORE RECEIVED SERVER DATA)");
 
-        if (!holder.CreateServer(serverRequest))
-        {
-            CoreCommunication.SendStringToStream(client, "FAIL");
-            return;
-        }
-        
-        CoreCommunication.SendStringToStream(client, "SUCCESS");
+        if (!holder.CreateServer(serverRequest, client))
+            CoreCommunication.SendStringToStream(client, "FAIL (could not parse your data json into a 'serverdata' type in the core server)");
     }
 }

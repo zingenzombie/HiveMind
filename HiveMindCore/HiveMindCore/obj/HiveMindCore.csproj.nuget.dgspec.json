@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "/root/HiveMindCore/HiveMindCore/HiveMindCore.csproj": {}
+    "/HiveMind/HiveMindCore/HiveMindCore/HiveMindCore.csproj": {}
   },
   "projects": {
-    "/root/HiveMindCore/HiveMindCore/HiveMindCore.csproj": {
+    "/HiveMind/HiveMindCore/HiveMindCore/HiveMindCore.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/root/HiveMindCore/HiveMindCore/HiveMindCore.csproj",
+        "projectUniqueName": "/HiveMind/HiveMindCore/HiveMindCore/HiveMindCore.csproj",
         "projectName": "HiveMindCore",
-        "projectPath": "/root/HiveMindCore/HiveMindCore/HiveMindCore.csproj",
+        "projectPath": "/HiveMind/HiveMindCore/HiveMindCore/HiveMindCore.csproj",
         "packagesPath": "/root/.nuget/packages/",
-        "outputPath": "/root/HiveMindCore/HiveMindCore/obj/",
+        "outputPath": "/HiveMind/HiveMindCore/HiveMindCore/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/root/.nuget/NuGet/NuGet.Config"
@@ -38,6 +38,10 @@
         "net7.0": {
           "targetAlias": "net7.0",
           "dependencies": {
+            "MySql.Data": {
+              "target": "Package",
+              "version": "[9.2.0, )"
+            },
             "newtonsoft.json": {
               "target": "Package",
               "version": "[9.0.1, )"

@@ -149,7 +149,7 @@ public class HexTileController : MonoBehaviour
         serverData.Ip = address.ToString();
         serverData.Port = port;
         serverData.Name = name;
-        serverData.OwnerID = owner;
+        serverData.OwnerId = owner;
 
         ClearGroundAndTileObjects();
     }
