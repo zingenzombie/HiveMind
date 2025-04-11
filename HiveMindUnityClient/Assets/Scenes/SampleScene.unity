@@ -400,7 +400,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   hotbarParent: {fileID: 1286621662}
-  emptyObject: {fileID: 2196164341809964163, guid: 8c39c6b98e8bbad409b160baa92d6566, type: 3}
   isInventoryMenuAsset: 1
   centerSlots: 0
   slotPrefab: {fileID: 358579548226134629, guid: 07c4bb0a2dd87944cbdb502e7d89fb79, type: 3}
@@ -595,6 +594,7 @@ GameObject:
   - component: {fileID: 275233370}
   - component: {fileID: 275233373}
   - component: {fileID: 275233374}
+  - component: {fileID: 275233375}
   - component: {fileID: 275233372}
   m_Layer: 5
   m_Name: HotbarParent
@@ -673,12 +673,24 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   hotbarParent: {fileID: 275233369}
-  emptyObject: {fileID: 2196164341809964163, guid: 8c39c6b98e8bbad409b160baa92d6566, type: 3}
   isInventoryMenuAsset: 0
   centerSlots: 1
   slotPrefab: {fileID: 3143170080540028004, guid: 1686223841908d64681cd46d32295500, type: 3}
   xOffset: 15
   yOffset: 0
+  playerHotbar: {fileID: 11400000, guid: f88bb5f19e4f49b4dba2e5b0e2082418, type: 2}
+--- !u!114 &275233375
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 275233369}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fc53dbf2fb7260143849a7bc3ec3be28, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
   playerHotbar: {fileID: 11400000, guid: f88bb5f19e4f49b4dba2e5b0e2082418, type: 2}
 --- !u!1 &284467900
 GameObject:
@@ -1010,7 +1022,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   hotbarParent: {fileID: 1240700532}
-  emptyObject: {fileID: 2196164341809964163, guid: 8c39c6b98e8bbad409b160baa92d6566, type: 3}
   isInventoryMenuAsset: 1
   centerSlots: 0
   slotPrefab: {fileID: 358579548226134629, guid: 07c4bb0a2dd87944cbdb502e7d89fb79, type: 3}

@@ -28,10 +28,9 @@ public class Item
     public int Id;
     public Item(ItemObject item) 
     {
-        Prefab = item.prefab;
-    }
-    public Item()
-    {
-        Prefab = Resources.Load<GameObject>("Items/EmptyPrefab");
+        if (item.prefab != null)
+        {
+            Prefab = item.prefab;
+        }
     }
 }

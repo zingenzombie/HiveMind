@@ -92,8 +92,10 @@ public class PlayerController : MonoBehaviour
             {
                 playerVelocity.y = jumpPower / 2;
             }
-            else if (Input.GetKey(KeyCode.LeftControl)) // TODO: Cond is placeholder
+            else if (Input.GetKey(KeyCode.LeftControl))
+            {
                 playerVelocity.y = -jumpPower / 2;
+            }
         }
             
         myRigidbody.linearVelocity = transform.TransformDirection(playerVelocity);

@@ -12,8 +12,6 @@ public class UIHotbarManager : MonoBehaviour
     public GameObject hotbarParent;
     private RectTransform hotbarRectTransform;
 
-    public GameObject emptyObject;
-
     // Sizes
     private float xSize;
     private float ySize;
@@ -49,8 +47,8 @@ public class UIHotbarManager : MonoBehaviour
         
         numberOfSlots = playerHotbar.Container.Items.Count;
 
-        //if (isInventoryMenuAsset)
-        //    RegisterItems();
+        if (isInventoryMenuAsset)
+            RegisterItems();
     }
 
     void Start()
@@ -64,11 +62,8 @@ public class UIHotbarManager : MonoBehaviour
         //UpdateSlots();
     }
 
-    /*public void RegisterItems()
-    {
-        playerHotbar.database.Items.Clear();
-        playerHotbar.database.ItemPrefabs.Clear();
-
+    public void RegisterItems()
+    { 
         foreach (var itemSlot in playerHotbar.Container.Items)
         {
             if (itemSlot.item.Prefab != null && itemSlot.item.Id != -1)
@@ -76,7 +71,7 @@ public class UIHotbarManager : MonoBehaviour
         }
     }
 
-    public void UpdateSlots()
+    /*public void UpdateSlots()
     {
         foreach (KeyValuePair<GameObject, InventorySlot> _slot in itemsDisplayed)
         {
@@ -156,6 +151,8 @@ public class UIHotbarManager : MonoBehaviour
 
     void InstantiateIcon(int index, RectTransform rectTransform, GameObject slotObj)
     {
+        GameObject iconObj;
+
         if (playerHotbar.Container.Items[index].item.Prefab == null)
         {
             GameObject emptyObj = Instantiate(slotObj);
@@ -167,11 +164,14 @@ public class UIHotbarManager : MonoBehaviour
                 Destroy(imageComponent);
             }
 
-            playerHotbar.Container.Items[index].item.Prefab = emptyObj;
+            iconObj = Instantiate(emptyObj, rectTransform);
+            iconObj.name = "EmptyObject";
         }
-
-        GameObject iconObj = Instantiate(playerHotbar.Container.Items[index].item.Prefab, rectTransform);
-        iconObj.name = playerHotbar.Container.Items[index].item.Prefab.name;
+        else 
+        {
+            iconObj = Instantiate(playerHotbar.Container.Items[index].item.Prefab, rectTransform);
+            iconObj.name = playerHotbar.Container.Items[index].item.Prefab.name;
+        }
 
         AddEvent(iconObj, EventTriggerType.PointerEnter, delegate { OnEnter(iconObj); });
         AddEvent(iconObj, EventTriggerType.PointerExit, delegate { OnExit(iconObj); });
@@ -183,7 +183,7 @@ public class UIHotbarManager : MonoBehaviour
         {
             Component component = iconObj.GetComponentAtIndex(j);
             if (!(component is Renderer) && !(component is MeshRenderer) && !(component is SkinnedMeshRenderer) && 
-                !(component is SpriteRenderer) && !(component is MeshFilter) && !(component is Transform))
+                !(component is SpriteRenderer) && !(component is MeshFilter) && !(component is Transform) && !(component is CanvasRenderer))
             {
                 Destroy(component);
             }
