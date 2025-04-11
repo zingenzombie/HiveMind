@@ -138,7 +138,7 @@ public class UIHotbarManager : MonoBehaviour
                 if (slotLabel != null)
                     slotLabel.text = (currNumItems + 1).ToString();
 
-                InstantiateIcon(j, slotTransform, slotObj);
+                InstantiateIcon(currNumItems, slotTransform, slotObj);
 
                 currRowItems++;
                 currNumItems++;

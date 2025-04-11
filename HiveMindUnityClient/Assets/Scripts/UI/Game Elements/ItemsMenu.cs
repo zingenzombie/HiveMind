@@ -36,9 +36,7 @@ public class ItemsMenu : MonoBehaviour
 
         float spawnlistY = -spawnlist.PrintItems(-spawnsY + rectTransformSpawnlist.sizeDelta.y);
 
-        Debug.Log(inventoryY + " " + spawnsY + " " + spawnlistY);
-
         uiSpace.sizeDelta = new Vector2(uiSpace.sizeDelta.x, -inventoryY - spawnsY - spawnlistY);
-        uiSpace.anchoredPosition = new Vector2(uiSpace.anchoredPosition.x, uiSpace.anchoredPosition.y + inventoryY + spawnsY + spawnlistY);
+        //uiSpace.anchoredPosition = new Vector2(uiSpace.anchoredPosition.x, uiSpace.anchoredPosition.y + inventoryY + spawnsY + spawnlistY);
     }
 }
