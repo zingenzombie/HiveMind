@@ -1,11 +1,13 @@
 using UnityEngine;
 using System.Collections.Generic;
 using TMPro;
+using Unity.VisualScripting;
 
 public class SpawnlistManager : MonoBehaviour
 {
     // Set parent
-    public RectTransform spawnlistParent;
+    public GameObject spawnlistParent;
+    private RectTransform spawnlistRectTransform;
 
     // Get prefabs for heading as well as any following entries
     public GameObject headingPrefab;
@@ -18,7 +20,9 @@ public class SpawnlistManager : MonoBehaviour
 
     void Awake()
     {
-        numberOfSlots = playerSpawnlist.Container.Count;
+        spawnlistRectTransform = spawnlistParent.GetComponent<RectTransform>();
+
+        numberOfSlots = playerSpawnlist.Container.Items.Count;
 
         if (slotObjects != null) 
         {
@@ -31,7 +35,7 @@ public class SpawnlistManager : MonoBehaviour
 
     public float PrintItems(float verticalOffset)
     {
-        GameObject headingObj = Instantiate(headingPrefab, spawnlistParent);
+        GameObject headingObj = Instantiate(headingPrefab, spawnlistRectTransform);
         headingObj.name = "Heading Object";
 
         RectTransform headingTransform = headingObj.GetComponent<RectTransform>();
@@ -42,7 +46,7 @@ public class SpawnlistManager : MonoBehaviour
         int entryIndex = 0;
         for (int i = 0; i < numberOfSlots; i++) 
         {
-            GameObject rowObj = Instantiate(entryPrefabs[entryIndex], spawnlistParent);
+            GameObject rowObj = Instantiate(entryPrefabs[entryIndex], spawnlistRectTransform);
             rowObj.name = "Spawnlist Row " + (i + 1).ToString();
 
             RectTransform rowTransform = rowObj.GetComponent<RectTransform>();
@@ -52,9 +56,9 @@ public class SpawnlistManager : MonoBehaviour
             TMP_Text[] textComponents = rowObj.GetComponentsInChildren<TMP_Text>();
             if (textComponents.Length >= 3) 
             {
-                textComponents[0].text = playerSpawnlist.Container[i].item.name;
-                textComponents[1].text = playerSpawnlist.Container[i].date;
-                textComponents[2].text = playerSpawnlist.Container[i].creator;
+                textComponents[0].text = playerSpawnlist.Container.Items[i].item.Prefab.name;
+                textComponents[1].text = playerSpawnlist.Container.Items[i].date;
+                textComponents[2].text = playerSpawnlist.Container.Items[i].creator;
             }
 
             if (entryIndex + 1 < entryPrefabs.Count) 
