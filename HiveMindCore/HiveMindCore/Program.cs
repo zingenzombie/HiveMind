@@ -96,21 +96,38 @@ void Main(string[] args)
 
     while (true)   //we wait for a connection
     {
-        
-        //if a connection exists, the server will accept it
-        if (!server.Pending()) 
-            continue;
-        
-        TcpClient client = server.AcceptTcpClient();
+        try
+        {
+            //if a connection exists, the server will accept it
+            if (!server.Pending())
+                continue;
 
-        if (!client.Connected) 
-            continue; 
-            
-        //while the client is connected, we look for incoming messages
-        Console.Write("Incoming connection request... (Verifying)... ");
-        new Thread(() => PromoteToSsl(client)).Start();
-    } 
-    
+            TcpClient client = server.AcceptTcpClient();
+
+            if (!client.Connected)
+                continue;
+
+            //while the client is connected, we look for incoming messages
+            Console.Write("Incoming connection request... (Verifying)... ");
+            new Thread(() =>
+            {
+                try
+                {
+                    PromoteToSsl(client);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                }
+                
+            }).Start();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine("An exception has occurred in the core loop.");
+            Console.WriteLine(e);
+        }
+    }
 }
 
 static X509Certificate2 GatherCertificate()
