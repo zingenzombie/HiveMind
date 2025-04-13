@@ -22,7 +22,7 @@ public class PlayerLook : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!UIOpenMenu.menuIsOpen)
+        if (!OpenMenu.menuIsOpen)
         {
             Cursor.lockState = CursorLockMode.Locked;
 

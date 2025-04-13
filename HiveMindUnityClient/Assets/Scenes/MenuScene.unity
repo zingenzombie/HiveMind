@@ -1859,8 +1859,6 @@ GameObject:
   - component: {fileID: 803444334}
   - component: {fileID: 803444338}
   - component: {fileID: 803444337}
-  - component: {fileID: 803444335}
-  - component: {fileID: 803444339}
   m_Layer: 5
   m_Name: TRHex
   m_TagString: Untagged
@@ -1887,22 +1885,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 422.042, y: 422.042}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &803444335
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 803444333}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cf8f1bfdeeab44a43b56b074b21f52c6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  polygonCollider2D: {fileID: 0}
-  onClick:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!114 &803444337
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1941,23 +1923,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 803444333}
   m_CullTransparentMesh: 1
---- !u!114 &803444339
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 803444333}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ea103bff62b15cd48833af83eae5f8eb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  polygonCollider2D: {fileID: 712208411}
-  scaleAmount: 1.15
-  image: {fileID: 803444337}
-  colorShiftAmount: -0.15
-  shine: {fileID: 0}
 --- !u!1 &809154406
 GameObject:
   m_ObjectHideFlags: 0

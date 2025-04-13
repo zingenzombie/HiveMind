@@ -57,8 +57,8 @@ public class SpawnlistManager : MonoBehaviour
             if (textComponents.Length >= 3) 
             {
                 textComponents[0].text = playerSpawnlist.Container.Items[i].item.Prefab.name;
-                textComponents[1].text = playerSpawnlist.Container.Items[i].date;
-                textComponents[2].text = playerSpawnlist.Container.Items[i].creator;
+                textComponents[1].text = playerSpawnlist.Container.Items[i].item.Date;
+                textComponents[2].text = playerSpawnlist.Container.Items[i].item.Creator;
             }
 
             if (entryIndex + 1 < entryPrefabs.Count) 

@@ -31,11 +31,11 @@ public class InventoryObject : ScriptableObject
         }
     }
 
-    public InventorySlot SetEmptySlot(Item _item, int _amount, string _creator, string _date) {
+    public InventorySlot SetEmptySlot(Item _item, int _amount, string _creator, string _date, GameObject _slotPrefab) {
         for (int i = 0; i < Container.Items.Count; i++) {
             if (Container.Items[i].ID <= -1)
             {
-                Container.Items[i].UpdateSlot(_item.Id, _item, _amount, _creator, _date);
+                Container.Items[i].UpdateSlot(_item.Id, _item, _amount, _slotPrefab);
                 return Container.Items[i];
             }
         } 
@@ -63,7 +63,7 @@ public class InventoryObject : ScriptableObject
 
             for (int i = 0; i < Container.Items.Count; i++)
             {
-                Container.Items[i].UpdateSlot(newContainer.Items[i].ID, newContainer.Items[i].item, newContainer.Items[i].amount, newContainer.Items[i].creator, newContainer.Items[i].date);
+                Container.Items[i].UpdateSlot(newContainer.Items[i].ID, newContainer.Items[i].item, newContainer.Items[i].amount, newContainer.Items[i].slotPrefab);
             }
 
             stream.Close();
@@ -78,9 +78,9 @@ public class InventoryObject : ScriptableObject
 
     public void MoveItem(InventorySlot item1, InventorySlot item2) 
     {
-        InventorySlot temp = new InventorySlot(item2.ID, item2.item, item2.amount, item2.creator, item2.date);
-        item2.UpdateSlot(item1.ID, item1.item, item2.amount, item2.creator, item2.date);
-        item1.UpdateSlot(temp.ID, temp.item, temp.amount, item2.creator, item2.date);
+        InventorySlot temp = new InventorySlot(item2.ID, item2.item, item2.amount, item2.slotPrefab);
+        item2.UpdateSlot(item1.ID, item1.item, item1.amount, item1.slotPrefab);
+        item1.UpdateSlot(temp.ID, temp.item, temp.amount, temp.slotPrefab);
     }
 
     public void RemoveItem(Item _item) {
@@ -88,7 +88,7 @@ public class InventoryObject : ScriptableObject
         {
             if (Container.Items[i].item == _item)
             {
-                Container.Items[i].UpdateSlot(-1, null, 0, "", "");
+                Container.Items[i].UpdateSlot(-1, null, 0, Container.Items[i].slotPrefab);
             }
         }
     }
@@ -105,9 +105,18 @@ public class Inventory : ISerializationCallbackReceiver
     {
         for (int i = 0; i < Items.Count; i++)
         {
-            if (Items[i].ID == -1)
+            if (Items[i] == null) 
             {
                 Items[i] = new InventorySlot();
+
+            }
+            else if (Items[i].ID == -1)
+            {
+                Items[i].ResetSlot();
+            }
+            else if (Items[i].item.Id == -1)
+            {
+                Items[i].item.ResetItem();
             }
         }
     }
@@ -127,34 +136,37 @@ public class InventorySlot
     [SerializeField] public int ID = -1;
     [SerializeField] public Item item;
     [SerializeField] public int amount;
-    [SerializeField] public string creator;
-    [SerializeField] public string date;
+    public GameObject slotPrefab;
 
-    public InventorySlot(int _id, Item _item, int _amount, string _creator, string _date)
+    public InventorySlot(int _id, Item _item, int _amount, GameObject _slotPrefab)
     {
         ID = _id;
         item = _item;
         amount = _amount;
-        creator = _creator;
-        date = _date;
+        slotPrefab = _slotPrefab;
     }
 
     public InventorySlot()
     {
         ID = -1;
-        item = null;
+        item.ResetItem();
         amount = 0;
-        creator = "";
-        date = "";
+        slotPrefab = null;
     }
 
-    public void UpdateSlot(int _id, Item _item, int _amount, string _creator, string _date)
+    public void ResetSlot()
+    {
+        ID = -1;
+        item.ResetItem();
+        amount = 0;
+    }
+
+    public void UpdateSlot(int _id, Item _item, int _amount, GameObject _slotPrefab)
     {
         ID = _id;
         item = _item;
         amount = _amount;
-        creator = _creator;
-        date = _date;
+        slotPrefab = _slotPrefab;
     }
 
     public void AddAmount(int value)

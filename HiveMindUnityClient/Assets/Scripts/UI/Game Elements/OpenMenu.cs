@@ -2,12 +2,11 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
-public class UIOpenMenu : MonoBehaviour
+public class OpenMenu : MonoBehaviour
 {
     public static bool menuIsOpen = false;
     public GameObject menu;
-    public InventoryObject inventory;
-
+    
     public GameObject InventoryArea;
     public GameObject AvatarsArea;
     public GameObject SettingsArea;

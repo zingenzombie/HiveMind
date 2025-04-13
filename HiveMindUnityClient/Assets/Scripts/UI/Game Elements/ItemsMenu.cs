@@ -4,8 +4,8 @@ using UnityEngine;
 public class ItemsMenu : MonoBehaviour
 {
     // Get scripts for hotbar, inventory, and spawnlist
-    public UIHotbarManager hotbar;
-    public UIHotbarManager inventory;
+    public InventoryManager hotbar;
+    public InventoryManager inventory;
     public SpawnlistManager spawnlist;
 
     // Get text for hotbar, inventory, and spawnlist
