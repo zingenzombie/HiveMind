@@ -83,7 +83,7 @@ public class GridController : MonoBehaviour
 
     IEnumerator FirstTimeTileSpawning()
     {
-        /*yield return*/ StartCoroutine(SpawnTiles(0, 0, false));
+        yield return StartCoroutine(SpawnTiles(0, 0, false));
 
         exitTile = Instantiate(exitTilePrefab, (grid[new Key(0, 0)]).transform);
         MoveExit exitTileMove = exitTile.GetComponent<MoveExit>();
