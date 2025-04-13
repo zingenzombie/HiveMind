@@ -47,11 +47,11 @@ public class ObjectManager : MonoBehaviour
 
     public void SendRequestedObjects(TileStream client)
     {
-        while (true)
+        while (client.GetBytesFromStream()[0] != 0)
         {
             //Read if asset wanted (end if 0)
-            if (client.GetBytesFromStream()[0] == 0)
-                return;
+            //if (client.GetBytesFromStream()[0] == 0)
+              //  return;
 
             //Read hash of file desired
             string hash = client.GetStringFromStream();

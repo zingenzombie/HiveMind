@@ -1,3 +1,4 @@
+using System.IO;
 using System;
 using System.Net.Security;
 using System.Net.Sockets;
@@ -14,65 +15,75 @@ public static class CoreCommunication
 
     public static void SendStringToStream(SslStream client, string payload)
     {
-        byte[] buffer = new byte[payload.Length + 1];
-
-
-        int i = 0;
-        foreach (char c in payload)
-            buffer[i++] = (byte)c;
-
-        client.Write(buffer);
+        SendBytesToStream(client, Encoding.ASCII.GetBytes(payload));
     }
 
     public static string GetStringFromStream(SslStream client)
     {
-        string request = "";
+        return Encoding.ASCII.GetString(GetBytesFromStream(client));
+    }
 
-        while (true)
+    public static void SendBytesToStream(SslStream client, byte[] payload)
+    {
+
+        // Send the length of the encrypted data
+        byte[] lengthBytes = BitConverter.GetBytes(payload.Length);
+        client.Write(lengthBytes, 0, lengthBytes.Length);
+
+        // Send the encrypted data in chunks
+        int chunkSize = 8192;
+        for (int i = 0; i < payload.Length; i += chunkSize)
         {
-            int read;
-
-            try
-            {
-                read = client.ReadByte();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.ToString());
-                return "";
-            }
-
-            if (read.Equals(-1))
-                continue;
-
-            if (read.Equals(0x00))
-                return request;
-
-            request += (char)read;
+            int size = Math.Min(chunkSize, payload.Length - i);
+            client.Write(payload, i, size);
         }
     }
 
-    //This is most-certainly broken
-    public static byte[] GetBytesFromStream(SslStream sslStream, int numBytes)
+    public static byte[] GetBytesFromStream(SslStream client)
     {
-        // Read the  message sent by the client.
-        // The client signals the end of the message using the
+        // Read the length of the encrypted data
+        int length = GetIntFromStream(client);
 
-        byte[] fileBuffer = new byte[numBytes];
+        // Define chunk size and buffer
+        int chunkSize = 8192;
+        byte[] buffer = new byte[chunkSize];
 
-        int bytesRead = 0;
-        while (bytesRead < numBytes)
+        // Use a MemoryStream to store the received encrypted data
+        using MemoryStream encryptedStream = new MemoryStream();
+        int totalBytesRead = 0;
+        while (totalBytesRead < length)
         {
-            int read = sslStream.Read(fileBuffer, bytesRead, numBytes - bytesRead);
-            //BROKEN AND SHOULDN'T RELY ON IsConnected()
-            if(read == 0 /*&& !CoreCommunication.IsConnected(sslStream)*/)
-            //Handle stream closed or error connection
-                break;
+            int bytesToRead = Math.Min(chunkSize, length - totalBytesRead);
+            int bytesRead = client.Read(buffer, 0, bytesToRead);
+            //if (bytesRead == 0)
+            //  break; // Connection closed
 
-            bytesRead += read;
+            encryptedStream.Write(buffer, 0, bytesRead);
+            totalBytesRead += bytesRead;
         }
 
-        return fileBuffer;
+        return encryptedStream.ToArray();
+    }
+
+    public static int GetIntFromStream(SslStream stream)
+    {
+        return BitConverter.ToInt32(ReadExactly(stream, 4));
+    }
+
+    public static byte[] ReadExactly(SslStream stream, int length)
+    {
+        byte[] buffer = new byte[length];
+
+        int offset = 0;
+        while (offset < length)
+        {
+            int bytesRead = stream.Read(buffer, offset, length - offset);
+            //if (bytesRead == 0)
+            //  throw new IOException("Unexpected end of stream");
+            offset += bytesRead;
+        }
+
+        return buffer;
     }
 
     public static SslStream EstablishSslStreamFromTcpAsClient(TcpClient client)
@@ -80,11 +91,11 @@ public static class CoreCommunication
 
 
         SslStream sslStream = new SslStream(
-               client.GetStream(),
-               false,
-               new RemoteCertificateValidationCallback(ValidateServerCertificate),
-               null
-               );
+            client.GetStream(),
+            false,
+            new RemoteCertificateValidationCallback(ValidateServerCertificate),
+            null
+        );
         // The server name must match the name on the server certificate
 
         try
@@ -110,11 +121,11 @@ public static class CoreCommunication
 
 
         SslStream sslStream = new SslStream(
-               client.GetStream(),
-               false,
-               new RemoteCertificateValidationCallback(ValidateServerCertificate),
-               null
-               );
+            client.GetStream(),
+            false,
+            new RemoteCertificateValidationCallback(ValidateServerCertificate),
+            null
+        );
         // The server name must match the name on the server certificate
 
         try
@@ -136,10 +147,10 @@ public static class CoreCommunication
     }
 
     public static bool ValidateServerCertificate(
-              object sender,
-              X509Certificate certificate,
-              X509Chain chain,
-              SslPolicyErrors sslPolicyErrors)
+        object sender,
+        X509Certificate certificate,
+        X509Chain chain,
+        SslPolicyErrors sslPolicyErrors)
     {
         if (sslPolicyErrors == SslPolicyErrors.None)
             return true;

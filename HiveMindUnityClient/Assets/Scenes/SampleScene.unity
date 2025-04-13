@@ -2658,7 +2658,7 @@ MonoBehaviour:
   hexTile: {fileID: 227366594333924227, guid: 1695bfc5e2fc432488d2b6fe01289783, type: 3}
   hexTileTemplate: {fileID: 7693739768744577133, guid: 142239a109042df4ab372023a3b13902, type: 3}
   exitTilePrefab: {fileID: 5966602332483114496, guid: 896fd603b63cc0847b1818deddef74b7, type: 3}
-  renderDistance: 4
+  renderDistance: 2
 --- !u!1 &1312724175
 GameObject:
   m_ObjectHideFlags: 0
