@@ -1,7 +1,6 @@
 ﻿using System.Net.Security;
 using System.Net.Sockets;
 using System.Text.Json.Serialization;
-using System.Xml.Linq;
 using Newtonsoft.Json;
 using MySql.Data.MySqlClient;
 
@@ -10,10 +9,11 @@ namespace HiveMindCore;
 public class ServerDataHolder
 {
     const string ConnStr = "server=localhost;user=core;database=Hive;port=3306;password=1234";
+
     public ServerDataHolder()
     {
         using MySqlConnection mySqlConnection = new MySqlConnection(ConnStr);
-        
+
         try
         {
             Console.WriteLine("Connecting to MySQL...");
@@ -27,6 +27,7 @@ public class ServerDataHolder
             {
                 Console.WriteLine(rdr[0]);
             }
+
             rdr.Close();
         }
         catch (Exception ex)
@@ -35,33 +36,25 @@ public class ServerDataHolder
             throw new Exception("Failed to establish connection with database!");
         }
     }
+
     public class ServerData
     {
-        [JsonInclude] 
-        public bool RequestTile;
-        [JsonInclude]
-        public int X;
-        [JsonInclude]
-        public int Y;
-        [JsonInclude]
-        public string Name;
-        [JsonInclude]
-        public string Ip;
-        [JsonInclude]
-        public int Port;
-        [JsonInclude]
-        public string OwnerId;
-        [JsonInclude]
-        public string PublicKey;
-        [JsonInclude]
-        public string LastContact;
+        [JsonInclude] public bool RequestTile;
+        [JsonInclude] public int X;
+        [JsonInclude] public int Y;
+        [JsonInclude] public string Name;
+        [JsonInclude] public string Ip;
+        [JsonInclude] public int Port;
+        [JsonInclude] public string OwnerId;
+        [JsonInclude] public string PublicKey;
+        [JsonInclude] public string LastContact;
 
         public string GetServerJsonData()
         {
             return JsonConvert.SerializeObject(this);
         }
     }
-    
+
     //Returns 1 if successfully creates a new server and 0 if not.
     public bool CreateServer(string jsonObject, SslStream client)
     {
@@ -78,10 +71,10 @@ public class ServerDataHolder
 
         if (newServerData == null)
             return false;
-        
+
         //CoreCommunication.SendStringToStream(client, "Parsing data was a success");
         //CoreCommunication.SendStringToStream(client, "Setting tile up...");
-        
+
         Console.Write($"New Server: {newServerData.Name} \n");
         if (newServerData.RequestTile)
         {
@@ -101,8 +94,9 @@ public class ServerDataHolder
     bool AssignTile(ServerData newServerData, SslStream client)
     {
         using MySqlConnection mySqlConnection = new MySqlConnection(ConnStr);
-        
-        string query = "INSERT INTO servers (x,y,name,ip,port,ownerID,publicKey) VALUES (@x,@y,@name,@ip, @port,@ownerID,@publicKey)";
+
+        string query =
+            "INSERT INTO servers (x,y,name,ip,port,ownerID,publicKey) VALUES (@x,@y,@name,@ip, @port,@ownerID,@publicKey)";
 
         try
         {
@@ -116,11 +110,11 @@ public class ServerDataHolder
             cmd.Parameters.AddWithValue("@port", newServerData.Port);
             cmd.Parameters.AddWithValue("@ownerID", newServerData.OwnerId);
             cmd.Parameters.AddWithValue("@publicKey", newServerData.PublicKey);
-                
+
             cmd.ExecuteNonQuery();
-                
+
             Console.WriteLine("Success!");
-                
+
             CoreCommunication.SendStringToStream(client, $"   GRANTED @ ({newServerData.X},{newServerData.Y})");
             return true;
         }
@@ -128,22 +122,78 @@ public class ServerDataHolder
         {
             Console.WriteLine(e);
         }
+
         CoreCommunication.SendStringToStream(client, $"   FAILED @ ({newServerData.X},{newServerData.Y})");
         return false;
     }
 
     public void FindAvailableTile(ServerData newServerData)
     {
-        
+    }
+
+    public List<string> GetServerRangeJsonData(int x, int y, int range)
+    {
+        using MySqlConnection mySqlConnection = new MySqlConnection(ConnStr);
+
+        string query = "SELECT * FROM servers WHERE x > @x1 AND x < @x2 AND y > @y1 AND y < @y2";
+
+        try
+        {
+            mySqlConnection.Open();
+
+            using MySqlCommand cmd = new MySqlCommand(query, mySqlConnection);
+            cmd.Parameters.AddWithValue("@x1", x - range);
+            cmd.Parameters.AddWithValue("@x2", x + range);
+            cmd.Parameters.AddWithValue("@y1", y - range);
+            cmd.Parameters.AddWithValue("@y2", y + range);
+
+            MySqlDataReader rdr = cmd.ExecuteReader();
+
+            Console.WriteLine("Success!");
+
+            //Read result into ServerData object;
+            //if (!rdr.HasRows)
+            //  return "DoesNotExist";
+
+            List<string> rows = new();
+
+            while (rdr.Read())
+            {
+                
+                ServerData data = new ServerData();
+                
+                int i = 0;
+
+                data.X = (int)rdr[i++];
+                data.Y = (int)rdr[i++];
+                data.Name = (string)rdr[i++];
+                data.Ip = (string)rdr[i++];
+                data.Port = (int)rdr[i++];
+                data.OwnerId = (string)rdr[i++];
+                data.PublicKey = (string)rdr[i++];
+
+                rows.Add(JsonConvert.SerializeObject(data));
+            }
+
+            rdr.Close();
+
+            return rows;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
+
+        return new();
     }
 
     public string GetServerJsonData(int x, int y)
     {
         //Use of the ServerData object is based on old solution and should be removed.
         //ServerData middle-man is no-longer necessary.
-        
+
         using MySqlConnection mySqlConnection = new MySqlConnection(ConnStr);
-        
+
         string query = "SELECT * FROM servers WHERE x = @x AND y = @y";
 
         try
@@ -153,28 +203,28 @@ public class ServerDataHolder
             using MySqlCommand cmd = new MySqlCommand(query, mySqlConnection);
             cmd.Parameters.AddWithValue("@x", x);
             cmd.Parameters.AddWithValue("@y", y);
-                
+
             MySqlDataReader rdr = cmd.ExecuteReader();
-                
+
             Console.WriteLine("Success!");
-                
+
             rdr.Read();
-                
+
             //Read result into ServerData object;
             if (!rdr.HasRows)
                 return "DoesNotExist";
-                    
+
             ServerData data = new ServerData();
-                
+
             int i = 0;
 
-            data.X = (int) rdr[i++];
-            data.Y = (int) rdr[i++];
-            data.Name = (string) rdr[i++];
-            data.Ip = (string) rdr[i++];
-            data.Port = (int) rdr[i++];
-            data.OwnerId = (string) rdr[i++];
-            data.PublicKey = (string) rdr[i++];
+            data.X = (int)rdr[i++];
+            data.Y = (int)rdr[i++];
+            data.Name = (string)rdr[i++];
+            data.Ip = (string)rdr[i++];
+            data.Port = (int)rdr[i++];
+            data.OwnerId = (string)rdr[i++];
+            data.PublicKey = (string)rdr[i++];
 
             return JsonConvert.SerializeObject(data);
         }
@@ -182,7 +232,7 @@ public class ServerDataHolder
         {
             Console.WriteLine(e);
         }
-        
+
         return "DoesNotExist";
     }
 
@@ -207,7 +257,7 @@ public class ServerDataHolder
             mySqlConnection.Open();
 
             using MySqlCommand cmd = new MySqlCommand(query, mySqlConnection);
-            using MySqlDataReader rdr = cmd.ExecuteReader();  // Automatically closes the reader
+            using MySqlDataReader rdr = cmd.ExecuteReader(); // Automatically closes the reader
 
             while (rdr.Read())
             {
@@ -263,12 +313,11 @@ public class ServerDataHolder
     }
 
 
-
     //Returns true if command sent; false otherwise.
     public bool DeleteServer(int x, int y)
     {
         using MySqlConnection connection = new MySqlConnection(ConnStr);
-        
+
         try
         {
             connection.Open();
@@ -281,12 +330,12 @@ public class ServerDataHolder
 
             command.ExecuteNonQuery();
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             Console.WriteLine(e);
             return false;
         }
+
         return true;
     }
-    
 }

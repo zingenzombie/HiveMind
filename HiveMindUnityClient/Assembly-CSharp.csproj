@@ -67,6 +67,7 @@
     <Compile Include="Assets\Scripts\UI\Game Elements\MenuNavigation.cs" />
     <Compile Include="Assets\Scripts\TileStream.cs" />
     <Compile Include="Assets\Scripts\ObjectManager.cs" />
+    <Compile Include="Assets\ScriptableObjects\Scripts\EmptyObject.cs" />
     <Compile Include="Assets\Scripts\CoroutineResult.cs" />
     <Compile Include="Assets\Scripts\HexTileController.cs" />
     <Compile Include="Assets\Scripts\PlayerLook.cs" />

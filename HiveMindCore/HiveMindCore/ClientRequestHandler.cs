@@ -30,9 +30,18 @@ public class ClientRequestHandler : RequestHandler
 
     private void GetServers()
     {
-        //Needs to be rebuilt to not use IsConnected()
-        //while (IsConnected())
-            GetServer();
+        int x = CoreCommunication.GetIntFromStream(client);
+        int y = CoreCommunication.GetIntFromStream(client);
+        int range = CoreCommunication.GetIntFromStream(client);
+        
+        List<string> tileRows = holder.GetServerRangeJsonData(x, y, range);
+        
+        CoreCommunication.SendIntToStream(client, tileRows.Count);
+
+        foreach (var tileRow in tileRows)
+        {
+            CoreCommunication.SendStringToStream(client, tileRow);
+        }
         
         Console.WriteLine("Client served.");
     }
