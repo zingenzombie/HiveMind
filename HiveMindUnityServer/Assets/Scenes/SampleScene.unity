@@ -261,10 +261,10 @@ MonoBehaviour:
   serverIPString: 127.0.0.1
   coreIPString: hive.honeydragonproductions.com
   requestXY: 1
-  port: 3622
+  port: 3623
   x: 0
-  y: 2
-  serverName: testServer
+  y: -1
+  serverName: LocalTestServer
   ownerID: Zin
   hexTileTemplate: {fileID: 7693739768744577133, guid: 142239a109042df4ab372023a3b13902, type: 3}
   initialized: 0
@@ -664,6 +664,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   composer: {fileID: 1455389449}
+  dynamicObjectPrefab: {fileID: 8653453998778751399, guid: d2fd8c8ffa055e047bfa19fd8d31e947, type: 3}
+  dynamicObjectTransform: {fileID: 628714865}
 --- !u!114 &1455389449
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -701,7 +703,7 @@ Transform:
   m_GameObject: {fileID: 1523369499}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 11.890109, y: 191.3302, z: 91.056335}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:

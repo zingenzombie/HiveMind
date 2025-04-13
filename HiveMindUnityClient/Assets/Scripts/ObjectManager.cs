@@ -68,7 +68,7 @@ public class ObjectManager : MonoBehaviour
         }
     }
 
-    public IEnumerator SpawnObjectAsServer(string hash, Transform parentTransform, TileStream tileStream = null)
+    public IEnumerator SpawnObjectAsClient(string hash, Transform parentTransform, TileStream tileStream = null)
     {
         yield return StartCoroutine(composer.Compose(hash, parentTransform, tileStream));
     }

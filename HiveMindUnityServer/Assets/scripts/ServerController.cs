@@ -8,6 +8,7 @@ using System.IO;
 using System.Net.Security;
 using System.Security.Cryptography;
 using System.Collections.Generic;
+using System.Collections;
 
 public class ServerController : MonoBehaviour
 {
@@ -69,7 +70,7 @@ public class ServerController : MonoBehaviour
             }
         }
 
-        InitializeWithCore();
+        StartCoroutine(InitializeWithCore());
 
         tileSize = hexTileTemplate.GetComponent<Renderer>().bounds.size.z;
 
@@ -83,13 +84,24 @@ public class ServerController : MonoBehaviour
         ClientConnectListener();
     }
 
-    private void ClientConnectListener()
+    void ClientConnectListener()
     {
         listen = new Thread(() => ListenForClientsTCP());
         listen.Start();
     }
 
-    void InitializeWithCore()
+    IEnumerator InitializeWithCore()
+    {
+        Thread coreInitialization = new Thread(EstablishStreamWithCoreAndReserve);
+        coreInitialization.Start();
+
+        while(coreInitialization.IsAlive)
+            yield return null;
+
+        Debug.Log("Established connection with core.");
+    }
+
+    void EstablishStreamWithCoreAndReserve()
     {
         ServerData tmp = new ServerData(requestXY, x, y, serverName, ipAddress.ToString(), port, ownerID, localRSA.ToXmlString(false));
         string jsonString = JsonUtility.ToJson(tmp);
@@ -101,28 +113,30 @@ public class ServerController : MonoBehaviour
 
         CoreCommunication.SendStringToStream(sslStream, "server");
         CoreCommunication.SendStringToStream(sslStream, "newServer");
-
+        /*
         byte[] bytesFinal = new byte[bytes.Length + 1];
 
         int i = 0;
-        foreach(byte b in bytes)
+        foreach (byte b in bytes)
             bytesFinal[i++] = b;
 
         bytesFinal[i] = 0x00;
 
         sslStream.Write(bytesFinal);
-        Debug.Log($"Sent over server info (of size: {bytesFinal.Length} bytes)");
+        Debug.Log($"Sent over server info (of size: {bytesFinal.Length} bytes)");*/
+
+        CoreCommunication.SendStringToStream(sslStream, jsonString);
 
         var tileReqResult = CoreCommunication.GetStringFromStream(sslStream);
         Debug.Log(/*tileReqAck + */tileReqResult);
 
-        if(tileReqResult.Contains("GRANTED"))
+        if (tileReqResult.Contains("GRANTED"))
             initialized = true;
 
         sslStream.Close();
     }
 
-    private void ListenForClientsTCP()
+    void ListenForClientsTCP()
     {
         TcpListener server = new TcpListener(IPAddress.Any, port);
         // we set our IP address as server's address, and we also set the port

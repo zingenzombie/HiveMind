@@ -162,6 +162,10 @@ public class PlayerData : MonoBehaviour
                     StartCoroutine(ChangeAvatarFromClient(networkMessage));
                     break;
 
+                case "SpawnObject":
+                    StartCoroutine(CreateDynamicObjectFromClient(networkMessage));
+                    break;
+
                 //First check for local request
                 //case "PlayerPos":
                 //    UpdatePlayerPosAndRot(message);
@@ -172,6 +176,41 @@ public class PlayerData : MonoBehaviour
                     playerManager.HandleNewMessages(networkMessage);
                     break;
             }
+
+        }
+
+        IEnumerator CreateDynamicObjectFromClient(NetworkMessage networkMessage)
+        {
+            string hash = ASCIIEncoding.ASCII.GetString(networkMessage.message);
+
+            Debug.Log("Creating Object " + hash + "...");
+
+            if (objectManager.HashExists(hash))
+            {
+                Debug.Log("Local hash found!");
+                yield return StartCoroutine(objectManager.SpawnObjectAsServer(hash, transform.GetChild(0)));
+
+
+                avatarHash = hash;
+                playerManager.HandleNewMessages(networkMessage);
+
+                yield break;
+            }
+
+            Debug.Log("Local hash not found; prompting client for new stream...");
+            serverPipeOut.Add(new NetworkMessage("", "OpenConnection", new byte[0]));
+
+            TileStream tmpTileStream;
+
+            while (!ObjectInTileStream.TryTake(out tmpTileStream))
+                yield return null;
+
+            Debug.Log("Received stream for avatar data transfer.");
+
+            //Compose new one
+            yield return StartCoroutine(objectManager.SpawnObjectAsServer(hash, null, tmpTileStream));
+
+            playerManager.HandleNewMessages(networkMessage);
 
         }
 

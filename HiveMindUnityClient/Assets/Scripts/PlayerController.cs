@@ -1,4 +1,5 @@
 using System;
+using System.Text;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -26,10 +27,18 @@ public class PlayerController : MonoBehaviour
     float lastPressedTime;
     bool justStoppedFlying = false;
     bool jumpHeld = false;
-    private LayerMask groundLayer = LayerMask.NameToLayer("Default");
+    private LayerMask groundLayer;
+
+
+    private void Awake()
+    {
+        groundLayer = LayerMask.NameToLayer("Default");
+    }
 
     void Start()
     {
+        objectManager = GameObject.FindWithTag("ObjectController").GetComponent<ObjectManager>();
+
         networkController = GameObject.FindWithTag("NetworkController").GetComponent<NetworkController>();
 
         walkSpeedActual = walkSpeed;
@@ -175,6 +184,16 @@ public class PlayerController : MonoBehaviour
     {
         if (!UIOpenMenu.menuIsOpen)
             sprinting = value.isPressed;
+    }
+
+    ObjectManager objectManager;
+    [SerializeField] GameObject objectToSend;
+
+    public void OnSpawnItem(InputValue value)
+    {
+        Debug.Log("1 pressed");
+
+        networkController.SendTCPMessage(new NetworkMessage("SpawnObject", ASCIIEncoding.ASCII.GetBytes(objectManager.DecomposeObject(Instantiate(objectToSend, transform.position, transform.rotation, networkController.GetActiveServerTransform())))));
     }
 
     public void OnJump(InputValue value)
