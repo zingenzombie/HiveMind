@@ -23,8 +23,11 @@ public class ItemDatabaseObject : ScriptableObject, ISerializationCallbackReceiv
 
         for (int i = 0; i < Items.Count; i++) 
         {
-            GetItem.Add(i, Items[i]);
-            ItemPrefabs.Add(Items[i].prefab);
+            if (Items[i] != null) 
+            {
+                GetItem.Add(i, Items[i]);
+                ItemPrefabs.Add(Items[i].prefab);
+            }
         }
     }
 

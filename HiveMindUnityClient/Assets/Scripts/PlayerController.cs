@@ -61,7 +61,7 @@ public class PlayerController : MonoBehaviour
     {
         UpdateSprintSpeed();
 
-        if (UIOpenMenu.menuIsOpen)
+        if (OpenMenu.menuIsOpen)
         {
             moveInput = Vector2.zero;
             myRigidbody.linearVelocity = new Vector3(0, myRigidbody.linearVelocity.y, moveInput.y * fallSpeedActual);
@@ -93,7 +93,7 @@ public class PlayerController : MonoBehaviour
         {
             playerVelocity = new Vector3(moveInput.x * walkSpeedActual, 0, moveInput.y * walkSpeedActual);
 
-            if (UIOpenMenu.menuIsOpen) 
+            if (OpenMenu.menuIsOpen) 
             {
                 playerVelocity.y = 0;
             }
@@ -101,8 +101,10 @@ public class PlayerController : MonoBehaviour
             {
                 playerVelocity.y = jumpPower / 2;
             }
-            else if (Input.GetKey(KeyCode.LeftControl)) // TODO: Cond is placeholder
+            else if (Input.GetKey(KeyCode.LeftControl))
+            {
                 playerVelocity.y = -jumpPower / 2;
+            }
         }
             
         myRigidbody.linearVelocity = transform.TransformDirection(playerVelocity);
@@ -156,13 +158,13 @@ public class PlayerController : MonoBehaviour
 
     public void OnMove(InputValue value)
     {
-        if (!UIOpenMenu.menuIsOpen)
+        if (!OpenMenu.menuIsOpen)
             moveInput = value.Get<Vector2>();
 
     }
     public void OnLook(InputValue value)
     {
-        if (!UIOpenMenu.menuIsOpen)
+        if (!OpenMenu.menuIsOpen)
             mainCamera.OnLook(value);
     }
 
@@ -182,7 +184,7 @@ public class PlayerController : MonoBehaviour
 
     public void OnSprint(InputValue value)
     {
-        if (!UIOpenMenu.menuIsOpen)
+        if (!OpenMenu.menuIsOpen)
             sprinting = value.isPressed;
     }
 
@@ -217,7 +219,7 @@ public class PlayerController : MonoBehaviour
                 pressedFirstTime = true;
             }
 
-            if (!UIOpenMenu.menuIsOpen)
+            if (!OpenMenu.menuIsOpen)
             {
                 if (!flying)
                 {

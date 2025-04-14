@@ -19,7 +19,7 @@ public class CloseMenu : MonoBehaviour
             inventory.Save();
             
         menu.SetActive(false);
-        UIOpenMenu.menuIsOpen = false;
+        OpenMenu.menuIsOpen = false;
 
         selectedColor = InventoryButton.colors;
         selectedColor.normalColor = new Color(0.349f, 0.349f, 0.349f);

@@ -4,8 +4,8 @@ using UnityEngine;
 public class ItemsMenu : MonoBehaviour
 {
     // Get scripts for hotbar, inventory, and spawnlist
-    public UIHotbarManager hotbar;
-    public UIHotbarManager inventory;
+    public InventoryManager hotbar;
+    public InventoryManager inventory;
     public SpawnlistManager spawnlist;
 
     // Get text for hotbar, inventory, and spawnlist
@@ -36,9 +36,7 @@ public class ItemsMenu : MonoBehaviour
 
         float spawnlistY = -spawnlist.PrintItems(-spawnsY + rectTransformSpawnlist.sizeDelta.y);
 
-        Debug.Log(inventoryY + " " + spawnsY + " " + spawnlistY);
-
         uiSpace.sizeDelta = new Vector2(uiSpace.sizeDelta.x, -inventoryY - spawnsY - spawnlistY);
-        uiSpace.anchoredPosition = new Vector2(uiSpace.anchoredPosition.x, uiSpace.anchoredPosition.y + inventoryY + spawnsY + spawnlistY);
+        //uiSpace.anchoredPosition = new Vector2(uiSpace.anchoredPosition.x, uiSpace.anchoredPosition.y + inventoryY + spawnsY + spawnlistY);
     }
 }

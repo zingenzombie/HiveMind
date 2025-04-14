@@ -26,12 +26,21 @@ public class Item
 {
     public GameObject Prefab;
     public int Id;
+    public string Creator;
+    public string Date;
     public Item(ItemObject item) 
     {
-        Prefab = item.prefab;
+        if (item.prefab != null)
+        {
+            Prefab = item.prefab;
+        }
     }
-    public Item()
+
+    public void ResetItem()
     {
-        Prefab = Resources.Load<GameObject>("Items/EmptyPrefab");
+        Prefab = null;
+        Id = -1;
+        Creator = "";
+        Date = "";
     }
 }
