@@ -57,35 +57,18 @@ public class HexTileController : MonoBehaviour
 
     public void ActivateTile()
     {
-        StartCoroutine(InitializeMe());
+
+        if (serverData == null)
+        {
+            hasServer = false;
+            return;
+        }
+
+        hasServer = true;
+        StartCoroutine(ContactServerAndRequestObjects());
     }
 
     Thread thread;
-    IEnumerator InitializeMe()
-    {
-        BlockingCollection<ServerData> pipe = new BlockingCollection<ServerData>();
-
-        thread = new Thread(() => ContactCore(pipe));
-        thread.Start();
-
-        while (true)
-        {
-            yield return null;
-
-            if (!thread.IsAlive)
-                break;
-        }
-
-        pipe.TryTake(out ServerData tmpData);
-
-        if (tmpData == null)
-            yield break;
-
-        serverData = tmpData;
-        hasServer = true;
-
-        StartCoroutine(ContactServerAndRequestObjects());
-    }
 
     public void ContactCore(BlockingCollection<ServerData> pipe)
     {
@@ -111,7 +94,54 @@ public class HexTileController : MonoBehaviour
         pipe.Add(serverData);
     }
 
-    private void OnDestroy()
+    public IEnumerator Ascend(float targetHeight = 250f)
+    {
+        float duration = 1.5f; // Total time for the ascent
+        float elapsed = 0f;
+
+        Vector3 start = transform.position;
+        Vector3 end = new Vector3(start.x, start.y + targetHeight, start.z);
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            float t = Mathf.Clamp01(elapsed / duration);
+
+            // Ease-out curve: slows down as it reaches the end
+            float easedT = 1f - Mathf.Pow(1f - t, 3);
+
+            transform.position = Vector3.Lerp(start, end, easedT);
+            yield return null;
+        }
+
+        // Snap to exact position to avoid float drift
+        transform.position = end;
+    }
+
+    IEnumerator Descend()
+    {
+        float speed = 1.25f;
+        float distanceTraveled = 0f;
+        float maxDistance = 250f;
+
+        while (distanceTraveled < maxDistance)
+        {
+            float delta = (speed + distanceTraveled) * Time.deltaTime;
+            transform.position -= new Vector3(0, delta, 0);
+            
+            distanceTraveled += delta;
+            yield return null;
+        }
+    }
+
+    public IEnumerator DestroyTile()
+    {
+        yield return StartCoroutine(Descend());
+
+        Destroy(gameObject);
+    }
+
+    void OnDestroy()
     {
 
         if (thread != null && thread.IsAlive)

@@ -22,6 +22,11 @@ public class NetworkController : MonoBehaviour
 
     [SerializeField] ObjectManager objectController;
 
+    public Transform GetActiveServerTransform()
+    {
+        return activeServer.transform;
+    }
+
     void Update()
     {
         HandleNewMessages();
@@ -65,6 +70,10 @@ public class NetworkController : MonoBehaviour
                     Debug.Log("Received new avatar for user " + networkMessage.spawningClient + ".");
                     ChangeAvatar(networkMessage);
                     break;
+                case "SpawnObject":
+                    Debug.Log("Received new object.");
+                    StartCoroutine(SpawnObject(networkMessage));
+                    break;
                 case "ping":
                     messagePipeOut.Add(new NetworkMessage("", "pong", new byte[0]));
                     break;
@@ -72,6 +81,24 @@ public class NetworkController : MonoBehaviour
                     break;
             }
         }
+    }
+
+    IEnumerator SpawnObject(NetworkMessage networkMessage)
+    {
+
+        string objectHash = ASCIIEncoding.ASCII.GetString(networkMessage.message);
+
+        if (objectController.HashExists(objectHash))
+        {
+            yield return StartCoroutine(objectController.Compose(objectHash, activeServer.transform));
+            yield break;
+        }
+
+        CoroutineResult<TileStream> tileStream = new CoroutineResult<TileStream>();
+
+        yield return StartCoroutine(objectHash, CreateFetchStream(tileStream));
+
+        yield return StartCoroutine(objectController.Compose(objectHash, activeServer.transform, tileStream.Value));
     }
 
     void ChangeAvatar(NetworkMessage networkMessage)

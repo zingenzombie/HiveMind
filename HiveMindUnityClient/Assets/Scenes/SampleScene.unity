@@ -374,7 +374,7 @@ MonoBehaviour:
   slotPrefab: {fileID: 358579548226134629, guid: 07c4bb0a2dd87944cbdb502e7d89fb79, type: 3}
   xOffset: 15
   yOffset: 0
-  playerItems: {fileID: 11400000, guid: 1d211f4c14f7a184a83357901af33755, type: 2}
+  playerItems: {fileID: 11400000, guid: f88bb5f19e4f49b4dba2e5b0e2082418, type: 2}
 --- !u!1 &208121086
 GameObject:
   m_ObjectHideFlags: 0
@@ -716,7 +716,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fc53dbf2fb7260143849a7bc3ec3be28, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerHotbar: {fileID: 11400000, guid: 1d211f4c14f7a184a83357901af33755, type: 2}
+  playerHotbar: {fileID: 11400000, guid: f88bb5f19e4f49b4dba2e5b0e2082418, type: 2}
   slotPrefab: {fileID: 3143170080540028004, guid: 1686223841908d64681cd46d32295500, type: 3}
   colorShiftAmount: -0.5
 --- !u!114 &275233376
@@ -737,7 +737,7 @@ MonoBehaviour:
   slotPrefab: {fileID: 3143170080540028004, guid: 1686223841908d64681cd46d32295500, type: 3}
   xOffset: 15
   yOffset: 0
-  playerItems: {fileID: 11400000, guid: 1d211f4c14f7a184a83357901af33755, type: 2}
+  playerItems: {fileID: 11400000, guid: f88bb5f19e4f49b4dba2e5b0e2082418, type: 2}
 --- !u!1 &284467900
 GameObject:
   m_ObjectHideFlags: 0
@@ -1577,7 +1577,7 @@ MonoBehaviour:
   entryPrefabs:
   - {fileID: 7016405062497254227, guid: d1bdba50be861d34f91b791e007fbabb, type: 3}
   - {fileID: 6505692031559039214, guid: 1021102e76d404541b8f73a3fa6b4d3f, type: 3}
-  playerSpawnlist: {fileID: 11400000, guid: 6e471f1726170f149a50f94d970c2792, type: 2}
+  playerSpawnlist: {fileID: 11400000, guid: 3493ef99751463f488fd2a1859ea2b1a, type: 2}
 --- !u!1 &560953885
 GameObject:
   m_ObjectHideFlags: 0
@@ -1972,6 +1972,7 @@ GameObject:
   - component: {fileID: 689657940}
   - component: {fileID: 689657939}
   - component: {fileID: 689657941}
+  - component: {fileID: 689657942}
   m_Layer: 5
   m_Name: HUD Parent
   m_TagString: Untagged
@@ -2056,6 +2057,25 @@ MonoBehaviour:
   AvatarsArea: {fileID: 376047203}
   SettingsArea: {fileID: 832285864}
   QuitArea: {fileID: 747903708}
+--- !u!114 &689657942
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 689657937}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ad66369f1ea182242aae76d5a2f5219a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hotbarParent: {fileID: 275233369}
+  isInventoryMenuAsset: 0
+  centerSlots: 1
+  slotPrefab: {fileID: 3143170080540028004, guid: 1686223841908d64681cd46d32295500, type: 3}
+  xOffset: 15
+  yOffset: 0
+  playerItems: {fileID: 0}
 --- !u!1 &747903708
 GameObject:
   m_ObjectHideFlags: 0
@@ -2864,7 +2884,7 @@ MonoBehaviour:
   hexTile: {fileID: 227366594333924227, guid: 1695bfc5e2fc432488d2b6fe01289783, type: 3}
   hexTileTemplate: {fileID: 7693739768744577133, guid: 142239a109042df4ab372023a3b13902, type: 3}
   exitTilePrefab: {fileID: 5966602332483114496, guid: 896fd603b63cc0847b1818deddef74b7, type: 3}
-  renderDistance: 12
+  renderDistance: 2
 --- !u!1 &1312724175
 GameObject:
   m_ObjectHideFlags: 0
@@ -4650,6 +4670,7 @@ MonoBehaviour:
   jumpPower: 18
   gravity: -20
   mainCamera: {fileID: 9210169823822129874}
+  objectToSend: {fileID: 3099095686292695660, guid: 4079511c98e62464fbfc796dd2336dd7, type: 3}
 --- !u!4 &7573471563246649973
 Transform:
   m_ObjectHideFlags: 0

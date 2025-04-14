@@ -3,6 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using System.Net.Security;
+using System.Net.Sockets;
+using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public class GridController : MonoBehaviour
@@ -74,22 +78,68 @@ public class GridController : MonoBehaviour
         }
 
         tileSize = hexTileTemplate.GetComponent<Renderer>().bounds.size.z;
-        SpawnTiles();
+        StartCoroutine(FirstTimeTileSpawning());
+    }
+
+    IEnumerator FirstTimeTileSpawning()
+    {
+        yield return StartCoroutine(SpawnTiles(0, 0, false));
 
         exitTile = Instantiate(exitTilePrefab, (grid[new Key(0, 0)]).transform);
         MoveExit exitTileMove = exitTile.GetComponent<MoveExit>();
-
-        StartCoroutine(networkController.ChangeActiveServer((grid[new Key(0, 0)]).GetComponent<HexTileController>()));
 
         exitTileMove.gridController = this;
         exitTileMove.x = 0;
         exitTileMove.y = 0;
 
-        player.transform.SetPositionAndRotation((grid[new Key(0, 0)]).transform.GetChild(1).transform.position, player.transform.rotation);
+        player.transform.SetPositionAndRotation((grid[new Key(0, 0)]).transform.GetChild(1).transform.position /*+ new Vector3(0,100,0)*/, player.transform.rotation);
+
+        yield return StartCoroutine(networkController.ChangeActiveServer((grid[new Key(0, 0)]).GetComponent<HexTileController>()));
+
+        }
+
+    List<string> FetchServerDataFromCore(int x, int y)
+    {
+        using TcpClient client = new TcpClient(coreAddress.ToString(), corePort);
+
+        SslStream sslStream = CoreCommunication.EstablishSslStreamFromTcpAsClient(client);
+
+        CoreCommunication.SendStringToStream(sslStream, "client");
+
+        CoreCommunication.SendStringToStream(sslStream, "getServers");
+
+        CoreCommunication.SendIntToStream(sslStream, x);
+        CoreCommunication.SendIntToStream(sslStream, y);
+        CoreCommunication.SendIntToStream(sslStream, renderDistance + 1);
+
+        int numRows = CoreCommunication.GetIntFromStream(sslStream);
+
+        List<string> tileRows = new();
+
+        for(int i = 0; i < numRows; i++)
+            tileRows.Add(CoreCommunication.GetStringFromStream(sslStream));
+
+        return tileRows;
     }
 
-    void SpawnTiles(int posX = 0, int posY = 0)
+    IEnumerator SpawnTiles(int posX = 0, int posY = 0, bool animateTiles = true)
     {
+
+        Debug.Log("Spawning position is " + posX + ", " + posY);
+
+        //Send position + radius to core & have JSON of tiles returned.
+        //Send data to relevant new tiles & start them.
+
+        List<string> tileRows = null;
+        bool isDone = false;
+
+        Thread fetchTilesThread = new Thread(() =>
+        {
+            tileRows = FetchServerDataFromCore(posX, posY);
+            isDone = true;
+        });
+
+        fetchTilesThread.Start();
 
         HashSet<Key> tiles = new HashSet<Key>();
 
@@ -99,14 +149,35 @@ public class GridController : MonoBehaviour
         for (int x = -renderDistance + posX; x < renderDistance + posX; x++)
             for (int y = -renderDistance + posY; y < renderDistance + posY; y++)
             {
-                SpawnTile(x, y/*, sslStream*/);
+                SpawnTile(x, y, animateTiles);
                 tiles.Remove(new Key(x, y));
             }
 
         foreach(var key in tiles)
         {
-            Destroy(grid[key]);
+            StartCoroutine(grid[key].GetComponent<HexTileController>().DestroyTile());
             grid.Remove(key);
+        }
+
+        while (!isDone)
+            yield return null;
+
+        foreach(var tileRow in tileRows)
+        {
+            ServerData serverData = JsonUtility.FromJson<ServerData>(tileRow);
+
+            HexTileController currentTile = grid[new Key(serverData.X, serverData.Y)].GetComponent<HexTileController>();
+
+            if (currentTile.serverData != null && currentTile.serverData.PublicKey == serverData.PublicKey)
+            {
+                continue;
+            }
+
+            if (currentTile.serverData != null)
+                currentTile.ClearGroundAndTileObjects();
+
+            currentTile.serverData = serverData;
+            currentTile.ActivateTile();
         }
     }
 
@@ -156,11 +227,13 @@ public class GridController : MonoBehaviour
         HexTileController newTileController = (grid[new Key(newX, newY)]).GetComponent<HexTileController>();
         StartCoroutine(networkController.ChangeActiveServer(newTileController));
 
-        SpawnTiles(newX, newY);
+        StartCoroutine(SpawnTiles(newX, newY));
     }
 
-    void SpawnTile(int x, int y/*, SslStream tcpClient*/)
+    void SpawnTile(int x, int y, bool animateTiles)
     {
+
+        Debug.Log("Spawning " +  x + ", " + y);
 
         if (grid.ContainsKey(new Key(x, y)))
             return;
@@ -170,8 +243,10 @@ public class GridController : MonoBehaviour
 
         offsetY += y * tileSize;
 
-        grid.Add(new Key(x, y), Instantiate(hexTile, new UnityEngine.Vector3(offsetX, 250 * Mathf.PerlinNoise(offsetX / 5000, offsetY / 5000), offsetY), transform.rotation, this.transform));
-
+        if(animateTiles)
+            grid.Add(new Key(x, y), Instantiate(hexTile, new UnityEngine.Vector3(offsetX, (250 * Mathf.PerlinNoise(offsetX / 5000, offsetY / 5000)) - 250, offsetY), transform.rotation, this.transform));
+        else
+            grid.Add(new Key(x, y), Instantiate(hexTile, new UnityEngine.Vector3(offsetX, (250 * Mathf.PerlinNoise(offsetX / 5000, offsetY / 5000)), offsetY), transform.rotation, this.transform));
         GameObject tile = (grid[new Key(x, y)]);
         HexTileController tileController = tile.GetComponent<HexTileController>();
 
@@ -179,6 +254,8 @@ public class GridController : MonoBehaviour
         tileController.x = x;
         tileController.y = y;
         tileController.player = player.GetComponent<PlayerInfo>();
-        tileController.ActivateTile();
+
+        if(animateTiles)
+            StartCoroutine(tileController.Ascend());
     }
 }
