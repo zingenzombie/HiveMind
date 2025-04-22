@@ -60,7 +60,7 @@ public class PlayerController : MonoBehaviour
     void Update()
     {
         UpdateSprintSpeed();
-
+        
         if (OpenMenu.menuIsOpen)
         {
             moveInput = Vector2.zero;

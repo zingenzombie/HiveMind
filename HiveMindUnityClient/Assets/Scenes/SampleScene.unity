@@ -716,7 +716,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fc53dbf2fb7260143849a7bc3ec3be28, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerHotbar: {fileID: 11400000, guid: f88bb5f19e4f49b4dba2e5b0e2082418, type: 2}
+  playerHotbar: {fileID: 11400000, guid: 1d211f4c14f7a184a83357901af33755, type: 2}
   slotPrefab: {fileID: 3143170080540028004, guid: 1686223841908d64681cd46d32295500, type: 3}
   colorShiftAmount: -0.5
 --- !u!114 &275233376
