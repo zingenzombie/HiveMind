@@ -9,8 +9,8 @@ using Unity.VisualScripting;
 public class InventoryManager : MonoBehaviour
 {
     // Set parent
-    public GameObject hotbarParent;
-    private RectTransform hotbarRectTransform;
+    public GameObject itemsParent;
+    private RectTransform itemsRectTransform;
 
     // Sizes
     private float xSize;
@@ -33,8 +33,6 @@ public class InventoryManager : MonoBehaviour
     float slotWidth = 0;
     float slotHeight = 0;
 
-    Dictionary<GameObject, InventorySlot> itemsDisplayed = new Dictionary<GameObject, InventorySlot>(); // make global, include all databases?
-
     // Item to handle drag and drop
     public MouseItem mouseItem = new MouseItem();
 
@@ -42,8 +40,8 @@ public class InventoryManager : MonoBehaviour
 
     void Awake()
     {
-        hotbarParent.SetActive(true);
-        hotbarRectTransform = hotbarParent.GetComponent<RectTransform>();
+        itemsParent.SetActive(true);
+        itemsRectTransform = itemsParent.GetComponent<RectTransform>();
         
         numberOfSlots = playerItems.Container.Items.Count;
 
@@ -97,7 +95,7 @@ public class InventoryManager : MonoBehaviour
                 if (currNumItems >= numberOfSlots) 
                     return numRows * (slotHeight + yOffset) + verticalOffset;
 
-                GameObject slotObj = Instantiate(slotPrefab, hotbarRectTransform);
+                GameObject slotObj = Instantiate(slotPrefab, itemsRectTransform);
                 slotObj.name = "(" + (i + 1) + ", " + (j + 1) + ")";
 
                 RectTransform slotTransform = slotObj.GetComponent<RectTransform>();
@@ -141,18 +139,21 @@ public class InventoryManager : MonoBehaviour
         else 
         {
             iconObj = Instantiate(playerItems.Container.Items[index].item.Prefab, rectTransform);
-            iconObj.name = playerItems.Container.Items[index].item.Prefab.name;
+            iconObj.name = playerItems.Container.Items[index].item.Prefab.name + "_Instance";
         }
 
-        EventTrigger trigger = slotObj.GetComponent<EventTrigger>();
-        if (trigger == null)
-            trigger = slotObj.AddComponent<EventTrigger>();
+        if (isInventoryMenuAsset)
+        {
+            EventTrigger trigger = slotObj.GetComponent<EventTrigger>();
+            if (trigger == null)
+                trigger = slotObj.AddComponent<EventTrigger>();
 
-        AddEvent(slotObj, EventTriggerType.PointerEnter, delegate { OnEnter(slotObj); });
-        AddEvent(slotObj, EventTriggerType.PointerExit, delegate { OnExit(slotObj); });
-        AddEvent(slotObj, EventTriggerType.BeginDrag, delegate { OnDragStart(slotObj); });
-        AddEvent(slotObj, EventTriggerType.EndDrag, delegate { OnDragEnd(slotObj); });
-        AddEvent(slotObj, EventTriggerType.Drag, delegate { OnDrag(slotObj); });
+            AddEvent(slotObj, EventTriggerType.PointerEnter, delegate { OnEnter(slotObj); });
+            AddEvent(slotObj, EventTriggerType.PointerExit, delegate { OnExit(slotObj); });
+            AddEvent(slotObj, EventTriggerType.BeginDrag, delegate { OnDragStart(slotObj); });
+            AddEvent(slotObj, EventTriggerType.EndDrag, delegate { OnDragEnd(slotObj); });
+            AddEvent(slotObj, EventTriggerType.Drag, delegate { OnDrag(slotObj); });
+        }
 
         playerItems.Container.Items[index].slotPrefab = slotObj;
 
@@ -173,7 +174,8 @@ public class InventoryManager : MonoBehaviour
 
         ScaleItem(iconObj);
 
-        itemsDisplayed.Add(slotObj, playerItems.Container.Items[index]);
+        ItemsMenu.slotsDisplayed.Add(slotObj, playerItems.Container.Items[index]);
+        ItemsMenu.iconsDisplayed.Add(slotObj, iconObj);
     }
 
     public void ScaleItem(GameObject iconObj)
@@ -240,10 +242,10 @@ public class InventoryManager : MonoBehaviour
 
     public int findNumCols()
     {
-        GameObject slotObj = Instantiate(slotPrefab, hotbarRectTransform);
+        GameObject slotObj = Instantiate(slotPrefab, itemsRectTransform);
         RectTransform rectTransform = slotObj.GetComponent<RectTransform>();
 
-        float screenWidth = hotbarRectTransform.rect.width;
+        float screenWidth = itemsRectTransform.rect.width;
         slotWidth = rectTransform.sizeDelta.x;
         slotHeight = rectTransform.sizeDelta.y;
 
@@ -283,9 +285,9 @@ public class InventoryManager : MonoBehaviour
     {
         mouseItem.hoverObj = obj;
         //Debug.Log("obj entered " + obj);
-        if (itemsDisplayed.ContainsKey(obj))
+        if (ItemsMenu.slotsDisplayed.ContainsKey(obj))
         {
-            mouseItem.hoverItem = itemsDisplayed[obj];
+            mouseItem.hoverItem = ItemsMenu.slotsDisplayed[obj];
             //Debug.Log("obj entered 2 " + obj);
         }
     }
@@ -300,27 +302,37 @@ public class InventoryManager : MonoBehaviour
     public void OnDragStart(GameObject obj)
     {
         //Debug.Log("drag active " + obj);
-        if (itemsDisplayed.ContainsKey(obj) && itemsDisplayed[obj].ID >= 0)
+        if (ItemsMenu.slotsDisplayed.ContainsKey(obj) && ItemsMenu.slotsDisplayed[obj].ID >= 0)
         {
             var originalIcon = obj;
             var mouseObject = Instantiate(originalIcon, transform.parent);
             mouseObject.name = "DraggedIcon";
 
             mouseItem.obj = mouseObject;
-            mouseItem.item = itemsDisplayed[obj];
+            mouseItem.item = ItemsMenu.slotsDisplayed[obj];
         }
     }
 
     public void OnDragEnd(GameObject obj)
     {
-        //Debug.Log("drag stopped " + obj + " " + mouseItem.hoverObj);
+        //Debug.Log("drag stopped " + obj + " " + mouseItem.hoverObj + " slots " + ItemsMenu.slotsDisplayed[obj] + " " + ItemsMenu.slotsDisplayed[mouseItem.hoverObj] + " icon " + ItemsMenu.iconsDisplayed[mouseItem.hoverObj] + " " + ItemsMenu.iconsDisplayed[obj]);
         if (mouseItem.hoverObj)
         {
-            playerItems.MoveItem(itemsDisplayed[obj], itemsDisplayed[mouseItem.hoverObj]);
+            playerItems.MoveItem(ItemsMenu.slotsDisplayed[obj], ItemsMenu.slotsDisplayed[mouseItem.hoverObj]);
+
+            Transform objParent = obj.transform;
+            Transform hoverParent = mouseItem.hoverObj.transform;
+
+            ItemsMenu.iconsDisplayed[obj].transform.SetParent(hoverParent, false);
+            ItemsMenu.iconsDisplayed[mouseItem.hoverObj].transform.SetParent(objParent, false);
+
+            var tempIcon = ItemsMenu.iconsDisplayed[obj];
+            ItemsMenu.iconsDisplayed[obj] = ItemsMenu.iconsDisplayed[mouseItem.hoverObj];
+            ItemsMenu.iconsDisplayed[mouseItem.hoverObj] = tempIcon;
         }
         else 
         {
-            playerItems.RemoveItem(itemsDisplayed[obj].item);
+            playerItems.RemoveItem(ItemsMenu.slotsDisplayed[obj].item);
         }
         Destroy(mouseItem.obj);
         mouseItem.item = null;

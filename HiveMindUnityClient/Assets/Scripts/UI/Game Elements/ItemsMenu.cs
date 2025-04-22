@@ -1,5 +1,6 @@
-using TMPro;
 using UnityEngine;
+using System.Collections.Generic;
+using TMPro;
 
 public class ItemsMenu : MonoBehaviour
 {
@@ -15,6 +16,10 @@ public class ItemsMenu : MonoBehaviour
     
     // Grab RectTransform for bounds so its size can be changed dynamically
     public RectTransform uiSpace;
+
+    // Create containers for inventory
+    public static Dictionary<GameObject, InventorySlot> slotsDisplayed = new Dictionary<GameObject, InventorySlot>(); // make global, include all databases?
+    public static Dictionary<GameObject, GameObject> iconsDisplayed = new Dictionary<GameObject, GameObject>();
     
     void Start()
     {
