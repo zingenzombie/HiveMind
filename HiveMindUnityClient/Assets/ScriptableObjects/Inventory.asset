@@ -1,0 +1,82 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0cd3304091e9cfb45a3a9d0e92b41983, type: 3}
+  m_Name: Inventory
+  m_EditorClassIdentifier: 
+  savePath: /InventoryObj
+  database: {fileID: 11400000, guid: 3b77aeda76a77a244a83d4278423889d, type: 2}
+  Container:
+    Items:
+    - ID: 1
+      item:
+        Prefab: {fileID: 4598916603952110476, guid: c103216e8fecda84ca9e68f6e5b18480, type: 3}
+        Id: 1
+        Creator: 
+        Date: 
+      amount: 0
+      slotPrefab: {fileID: 0}
+    - ID: 4
+      item:
+        Prefab: {fileID: 861175287742496408, guid: 8ed5ae56d7972ca4e97b8fcda7970714, type: 3}
+        Id: 3
+        Creator: 
+        Date: 
+      amount: 0
+      slotPrefab: {fileID: 0}
+    - ID: -1
+      item:
+        Prefab: {fileID: 0}
+        Id: -1
+        Creator: 
+        Date: 
+      amount: 0
+      slotPrefab: {fileID: 0}
+    - ID: 0
+      item:
+        Prefab: {fileID: 0}
+        Id: 0
+        Creator: 
+        Date: 
+      amount: 0
+      slotPrefab: {fileID: 0}
+    - ID: 1
+      item:
+        Prefab: {fileID: 861175287742496408, guid: 8ed5ae56d7972ca4e97b8fcda7970714, type: 3}
+        Id: 1
+        Creator: 
+        Date: 
+      amount: 0
+      slotPrefab: {fileID: 0}
+    - ID: 3
+      item:
+        Prefab: {fileID: 4598916603952110476, guid: c103216e8fecda84ca9e68f6e5b18480, type: 3}
+        Id: 2
+        Creator: 
+        Date: 
+      amount: 0
+      slotPrefab: {fileID: 0}
+    - ID: -1
+      item:
+        Prefab: {fileID: 0}
+        Id: -1
+        Creator: 
+        Date: 
+      amount: 0
+      slotPrefab: {fileID: 0}
+    - ID: -1
+      item:
+        Prefab: {fileID: 0}
+        Id: -1
+        Creator: 
+        Date: 
+      amount: 0
+      slotPrefab: {fileID: 0}

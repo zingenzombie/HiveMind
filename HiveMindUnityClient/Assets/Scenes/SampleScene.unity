@@ -374,7 +374,7 @@ MonoBehaviour:
   slotPrefab: {fileID: 358579548226134629, guid: 07c4bb0a2dd87944cbdb502e7d89fb79, type: 3}
   xOffset: 15
   yOffset: 0
-  playerItems: {fileID: 11400000, guid: f88bb5f19e4f49b4dba2e5b0e2082418, type: 2}
+  playerItems: {fileID: 11400000, guid: 1d211f4c14f7a184a83357901af33755, type: 2}
 --- !u!1 &208121086
 GameObject:
   m_ObjectHideFlags: 0
@@ -737,7 +737,7 @@ MonoBehaviour:
   slotPrefab: {fileID: 3143170080540028004, guid: 1686223841908d64681cd46d32295500, type: 3}
   xOffset: 15
   yOffset: 0
-  playerItems: {fileID: 11400000, guid: f88bb5f19e4f49b4dba2e5b0e2082418, type: 2}
+  playerItems: {fileID: 11400000, guid: 1d211f4c14f7a184a83357901af33755, type: 2}
 --- !u!1 &284467900
 GameObject:
   m_ObjectHideFlags: 0
@@ -1577,7 +1577,7 @@ MonoBehaviour:
   entryPrefabs:
   - {fileID: 7016405062497254227, guid: d1bdba50be861d34f91b791e007fbabb, type: 3}
   - {fileID: 6505692031559039214, guid: 1021102e76d404541b8f73a3fa6b4d3f, type: 3}
-  playerSpawnlist: {fileID: 11400000, guid: 3493ef99751463f488fd2a1859ea2b1a, type: 2}
+  playerSpawnlist: {fileID: 11400000, guid: 6e471f1726170f149a50f94d970c2792, type: 2}
 --- !u!1 &560953885
 GameObject:
   m_ObjectHideFlags: 0
