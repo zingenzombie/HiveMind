@@ -72,9 +72,6 @@ public class ServerDataHolder
         if (newServerData == null)
             return false;
 
-        //CoreCommunication.SendStringToStream(client, "Parsing data was a success");
-        //CoreCommunication.SendStringToStream(client, "Setting tile up...");
-
         Console.Write($"New Server: {newServerData.Name} \n");
         if (newServerData.RequestTile)
         {
@@ -95,8 +92,10 @@ public class ServerDataHolder
     {
         using MySqlConnection mySqlConnection = new MySqlConnection(ConnStr);
 
-        string query =
-            "INSERT INTO servers (x,y,name,ip,port,ownerID,publicKey) VALUES (@x,@y,@name,@ip, @port,@ownerID,@publicKey)";
+        //string query = "INSERT INTO servers (x,y,name,ip,port,ownerID,publicKey) VALUES (@x,@y,@name,@ip, @port,@ownerID,@publicKey)";
+
+        //For testing, this allows for repeated relaunching of same tile while maintainer is disabled
+        string query = "REPLACE INTO servers (x,y,name,ip,port,ownerID,publicKey) VALUES (@x,@y,@name,@ip, @port,@ownerID,@publicKey)";
 
         try
         {
