@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using System.Net.Security;
 using System.Net.Sockets;
+using System.Runtime.ConstrainedExecution;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using HiveMindCore;
@@ -132,15 +133,9 @@ void Main(string[] args)
 
 static X509Certificate2 GatherCertificate()
 {
-
-    String certAddr = "/honeydragonproductions.com-ssl-bundle/certificate.pfx";
-    String pwdAddr = "/honeydragonproductions.com-ssl-bundle/pwd";
-
-    string pwd = File.ReadAllText(pwdAddr);
-
-    pwd = pwd.Substring(0, pwd.Length - 1);
-
-    return new X509Certificate2(certAddr, pwd);
+    String certAddr = "/etc/letsencrypt/live/honeydragonproductions.com/fullchain.pem";
+    String key = "/etc/letsencrypt/live/honeydragonproductions.com/privkey.pem";
+    return X509Certificate2.CreateFromPemFile(certAddr, key);
 }
 
 void IncomingConnectionHandler(SslStream sslStream)
