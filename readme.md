@@ -1,4 +1,4 @@
-* Hive Mind
+# Hive Mind
 Welcome to Hive Mind. Hive Mind is an open-source shared experience where all players share one world (the hive). The hive is defined as an infinite grid of hexagonal tiles. Each tile can be “possessed” by a “tile server” and given its own physics, assets, rules, etc. As a player, one can walk between tiles seamlessly.
 
 
@@ -7,14 +7,14 @@ Hive Mind is a distributed platform composed of three distinct component types:
 * Tile Servers
 * Clients
 
-** Core Server
+## Core Server
 There is one core server for the entire platform. It hosts the map of tiles.
 Responsible for:
 * Assigning tile servers positions on the grid
 * Responding to client requests on what servers are where
 * Automatically removing unreachable servers
 
-** Tile Servers
+## Tile Servers
 Servers possessing individual tiles. These can provide their own physics, as-
 sets, rules, etc.
 Responsible for:
@@ -22,7 +22,7 @@ Responsible for:
 * Accepting & authenticating client connections
 * Providing assets upon client request
 
-** Clients
+## Clients
 The actual players. Clients can seamlessly walk between tiles, automatically
 loading in assets of visible tiles as the player moves. Fundamentally, each client
 is defined by their public RSA key. When they connect to a tile server, said
